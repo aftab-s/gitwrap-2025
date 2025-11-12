@@ -28,16 +28,17 @@ export default function Home() {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Fonts are loaded in _document.tsx to avoid per-page loading warnings */}
-        {/* Load Tailwind CDN and inline config via next/script to avoid synchronous script errors */}
-        <Script id="tailwind-config" strategy="beforeInteractive" dangerouslySetInnerHTML={{
-          __html: `tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#14b8a6', 'background-light': '#f3f4f6', 'background-dark': '#111827' }, fontFamily: { display: ['Space Grotesk', 'sans-serif'] }, borderRadius: { DEFAULT: '0.5rem' } } } };`
-        }} />
-        <Script src="https://cdn.tailwindcss.com?plugins=forms,typography" strategy="beforeInteractive" />
         <style>{`
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
     .text-gradient { background-image: linear-gradient(to right, #14b8a6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent; }
   `}</style>
       </Head>
+
+      {/* Tailwind CDN and inline config - placed after <Head> to satisfy Next.js rules. */}
+      <Script id="tailwind-config" strategy="afterInteractive" dangerouslySetInnerHTML={{
+        __html: `tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#14b8a6', 'background-light': '#f3f4f6', 'background-dark': '#111827' }, fontFamily: { display: ['Space Grotesk', 'sans-serif'] }, borderRadius: { DEFAULT: '0.5rem' } } } };`
+      }} />
+      <Script src="https://cdn.tailwindcss.com?plugins=forms,typography" strategy="afterInteractive" />
 
       <div className="bg-background-dark font-display text-gray-300 antialiased min-h-screen">
         <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 sm:p-6">
