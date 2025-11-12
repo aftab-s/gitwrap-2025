@@ -34,11 +34,9 @@ export default function Home() {
   `}</style>
       </Head>
 
-      {/* Tailwind CDN and inline config - placed after <Head> to satisfy Next.js rules. */}
-      <Script id="tailwind-config" strategy="afterInteractive" dangerouslySetInnerHTML={{
-        __html: `tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#14b8a6', 'background-light': '#f3f4f6', 'background-dark': '#111827' }, fontFamily: { display: ['Space Grotesk', 'sans-serif'] }, borderRadius: { DEFAULT: '0.5rem' } } } };`
-      }} />
-      <Script src="https://cdn.tailwindcss.com?plugins=forms,typography" strategy="afterInteractive" />
+      {/* Tailwind is built via PostCSS (globals.css + tailwind.config.js).
+          Removed the CDN script/config to avoid runtime conflicts between
+          compiled Tailwind and the CDN-injected styles. */}
 
       <div className="bg-background-dark font-display text-gray-300 antialiased min-h-screen">
         <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 sm:p-6">

@@ -22,6 +22,37 @@ interface ExportOptions {
 
 const EXPORT_PIXEL_RATIO = 2; // balances clarity and file size
 
+// User-configurable defaults for exports. These can be set to a number (pixels) or
+// a percentage string (e.g. '80%') which will be resolved relative to the card element.
+export type Dimension = number | string | null;
+export const EXPORT_TARGET_WIDTH: Dimension = CANONICAL_CARD_DIMENSIONS.width; // px by default
+export const EXPORT_TARGET_HEIGHT: Dimension = null; // null = auto height (content-driven)
+
+function resolveDimension(
+  dim: Dimension,
+  element: HTMLElement,
+  fallbackPx: number
+): number | null {
+  if (dim == null) return null;
+  if (typeof dim === 'number') return dim;
+  const s = String(dim).trim();
+  if (s.endsWith('px')) {
+    const n = parseFloat(s.slice(0, -2));
+    return Number.isFinite(n) ? n : fallbackPx;
+  }
+  if (s.endsWith('%')) {
+    const pct = parseFloat(s.slice(0, -1));
+    if (!Number.isFinite(pct)) return fallbackPx;
+    // For widths, percentage is of element's bounding width; for heights, caller should
+    // pass the appropriate reference (we use element height for height percentages).
+    const rect = element.getBoundingClientRect();
+    return Math.max(1, Math.round((pct / 100) * rect.width));
+  }
+  // fallback parse as number of pixels
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : fallbackPx;
+}
+
 async function waitForFonts(): Promise<void> {
   if (typeof document === 'undefined' || !('fonts' in document)) {
     return;
@@ -71,6 +102,9 @@ function mountCloneForExport(element: HTMLElement, targetWidth: number): {
 async function renderElementToCanvas(
   element: HTMLElement,
   captureWidth: number,
+  // Optional forced export height in logical pixels. If null, the function uses
+  // a content-measured naturalHeight so exports remain content-driven and responsive.
+  desiredHeight: number | null,
   backgroundColor: string | null
 ): Promise<{ canvas: HTMLCanvasElement; logicalWidth: number; logicalHeight: number }> {
   await waitForFonts();
@@ -120,19 +154,23 @@ async function renderElementToCanvas(
     });
   }
 
-  clone.style.height = `${naturalHeight}px`;
-  clone.style.minHeight = `${naturalHeight}px`;
-  clone.style.maxHeight = `${naturalHeight}px`;
+  // If a desired height is supplied, use that as the export height; otherwise
+  // use the natural content-measured height so the export fits the layout.
+  const exportHeight = typeof desiredHeight === 'number' && desiredHeight > 0 ? desiredHeight : naturalHeight;
+
+  clone.style.height = `${exportHeight}px`;
+  clone.style.minHeight = `${exportHeight}px`;
+  clone.style.maxHeight = `${exportHeight}px`;
 
   const canvas = await toCanvas(clone, {
     cacheBust: true,
     pixelRatio: EXPORT_PIXEL_RATIO,
     backgroundColor: backgroundColor ?? undefined,
     width: captureWidth,
-    height: naturalHeight,
+    height: exportHeight,
     style: {
       width: `${captureWidth}px`,
-      height: `${naturalHeight}px`,
+      height: `${exportHeight}px`,
     },
   });
 
@@ -173,10 +211,28 @@ export async function exportHtmlToPng(
   options: ExportOptions = {}
 ): Promise<void> {
   try {
-    // Render at the actual card content height with the specified width
-    const { canvas } = await renderElementToCanvas(
+    // Render at the requested width and (optionally) forced height so output matches the
+    // desired aspect ratio (e.g. 9:16). Pass the size.height as desiredHeight.
+    // Resolve width/height (allow px number or percentage strings). For width, if
+    // size.width is provided we use that; otherwise fall back to EXPORT_TARGET_WIDTH.
+    const widthDim = (size && (size.width as Dimension)) ?? EXPORT_TARGET_WIDTH;
+    const heightDim = (size && (size.height as Dimension)) ?? EXPORT_TARGET_HEIGHT;
+
+    // Resolve width in pixels relative to the element.
+    const captureWidth = resolveDimension(
+      widthDim,
       element,
-      size.width,
+      CANONICAL_CARD_DIMENSIONS.width
+    ) as number;
+
+    // If height dimension is provided, resolve it; otherwise pass null so renderer
+    // uses content-driven height.
+    const desiredHeight = heightDim != null ? resolveDimension(heightDim, element, CANONICAL_CARD_DIMENSIONS.height) : null;
+
+    const { canvas, logicalHeight } = await renderElementToCanvas(
+      element,
+      captureWidth,
+      desiredHeight,
       options.backgroundColor ?? null
     );
 
@@ -190,7 +246,8 @@ export async function exportHtmlToPng(
         const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = `${filename}-${size.width}x${canvas.height / EXPORT_PIXEL_RATIO}.png`;
+  // Use the actual logical height (measured) for the filename.
+  link.download = `${filename}-${size.width}x${Math.round(logicalHeight)}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
