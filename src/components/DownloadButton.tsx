@@ -1,38 +1,107 @@
 import React, { useState } from 'react';
-import { exportSvgToPng, EXPORT_SIZES } from '@/lib/svg-to-png';
+import { exportHtmlToPng, type ExportDimensions, CANONICAL_CARD_DIMENSIONS } from '@/lib/html-to-pdf';
 
 interface DownloadButtonProps {
-  svgRef: React.RefObject<SVGSVGElement>;
+  cardRef?: React.RefObject<HTMLDivElement>; // HTML card reference for exports
   username: string;
   disabled?: boolean;
   theme?: string;
   themeColors?: any;
 }
 
-export function DownloadButton({ svgRef, username, disabled, theme = 'space', themeColors }: DownloadButtonProps) {
+export function DownloadButton({ cardRef, username, disabled, theme = 'space', themeColors }: DownloadButtonProps) {
   const [downloading, setDownloading] = useState(false);
-  const [showSizes, setShowSizes] = useState(false);
+  const [cardSize, setCardSize] = useState<{ width: number; height: number } | null>(null);
 
-  const handleDownload = async (sizeKey: keyof typeof EXPORT_SIZES) => {
-    if (!svgRef.current || downloading) return;
+  React.useEffect(() => {
+    if (!cardRef?.current) {
+      return;
+    }
+
+    let animationFrame: number | null = null;
+
+    const updateSize = () => {
+      animationFrame = null;
+      const rect = cardRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const width = Math.round(rect.width);
+      const height = Math.round(rect.height);
+      if (!width || !height) return;
+      setCardSize((prev) => {
+        if (prev && prev.width === width && prev.height === height) {
+          return prev;
+        }
+        return { width, height };
+      });
+    };
+
+    const requestUpdate = () => {
+      if (animationFrame !== null) return;
+      animationFrame = window.requestAnimationFrame(updateSize);
+    };
+
+    updateSize();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(requestUpdate);
+      resizeObserver.observe(cardRef.current);
+    } else {
+      window.addEventListener('resize', requestUpdate);
+    }
+
+    return () => {
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      } else {
+        window.removeEventListener('resize', requestUpdate);
+      }
+    };
+  }, [cardRef]);
+
+  const resolvedCardSize = React.useMemo(() => {
+    if (cardSize && cardSize.width > 0 && cardSize.height > 0) {
+      const ratio = cardSize.height / cardSize.width;
+      const width = CANONICAL_CARD_DIMENSIONS.width;
+      const height = Math.round(width * ratio);
+      return { width, height };
+    }
+
+    return {
+      width: CANONICAL_CARD_DIMENSIONS.width,
+      height: CANONICAL_CARD_DIMENSIONS.height,
+    };
+  }, [cardSize]);
+
+  const desktopExportSize: ExportDimensions = React.useMemo(() => ({
+    width: resolvedCardSize.width,
+    height: resolvedCardSize.height,
+    label: `Desktop (${resolvedCardSize.width} × ${resolvedCardSize.height})`,
+  }), [resolvedCardSize]);
+
+  const handleDownloadPng = async () => {
+    if (!cardRef?.current || downloading) return;
 
     setDownloading(true);
     try {
-      const size = EXPORT_SIZES[sizeKey];
-      await exportSvgToPng(svgRef.current, size, `${username}-github-unwrapped-2025`);
+      await exportHtmlToPng(cardRef.current, desktopExportSize, `${username}-github-unwrapped-2025`, {
+        backgroundColor: theme === 'minimal' ? '#ffffff' : null,
+      });
     } catch (error) {
       console.error('Download error:', error);
       alert('Failed to download image. Please try again.');
     } finally {
       setDownloading(false);
-      setShowSizes(false);
     }
   };
 
   return (
     <div className="relative">
       <button
-        onClick={() => setShowSizes(!showSizes)}
+        onClick={handleDownloadPng}
         disabled={disabled || downloading}
         className="group flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 font-bold text-white shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         style={{
@@ -59,50 +128,12 @@ export function DownloadButton({ svgRef, username, disabled, theme = 'space', th
         )}
       </button>
 
-      {showSizes && !disabled && (
-        <div 
-          className="absolute bottom-full mb-2 left-0 right-0 rounded-lg shadow-xl p-2 z-10 border"
-          style={{
-            backgroundColor: theme === 'minimal' ? '#ffffff' : '#1f2937',
-            borderColor: theme === 'minimal' ? '#e2e8f0' : '#374151',
-          }}
-        >
-          <div 
-            className="text-sm font-semibold mb-2 px-2"
-            style={{
-              color: theme === 'minimal' ? '#1e293b' : '#ffffff',
-            }}
-          >
-            Choose Size:
-          </div>
-          {Object.entries(EXPORT_SIZES).map(([key, size]) => (
-            <button
-              key={key}
-              onClick={() => handleDownload(key as keyof typeof EXPORT_SIZES)}
-              className="w-full text-left px-3 py-2 rounded transition-colors"
-              style={{
-                color: theme === 'minimal' ? '#1e293b' : '#ffffff',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme === 'minimal' ? '#f1f5f9' : '#374151';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <div className="font-medium">{size.name}</div>
-              <div 
-                className="text-xs"
-                style={{
-                  color: theme === 'minimal' ? '#64748b' : '#9ca3af',
-                }}
-              >
-                {size.width} × {size.height} px
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+      <p
+        className="mt-2 text-center text-xs font-medium"
+        style={{ color: theme === 'minimal' ? '#475569' : '#e5e7eb' }}
+      >
+        {desktopExportSize.label}
+      </p>
     </div>
   );
 }

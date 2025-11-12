@@ -1,10 +1,8 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React, { useState, useRef, useEffect } from 'react';
-import { CardRenderer } from '@/components/CardRenderer';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { DownloadButton } from '@/components/DownloadButton';
-import { ShareButton } from '@/components/ShareButton';
 import type { UserStats, ThemeName, StatsAPIResponse } from '@/types';
 import { THEME_COLORS, LAYOUT } from '@/types/theme';
 
@@ -19,7 +17,7 @@ export default function UserPage() {
   const [theme, setTheme] = useState<ThemeName>('space');
   const [copied, setCopied] = useState(false);
 
-  const cardRef = useRef<SVGSVGElement>(null);
+  const htmlCardRef = useRef<HTMLDivElement>(null); // Reference to the visible HTML card
 
   useEffect(() => {
     if (!username || typeof username !== 'string') return;
@@ -271,11 +269,14 @@ export default function UserPage() {
                 )}
                 
                 <div 
-                  className={`relative backdrop-blur-lg rounded-3xl p-6 sm:p-8 border overflow-hidden ${theme === 'space' ? 'z-10' : ''}`}
+                  ref={htmlCardRef}
+                  className={`relative backdrop-blur-lg rounded-3xl p-8 border overflow-hidden ${theme === 'space' ? 'z-10' : ''}`}
                   style={{
                     backgroundColor: theme === 'space' ? 'rgba(31, 41, 55, 0.9)' : currentTheme.cardBg,
                     borderColor: theme === 'space' ? 'rgba(255, 255, 255, 0.1)' : currentTheme.border,
                     boxShadow: theme === 'minimal' ? '0 25px 50px -12px rgba(0, 0, 0, 0.15)' : 'none',
+                    maxWidth: '1080px',
+                    margin: '0 auto',
                   }}
                 >
                   {/* Space theme background with nebula and stars */}
@@ -755,7 +756,12 @@ export default function UserPage() {
                       background: theme === 'minimal' ? 'transparent' : undefined,
                     }}
                   >
-                    <DownloadButton svgRef={cardRef} username={stats.login} theme={theme} themeColors={currentTheme} />
+                    <DownloadButton 
+                      cardRef={htmlCardRef}
+                      username={stats.login} 
+                      theme={theme} 
+                      themeColors={currentTheme} 
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -837,11 +843,6 @@ export default function UserPage() {
                   <span className="material-symbols-outlined transition-transform group-hover:rotate-90">add_circle</span>
                   Generate Your Own
                 </a>
-
-                {/* Hidden SVG Card for Download */}
-                <div className="hidden">
-                  <CardRenderer ref={cardRef} stats={stats} theme={theme} />
-                </div>
               </div>
             </div>
           </div>
