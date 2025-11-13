@@ -96,6 +96,36 @@ export default function UserPage() {
   // Theme colors configuration - imported from modular system
   const currentTheme = THEME_COLORS[theme];
 
+  // Build small datasets for activity visuals (hooks must run unconditionally)
+  const weeklyTotals = React.useMemo(() => {
+    if (!stats?.contributionCalendar) return [] as number[];
+    const weeks: number[] = [];
+    const byWeek: Record<string, number> = {};
+    stats.contributionCalendar.forEach((d) => {
+      const date = new Date(d.date);
+      // crude week key: year-weekIndex
+      const wk = `${date.getFullYear()}-${Math.floor((date.getTime() / 86400000 + 4 - date.getDay()) / 7)}`;
+      byWeek[wk] = (byWeek[wk] || 0) + (d.count || 0);
+    });
+    Object.keys(byWeek)
+      .sort()
+      .forEach((k) => weeks.push(byWeek[k]));
+    return weeks;
+  }, [stats?.contributionCalendar]);
+
+  const weekdayCounts = React.useMemo(() => {
+    const counts = new Array(7).fill(0);
+    if (!stats?.contributionCalendar) return counts;
+    stats.contributionCalendar.forEach((d) => {
+      const dow = new Date(d.date).getDay();
+      counts[dow] += d.count || 0;
+    });
+    return counts;
+  }, [stats?.contributionCalendar]);
+
+  const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const bestDayIndex = stats?.bestDayOfWeek ? weekdayNames.indexOf(stats.bestDayOfWeek) : -1;
+
   if (loading) {
     return (
       <>
@@ -147,6 +177,8 @@ export default function UserPage() {
 
   const pageTitle = `@${stats.login}'s GitHub Unwrapped 2025`;
   const pageDescription = `${stats.totalCommits} commits, ${stats.longestStreakDays} day streak, ${stats.totalPRs} PRs in 2025!`;
+
+  
 
   return (
     <>
@@ -290,52 +322,7 @@ export default function UserPage() {
                           animation: 'nebula-pan 45s ease-in-out infinite alternate',
                         }}
                       />
-                      <div className="absolute inset-0 z-0">
-                        {/* Twinkling stars */}
-                        {[0, 0.5, 1.5, 1, 2.5, 2, 3, 3.5, 4, 4.5].map((delay, index) => (
-                          <div
-                            key={index}
-                            className="absolute rounded-full bg-white/80 animate-twinkle"
-                            style={{
-                              width: index % 3 === 0 ? '4px' : '2px',
-                              height: index % 3 === 0 ? '4px' : '2px',
-                              top: `${(20 + index * 10) % 90}%`,
-                              left: `${(20 + index * 13) % 90}%`,
-                              opacity: index % 2 === 0 ? 0.8 : 0.6,
-                              animationDelay: `${delay}s`,
-                            }}
-                          />
-                        ))}
-                      </div>
-                      {/* Meteor shower effect */}
-                      <div className="absolute -top-1/4 -right-1/4 w-1/2 h-[200%] z-0">
-                        {[0, 2, 5].map((delay, i) => (
-                          <div
-                            key={i}
-                            className="absolute top-0 right-0 rounded-full bg-gradient-to-b from-white/30 to-transparent animate-meteor-shower"
-                            style={{
-                              width: i === 1 ? '2px' : '4px',
-                              height: i === 0 ? '384px' : i === 1 ? '320px' : '384px',
-                              opacity: 0.3,
-                              animationDelay: `${delay}s`,
-                              animationDuration: i === 1 ? '7s' : i === 2 ? '6s' : '8s',
-                            }}
-                          />
-                        ))}
-                      </div>
                     </>
-                  )}
-                  
-                  {/* Scanlines effect for retro theme */}
-                  {theme === 'retro' && (
-                    <div 
-                      className="absolute inset-0 pointer-events-none z-10"
-                      style={{
-                        backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 50%, transparent 50%)',
-                        backgroundSize: '100% 4px',
-                        opacity: 0.5,
-                      }}
-                    />
                   )}
 
                   {/* Matrix stream effect for high-contrast/matrix theme */}
@@ -394,32 +381,59 @@ export default function UserPage() {
                   )}
                   
                   <div className={`relative z-10 ${theme === 'space' ? '' : ''}`}>
-                {/* Avatar and Name */}
-                <div className={`flex flex-col sm:flex-row items-center gap-4 sm:gap-5 mb-6 sm:mb-8`}>
-                  <img 
-                    alt={`${stats.login} avatar`}
-                    className="w-20 h-20 rounded-full border-4 shadow-lg"
-                    style={{
-                      borderColor: currentTheme.avatar,
-                      boxShadow: theme === 'retro' 
-                        ? `0 0 20px ${currentTheme.avatar}` 
-                        : `0 10px 15px -3px ${currentTheme.glow}, 0 4px 6px -2px ${currentTheme.glow}`,
-                    }}
-                    src={stats.avatarUrl}
-                  />
-                  <div className={`text-center sm:text-left`}>
-                    <h2 
-                      className="text-xl sm:text-2xl font-bold"
-                      style={{ 
-                        color: currentTheme.textPrimary,
-                        textShadow: theme === 'retro' ? `0 0 5px ${currentTheme.accent}, 0 0 10px ${currentTheme.accent}` : 'none'
+                {/* Header: Avatar, Name, and Title */}
+                <div className={`flex items-center justify-between gap-4 mb-6 sm:mb-8`}>
+                  {/* Left: Avatar and Name */}
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      alt={`${stats.login} avatar`}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 shadow-lg flex-shrink-0"
+                      style={{
+                        borderColor: currentTheme.avatar,
+                        boxShadow: theme === 'retro' 
+                          ? `0 0 20px ${currentTheme.avatar}` 
+                          : `0 10px 15px -3px ${currentTheme.glow}, 0 4px 6px -2px ${currentTheme.glow}`,
                       }}
-                    >
-                      {stats.name || stats.login}
-                    </h2>
-                    <p className="text-sm sm:text-base" style={{ color: currentTheme.textSecondary }}>
-                      @{stats.login}
-                    </p>
+                      src={stats.avatarUrl}
+                    />
+                    <div>
+                      <h2 
+                        className="text-xl sm:text-2xl font-bold leading-tight"
+                        style={{ 
+                          color: currentTheme.textPrimary,
+                          textShadow: theme === 'retro' ? `0 0 5px ${currentTheme.accent}, 0 0 10px ${currentTheme.accent}` : 'none'
+                        }}
+                      >
+                        {stats.name || stats.login}
+                      </h2>
+                      <p className="text-sm sm:text-base" style={{ color: currentTheme.textSecondary }}>
+                        @{stats.login}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Title */}
+                  <div className="text-right">
+                    <div className="text-sm sm:text-base font-medium leading-tight" style={{ color: currentTheme.textSecondary }}>
+                      Your Open Source Story
+                    </div>
+                    <div className="flex items-baseline justify-end gap-1.5">
+                      <span className="text-sm sm:text-base font-medium" style={{ color: currentTheme.textSecondary }}>
+                        in
+                      </span>
+                      <span 
+                        className="font-bold text-2xl sm:text-3xl leading-none"
+                        style={{
+                          background: `linear-gradient(to right, ${currentTheme.accent}, ${currentTheme.accentSecondary})`,
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        2025
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -482,41 +496,219 @@ export default function UserPage() {
                   ))}
                 </div>
 
-                {/* Activity Insights */}
+                {/* Activity Insights - Fun Redesign */}
                 <div className="space-y-4 sm:space-y-5">
                   {stats.bestDayOfWeek && (
                     <div 
-                      className="border p-3 sm:p-4 rounded-xl"
+                      className="border p-4 sm:p-5 rounded-2xl overflow-hidden relative"
                       style={{
                         backgroundColor: currentTheme.statBg,
                         borderColor: currentTheme.statBorder,
                       }}
                     >
-                      <h3 
-                        className="text-sm sm:text-base font-bold mb-2 sm:mb-3 flex items-center gap-2"
-                        style={{ color: currentTheme.textPrimary }}
-                      >
-                        <span className="material-symbols-outlined !text-lg sm:!text-xl" style={{ color: currentTheme.iconColor }}>
-                          monitoring
-                        </span>
-                        Activity Insights
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3 text-left">
-                        <div>
-                          <p className="text-xs sm:text-sm" style={{ color: currentTheme.textSecondary }}>
-                            Most Productive Day
-                          </p>
-                          <p className="text-sm sm:text-base font-medium" style={{ color: currentTheme.textPrimary }}>
-                            {stats.bestDayOfWeek}
-                          </p>
+                      {/* Decorative gradient orbs */}
+                      <div 
+                        className="absolute -top-12 -right-12 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${currentTheme.accent}, transparent)`,
+                        }}
+                      />
+                      <div 
+                        className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${currentTheme.accentSecondary}, transparent)`,
+                        }}
+                      />
+                      
+                      <div className="relative">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between mb-4 sm:mb-5">
+                          <h3 
+                            className="text-base sm:text-lg font-bold flex items-center gap-2.5"
+                            style={{ color: currentTheme.textPrimary }}
+                          >
+                            <span 
+                              className="material-symbols-outlined !text-xl sm:!text-2xl"
+                              style={{ color: currentTheme.accent }}
+                            >
+                              insights
+                            </span>
+                            Activity Insights
+                          </h3>
+                          <span 
+                            className="text-lg sm:text-xl opacity-80"
+                            style={{ 
+                              filter: `drop-shadow(0 0 8px ${currentTheme.accent}40)`,
+                            }}
+                          >
+                            ✨
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-xs sm:text-sm" style={{ color: currentTheme.textSecondary }}>
-                            Most Productive Hour
-                          </p>
-                          <p className="text-sm sm:text-base font-medium" style={{ color: currentTheme.textPrimary }}>
-                            {stats.bestHour}:00
-                          </p>
+
+                        <div className="space-y-4">
+                          {/* Productivity Cards Row */}
+                          <div className="grid grid-cols-2 gap-3">
+                            {/* Best Day Card */}
+                            <div 
+                              className="p-4 rounded-xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                              style={{
+                                background: theme === 'minimal' 
+                                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05))'
+                                  : `linear-gradient(135deg, ${currentTheme.accent}20, ${currentTheme.accentSecondary}10)`,
+                                border: `1.5px solid ${currentTheme.accent}40`,
+                              }}
+                            >
+                              <div className="flex flex-col h-full">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div 
+                                    className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg"
+                                    style={{
+                                      backgroundColor: `${currentTheme.accent}25`,
+                                    }}
+                                  >
+                                    <span className="text-base sm:text-lg">📅</span>
+                                  </div>
+                                  <p 
+                                    className="text-xs uppercase tracking-wide font-bold"
+                                    style={{ color: currentTheme.accent }}
+                                  >
+                                    Peak Day
+                                  </p>
+                                </div>
+                                <p 
+                                  className="text-lg sm:text-xl font-bold mt-auto"
+                                  style={{ color: currentTheme.textPrimary }}
+                                >
+                                  {stats.bestDayOfWeek}
+                                </p>
+                              </div>
+                              <div 
+                                className="absolute bottom-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-20"
+                                style={{ background: currentTheme.accent }}
+                              />
+                            </div>
+
+                            {/* Best Hour Card */}
+                            <div 
+                              className="p-4 rounded-xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                              style={{
+                                background: theme === 'minimal'
+                                  ? 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(251, 113, 133, 0.05))'
+                                  : `linear-gradient(135deg, ${currentTheme.accentSecondary}20, ${currentTheme.accent}10)`,
+                                border: `1.5px solid ${currentTheme.accentSecondary}40`,
+                              }}
+                            >
+                              <div className="flex flex-col h-full">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div 
+                                    className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg"
+                                    style={{
+                                      backgroundColor: `${currentTheme.accentSecondary}25`,
+                                    }}
+                                  >
+                                    <span className="text-base sm:text-lg">⏰</span>
+                                  </div>
+                                  <p 
+                                    className="text-xs uppercase tracking-wide font-bold"
+                                    style={{ color: currentTheme.accentSecondary }}
+                                  >
+                                    Peak Hour
+                                  </p>
+                                </div>
+                                <p 
+                                  className="text-lg sm:text-xl font-bold mt-auto"
+                                  style={{ color: currentTheme.textPrimary }}
+                                >
+                                  {stats.bestHour}:00
+                                </p>
+                              </div>
+                              <div 
+                                className="absolute bottom-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-20"
+                                style={{ background: currentTheme.accentSecondary }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Week Pattern Visualization */}
+                          {weekdayCounts.some((c) => c > 0) && (
+                            <div 
+                              className="p-4 rounded-xl"
+                              style={{
+                                backgroundColor: theme === 'minimal' 
+                                  ? 'rgba(241, 245, 249, 0.6)' 
+                                  : `${currentTheme.cardBg}50`,
+                                border: `1px solid ${currentTheme.statBorder}`,
+                              }}
+                            >
+                              <div className="flex items-center justify-between mb-3.5">
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="flex items-center justify-center w-7 h-7 rounded-lg"
+                                    style={{
+                                      backgroundColor: `${currentTheme.accent}20`,
+                                    }}
+                                  >
+                                    <span className="text-sm">🔥</span>
+                                  </div>
+                                  <p 
+                                    className="text-sm font-bold"
+                                    style={{ color: currentTheme.textPrimary }}
+                                  >
+                                    Weekly Pattern
+                                  </p>
+                                </div>
+                                <p 
+                                  className="text-xs"
+                                  style={{ color: currentTheme.textSecondary }}
+                                >
+                                  contributions
+                                </p>
+                              </div>
+                              
+                              <div className="grid grid-cols-7 gap-2">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => {
+                                  const count = weekdayCounts[idx];
+                                  const maxCount = Math.max(...weekdayCounts);
+                                  const heightPercent = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                                  const isBestDay = idx === bestDayIndex;
+                                  
+                                  return (
+                                    <div key={idx} className="flex flex-col items-center gap-2">
+                                      <div 
+                                        className="w-full relative flex items-end justify-center"
+                                        style={{ height: '56px' }}
+                                      >
+                                        <div 
+                                          className="w-full rounded-lg transition-all duration-500 relative"
+                                          style={{
+                                            height: `${Math.max(8, heightPercent)}%`,
+                                            background: isBestDay
+                                              ? `linear-gradient(to top, ${currentTheme.accent}, ${currentTheme.accentSecondary})`
+                                              : theme === 'minimal'
+                                              ? `linear-gradient(to top, ${currentTheme.accent}50, ${currentTheme.accent}30)`
+                                              : `linear-gradient(to top, ${currentTheme.accent}70, ${currentTheme.accent}40)`,
+                                            boxShadow: isBestDay 
+                                              ? `0 4px 16px ${currentTheme.accent}60, 0 0 0 2px ${currentTheme.accent}30` 
+                                              : `0 2px 8px ${currentTheme.accent}20`,
+                                          }}
+                                        >
+                                          {/* Star indicator removed intentionally */}
+                                        </div>
+                                      </div>
+                                      <span 
+                                        className="text-[10px] font-semibold tracking-tight text-center"
+                                        style={{ 
+                                          color: isBestDay ? currentTheme.accent : currentTheme.textSecondary,
+                                        }}
+                                      >
+                                        {day}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -541,52 +733,110 @@ export default function UserPage() {
                         Top Languages
                       </h3>
                       <div className="space-y-2 sm:space-y-3">
-                        {stats.topLanguages.slice(0, 3).map((lang, index) => (
-                          <div key={lang.name} className="flex items-center gap-2 sm:gap-3">
-                            <div 
-                              className="text-xs sm:text-sm font-mono w-16 sm:w-20 text-right"
-                              style={{ color: currentTheme.textSecondary }}
-                            >
-                              {lang.name}
-                            </div>
-                            <div 
-                              className="relative flex-1 h-2 sm:h-3 rounded-full overflow-hidden"
-                              style={{ 
-                                backgroundColor: theme === 'minimal' 
-                                  ? 'rgba(226, 232, 240, 1)' 
-                                  : theme === 'retro'
-                                  ? 'rgba(131, 24, 67, 0.5)'
-                                  : theme === 'sunset'
-                                  ? 'rgba(63, 63, 70, 0.5)'
-                                  : 'rgba(55, 65, 81, 0.5)'
-                              }}
-                            >
+                        {stats.topLanguages.slice(0, 5).map((lang, index) => {
+                          const fallbackGradient = index === 0
+                            ? `linear-gradient(to right, ${currentTheme.accent}, ${theme === 'minimal' ? '#f9a8d4' : theme === 'retro' ? '#f9a8d4' : theme === 'sunset' ? '#ec4899' : currentTheme.accentSecondary})`
+                            : index === 1
+                            ? (theme === 'retro' ? 'linear-gradient(to right, #06b6d4, #38bdf8)' : 'linear-gradient(to right, #6366f1, #a78bfa)')
+                            : 'linear-gradient(to right, #f59e0b, #fbbf24)';
+
+                          return (
+                            <div key={lang.name} className="flex items-center gap-2 sm:gap-3">
+                              {/* Color dot + name */}
+                              <div className="flex items-center justify-end w-20 sm:w-24 gap-1.5">
+                                <span
+                                  aria-hidden
+                                  className="inline-block rounded-full"
+                                  style={{ width: 8, height: 8, backgroundColor: lang.color || currentTheme.iconColor, boxShadow: `0 0 0 1px ${currentTheme.statBorder}` }}
+                                />
+                                <span 
+                                  className="text-xs sm:text-sm font-mono truncate"
+                                  title={lang.name}
+                                  style={{ color: currentTheme.textSecondary }}
+                                >
+                                  {lang.name}
+                                </span>
+                              </div>
+
+                              {/* Bar */}
                               <div 
-                                className="absolute top-0 left-0 h-full rounded-full"
+                                className="relative flex-1 h-2 sm:h-3 rounded-full overflow-hidden"
                                 style={{ 
-                                  width: `${lang.percent * 100}%`,
-                                  background: index === 0 
-                                    ? `linear-gradient(to right, ${currentTheme.accent}, ${theme === 'minimal' ? '#f9a8d4' : theme === 'retro' ? '#f9a8d4' : theme === 'sunset' ? '#ec4899' : currentTheme.accentSecondary})` 
-                                    : index === 1
-                                    ? (theme === 'retro' ? 'linear-gradient(to right, #06b6d4, #38bdf8)' : 'linear-gradient(to right, #6366f1, #a78bfa)')
-                                    : 'linear-gradient(to right, #f59e0b, #fbbf24)'
+                                  backgroundColor: theme === 'minimal' 
+                                    ? 'rgba(226, 232, 240, 1)' 
+                                    : theme === 'retro'
+                                    ? 'rgba(131, 24, 67, 0.5)'
+                                    : theme === 'sunset'
+                                    ? 'rgba(63, 63, 70, 0.5)'
+                                    : 'rgba(55, 65, 81, 0.5)'
                                 }}
-                              />
+                              >
+                                <div 
+                                  className="absolute top-0 left-0 h-full rounded-full"
+                                  style={{ 
+                                    width: `${Math.max(2, Math.round(lang.percent * 100))}%`,
+                                    background: lang.color || fallbackGradient,
+                                  }}
+                                />
+                              </div>
+
+                              {/* Percentage */}
+                              <div 
+                                className="text-xs sm:text-sm w-10 sm:w-12 text-right font-semibold tabular-nums"
+                                style={{ color: currentTheme.textPrimary }}
+                              >
+                                {(lang.percent * 100).toFixed(1)}%
+                              </div>
                             </div>
-                            <div 
-                              className="text-xs sm:text-sm w-8 sm:w-10 text-right font-semibold"
-                              style={{ color: currentTheme.textPrimary }}
-                            >
-                              {Math.round(lang.percent * 100)}%
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
 
-                  {/* Top Repository */}
-                  {stats.topRepos.length > 0 && (
+                  {/* Top Repository & GitHub Anniversary - Side by Side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    {/* Top Repository */}
+                    {stats.topRepos.length > 0 && (
+                      <div 
+                        className="border p-3 sm:p-4 rounded-xl"
+                        style={{
+                          backgroundColor: currentTheme.statBg,
+                          borderColor: currentTheme.statBorder,
+                        }}
+                      >
+                        <h3 
+                          className="text-sm sm:text-base font-bold mb-2 sm:mb-3 flex items-center gap-2"
+                          style={{ color: currentTheme.textPrimary }}
+                        >
+                          <span className="material-symbols-outlined !text-lg sm:!text-xl" style={{ color: currentTheme.iconColor }}>
+                            star
+                          </span>
+                          Top Repository
+                        </h3>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div 
+                            className="w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm sm:text-base"
+                            style={{
+                              background: `linear-gradient(to bottom right, ${currentTheme.accent}, ${currentTheme.accentSecondary})`,
+                              boxShadow: `0 4px 6px -1px ${currentTheme.glow}`,
+                            }}
+                          >
+                            {stats.topRepos[0].name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm sm:text-base" style={{ color: currentTheme.textPrimary }}>
+                              {stats.topRepos[0].name}
+                            </p>
+                            <p className="text-xs sm:text-sm" style={{ color: currentTheme.textSecondary }}>
+                              {stats.topRepos[0].contributions} contributions
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* GitHub Anniversary */}
                     <div 
                       className="border p-3 sm:p-4 rounded-xl"
                       style={{
@@ -599,27 +849,211 @@ export default function UserPage() {
                         style={{ color: currentTheme.textPrimary }}
                       >
                         <span className="material-symbols-outlined !text-lg sm:!text-xl" style={{ color: currentTheme.iconColor }}>
-                          star
+                          celebration
                         </span>
-                        Top Repository
+                        GitHub Anniversary
                       </h3>
-                      <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-3">
                         <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm"
+                          className="w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-sm sm:text-base"
                           style={{
                             background: `linear-gradient(to bottom right, ${currentTheme.accent}, ${currentTheme.accentSecondary})`,
                             boxShadow: `0 4px 6px -1px ${currentTheme.glow}`,
                           }}
                         >
-                          {stats.topRepos[0].name.charAt(0).toUpperCase()}
+                          {stats.githubAnniversary}
                         </div>
                         <div>
-                          <p className="font-medium text-sm sm:text-base" style={{ color: currentTheme.textPrimary }}>
-                            {stats.topRepos[0].name}
+                          <p className="text-sm sm:text-lg font-bold" style={{ color: currentTheme.textPrimary }}>
+                            {stats.githubAnniversary} {stats.githubAnniversary === 1 ? 'Year' : 'Years'}
                           </p>
                           <p className="text-xs sm:text-sm" style={{ color: currentTheme.textSecondary }}>
-                            {stats.topRepos[0].contributions} contributions
+                            Since {new Date(Date.now() - stats.githubAnniversary * 365 * 24 * 60 * 60 * 1000).getFullYear()}
                           </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Year-over-Year Growth - Redesigned */}
+                  {stats.yearOverYearGrowth && (
+                    <div 
+                      className="border p-4 sm:p-5 rounded-2xl overflow-hidden relative"
+                      style={{
+                        backgroundColor: currentTheme.statBg,
+                        borderColor: currentTheme.statBorder,
+                      }}
+                    >
+                      {/* Decorative gradient orbs */}
+                      <div 
+                        className="absolute -top-12 -right-12 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${currentTheme.accent}, transparent)`,
+                        }}
+                      />
+                      <div 
+                        className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${currentTheme.accentSecondary}, transparent)`,
+                        }}
+                      />
+
+                      <div className="relative">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between mb-4 sm:mb-5">
+                          <h3 
+                            className="text-base sm:text-lg font-bold flex items-center gap-2.5"
+                            style={{ color: currentTheme.textPrimary }}
+                          >
+                            <span 
+                              className="material-symbols-outlined !text-xl sm:!text-2xl"
+                              style={{ color: currentTheme.accent }}
+                            >
+                              trending_up
+                            </span>
+                            Year-over-Year Growth
+                          </h3>
+                          <span 
+                            className="text-lg sm:text-xl opacity-80"
+                            style={{ 
+                              filter: `drop-shadow(0 0 8px ${currentTheme.accent}40)`,
+                            }}
+                          >
+                            📈
+                          </span>
+                        </div>
+
+                        <div className="space-y-4">
+                          {/* Overall Growth - Prominent Card */}
+                          <div 
+                            className="p-4 rounded-xl relative overflow-hidden"
+                            style={{
+                              background: theme === 'minimal'
+                                ? `linear-gradient(135deg, ${currentTheme.accent}20, ${currentTheme.accentSecondary}10)`
+                                : `linear-gradient(135deg, ${currentTheme.accent}20, ${currentTheme.accentSecondary}30)`,
+                              border: `1.5px solid ${currentTheme.accent}40`,
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p 
+                                  className="text-xs uppercase tracking-wide font-bold mb-2"
+                                  style={{ color: currentTheme.accent }}
+                                >
+                                  Overall Growth
+                                </p>
+                                <p 
+                                  className="text-3xl sm:text-4xl font-bold"
+                                  style={{ color: stats.yearOverYearGrowth.overallGrowth >= 0 ? currentTheme.accent : '#ef4444' }}
+                                >
+                                  {stats.yearOverYearGrowth.overallGrowth > 0 ? '+' : ''}
+                                  {stats.yearOverYearGrowth.overallGrowth}%
+                                </p>
+                              </div>
+                              <div 
+                                className="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full"
+                                style={{
+                                  backgroundColor: stats.yearOverYearGrowth.overallGrowth >= 0 ? `${currentTheme.accent}15` : '#ef444415',
+                                }}
+                              >
+                                <span 
+                                  className="text-3xl sm:text-4xl"
+                                  style={{
+                                    filter: stats.yearOverYearGrowth.overallGrowth >= 0 ? 'none' : 'grayscale(0)',
+                                  }}
+                                >
+                                  {stats.yearOverYearGrowth.overallGrowth >= 0 ? '🚀' : '📉'}
+                                </span>
+                              </div>
+                            </div>
+                            <div 
+                              className="absolute bottom-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-20"
+                              style={{ background: currentTheme.accent }}
+                            />
+                          </div>
+
+                          {/* Growth Metrics Grid */}
+                          <div className="grid grid-cols-3 gap-2.5">
+                            {/* Commits Growth */}
+                            <div 
+                              className="p-3 rounded-lg relative overflow-hidden transition-all duration-300 hover:scale-[1.03]"
+                              style={{
+                                background: theme === 'minimal'
+                                  ? `linear-gradient(135deg, ${currentTheme.accent}15, ${currentTheme.accent}08)`
+                                  : `linear-gradient(135deg, ${currentTheme.accent}20, ${currentTheme.accent}10)`,
+                                border: `1px solid ${currentTheme.accent}40`,
+                              }}
+                            >
+                              <p 
+                                className="text-[10px] sm:text-xs uppercase tracking-wide font-bold mb-1.5"
+                                style={{ color: currentTheme.accent }}
+                              >
+                                Commits
+                              </p>
+                              <p 
+                                className="text-base sm:text-lg font-bold"
+                                style={{ color: stats.yearOverYearGrowth.commitsGrowth >= 0 ? currentTheme.accent : '#ef4444' }}
+                              >
+                                {stats.yearOverYearGrowth.commitsGrowth > 0 ? '+' : ''}
+                                {stats.yearOverYearGrowth.commitsGrowth}%
+                              </p>
+                            </div>
+
+                            {/* PRs Growth */}
+                            <div 
+                              className="p-3 rounded-lg relative overflow-hidden transition-all duration-300 hover:scale-[1.03]"
+                              style={{
+                                background: theme === 'minimal'
+                                  ? `linear-gradient(135deg, ${currentTheme.accentSecondary}15, ${currentTheme.accentSecondary}08)`
+                                  : `linear-gradient(135deg, ${currentTheme.accentSecondary}20, ${currentTheme.accentSecondary}10)`,
+                                border: `1px solid ${currentTheme.accentSecondary}40`,
+                              }}
+                            >
+                              <p 
+                                className="text-[10px] sm:text-xs uppercase tracking-wide font-bold mb-1.5"
+                                style={{ color: currentTheme.accentSecondary }}
+                              >
+                                PRs
+                              </p>
+                              <p 
+                                className="text-base sm:text-lg font-bold"
+                                style={{ color: stats.yearOverYearGrowth.prsGrowth >= 0 ? currentTheme.accentSecondary : '#ef4444' }}
+                              >
+                                {stats.yearOverYearGrowth.prsGrowth > 0 ? '+' : ''}
+                                {stats.yearOverYearGrowth.prsGrowth}%
+                              </p>
+                            </div>
+
+                            {/* Issues Growth */}
+                            <div 
+                              className="p-3 rounded-lg relative overflow-hidden transition-all duration-300 hover:scale-[1.03]"
+                              style={{
+                                background: theme === 'minimal'
+                                  ? `linear-gradient(135deg, ${currentTheme.accent}12, ${currentTheme.accentSecondary}06)`
+                                  : `linear-gradient(135deg, ${currentTheme.accent}18, ${currentTheme.accentSecondary}12)`,
+                                border: `1px solid ${currentTheme.accent}35`,
+                              }}
+                            >
+                              <p 
+                                className="text-[10px] sm:text-xs uppercase tracking-wide font-bold mb-1.5"
+                                style={{ 
+                                  background: `linear-gradient(to right, ${currentTheme.accent}, ${currentTheme.accentSecondary})`,
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  backgroundClip: 'text',
+                                }}
+                              >
+                                Issues
+                              </p>
+                              <p 
+                                className="text-base sm:text-lg font-bold"
+                                style={{ color: stats.yearOverYearGrowth.issuesGrowth >= 0 ? currentTheme.accent : '#ef4444' }}
+                              >
+                                {stats.yearOverYearGrowth.issuesGrowth > 0 ? '+' : ''}
+                                {stats.yearOverYearGrowth.issuesGrowth}%
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -633,6 +1067,32 @@ export default function UserPage() {
                       themeColors={currentTheme}
                     />
                   )}
+
+                  {/* Grateful Footer - Export only */}
+                  <div 
+                    className="border p-3 sm:p-4 rounded-xl text-center hidden"
+                    style={{
+                      backgroundColor: currentTheme.statBg,
+                      borderColor: currentTheme.statBorder,
+                    }}
+                    data-export-only="true"
+                  >
+                    <p 
+                      className="text-sm sm:text-base leading-relaxed"
+                      style={{ color: currentTheme.textPrimary }}
+                    >
+                      The open source community is grateful to have passionate contributors like you. 
+                      <span style={{ color: currentTheme.accent }}>
+                        {' '}Your code, ideas, and dedication help shape the future of technology.
+                      </span>
+                    </p>
+                    <p 
+                      className="text-xs sm:text-sm mt-3"
+                      style={{ color: currentTheme.textSecondary }}
+                    >
+                      Keep building, keep contributing, keep inspiring. 💜
+                    </p>
+                  </div>
                   </div>
                 </div>
               </div>

@@ -29,7 +29,6 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Fonts are loaded in _document.tsx to avoid per-page loading warnings */}
         <style>{`
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
     .text-gradient { background-image: linear-gradient(to right, #14b8a6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent; }
   `}</style>
       </Head>

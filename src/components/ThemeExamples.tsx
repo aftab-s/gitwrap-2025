@@ -79,7 +79,7 @@ function ThemeUtilitiesExample({ theme }: { theme: ThemeName }) {
   
   // Get display name
   const displayName = getThemeDisplay(theme);
-  console.log(displayName); // "🚀 Space"
+  // Example only: Show display name in UI instead of logging to console
   
   // Get stat box colors
   const statColors = getStatBoxColors(theme);

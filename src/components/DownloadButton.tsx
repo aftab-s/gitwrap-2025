@@ -16,7 +16,7 @@ export function DownloadButton({ cardRef, username, disabled, theme = 'space', t
     () => ({
       width: CANONICAL_CARD_DIMENSIONS.width,
       height: CANONICAL_CARD_DIMENSIONS.height,
-      label: `Instagram Story (${CANONICAL_CARD_DIMENSIONS.width} × ${CANONICAL_CARD_DIMENSIONS.height})`,
+      label: `Story 9:16 (${CANONICAL_CARD_DIMENSIONS.width} × ${CANONICAL_CARD_DIMENSIONS.height})`,
     }),
     []
   );
@@ -28,6 +28,7 @@ export function DownloadButton({ cardRef, username, disabled, theme = 'space', t
     try {
       await exportHtmlToPng(cardRef.current, storyExportSize, `${username}-github-unwrapped-2025`, {
         backgroundColor: theme === 'minimal' ? '#ffffff' : null,
+        fitToFrame: true,
       });
     } catch (error) {
       console.error('Download error:', error);
@@ -62,7 +63,7 @@ export function DownloadButton({ cardRef, username, disabled, theme = 'space', t
         ) : (
           <>
             <span className="material-symbols-outlined transition-transform group-hover:rotate-12">download</span>
-            <span>Download Story PNG</span>
+            <span>Download Card PNG</span>
           </>
         )}
       </button>

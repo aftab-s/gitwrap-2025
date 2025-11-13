@@ -41,7 +41,7 @@ export default async function handler(
 
     // If we have stale data and GitHub might be rate-limited, return stale data
     if (cached && cached.stale) {
-      console.log(`Using stale cache for ${username} as fallback`);
+  console.warn(`Using stale cache for ${username} as fallback`);
     }
 
     // Fetch fresh data from GitHub

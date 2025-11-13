@@ -18,6 +18,13 @@ interface ExportOptions {
    * Defaults to transparent to preserve the exact card styling.
    */
   backgroundColor?: string | null;
+  /**
+   * When true, uniformly scales the rendered card to fit entirely within the
+   * requested export frame (width × height) without cropping, centering it
+   * with potential letterboxing. If false, content may overflow and be clipped.
+   * Defaults to true.
+   */
+  fitToFrame?: boolean;
 }
 
 const EXPORT_PIXEL_RATIO = 2; // balances clarity and file size
@@ -65,6 +72,78 @@ async function waitForFonts(): Promise<void> {
   }
 }
 
+// Tiny helpers for timing/layout stability
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r(undefined)));
+
+/**
+ * Wait for all <img> elements inside the root to either load or error (with timeout).
+ * We also force eager loading to avoid lazy-loading delays in the offscreen clone.
+ */
+async function waitForImages(root: HTMLElement, timeoutMs = 5000): Promise<void> {
+  const imgs = Array.from(root.querySelectorAll('img')) as HTMLImageElement[];
+  if (imgs.length === 0) return;
+
+  await Promise.all(
+    imgs.map((img) =>
+      new Promise<void>((resolve) => {
+        // Force eager loading for the cloned tree
+        try {
+          img.loading = 'eager';
+          img.decoding = 'sync';
+        } catch {}
+
+        if (img.complete) {
+          resolve();
+          return;
+        }
+        let done = false;
+        const onDone = () => {
+          if (done) return;
+          done = true;
+          img.removeEventListener('load', onDone);
+          img.removeEventListener('error', onDone);
+          resolve();
+        };
+        const t = setTimeout(onDone, timeoutMs);
+        img.addEventListener('load', () => {
+          clearTimeout(t);
+          onDone();
+        });
+        img.addEventListener('error', () => {
+          clearTimeout(t);
+          onDone();
+        });
+      })
+    )
+  );
+}
+
+/**
+ * Wait for the element scrollHeight to stabilize across a number of samples or until timeout.
+ */
+async function waitForStableLayout(el: HTMLElement, opts?: { samples?: number; intervalMs?: number; timeoutMs?: number }): Promise<void> {
+  const samples = opts?.samples ?? 3;
+  const intervalMs = opts?.intervalMs ?? 50;
+  const timeoutMs = opts?.timeoutMs ?? 1500;
+  const heights: number[] = [];
+  const start = performance.now();
+
+  // Give the browser two frames to flush styles first
+  await nextFrame();
+  await nextFrame();
+
+  while (performance.now() - start < timeoutMs) {
+    heights.push(el.scrollHeight);
+    if (heights.length >= samples) {
+      const last = heights.slice(-samples);
+      const equal = last.every((h) => h === last[0]);
+      if (equal) return;
+    }
+    await sleep(intervalMs);
+  }
+}
+
 function mountCloneForExport(element: HTMLElement, targetWidth: number): {
   wrapper: HTMLDivElement;
   clone: HTMLElement;
@@ -76,6 +155,7 @@ function mountCloneForExport(element: HTMLElement, targetWidth: number): {
   clone.style.width = `${targetWidth}px`;
   clone.style.minWidth = `${targetWidth}px`;
   clone.style.maxWidth = `${targetWidth}px`;
+  // Height will be set later once we know the exportHeight
   clone.style.height = 'auto';
   clone.style.minHeight = '0';
   clone.style.maxHeight = 'none';
@@ -83,14 +163,22 @@ function mountCloneForExport(element: HTMLElement, targetWidth: number): {
   clone.style.left = '0';
   clone.style.top = '0';
   clone.style.transform = 'none';
+  clone.style.overflow = 'hidden';
+  // Freeze text adjustments at the element level for mobile Safari
+  clone.style.setProperty('-webkit-text-size-adjust', 'none');
+  clone.style.setProperty('text-size-adjust', 'none');
+  clone.style.setProperty('font-synthesis', 'none');
+  clone.style.fontFamily = "'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'";
 
   const wrapper = document.createElement('div');
+  // Offscreen container: keep it renderable (no visibility:hidden) to avoid blank captures
   wrapper.style.position = 'fixed';
   wrapper.style.pointerEvents = 'none';
   wrapper.style.opacity = '0';
   wrapper.style.left = '0';
   wrapper.style.top = '-100000px';
   wrapper.style.width = `${targetWidth}px`;
+  // Height will be explicitly set by the caller based on desired export height
   wrapper.style.height = 'auto';
   wrapper.style.zIndex = '-1';
   wrapper.appendChild(clone);
@@ -105,7 +193,8 @@ async function renderElementToCanvas(
   // Optional forced export height in logical pixels. If null, the function uses
   // a content-measured naturalHeight so exports remain content-driven and responsive.
   desiredHeight: number | null,
-  backgroundColor: string | null
+  backgroundColor: string | null,
+  fitToFrame: boolean
 ): Promise<{ canvas: HTMLCanvasElement; logicalWidth: number; logicalHeight: number }> {
   await waitForFonts();
 
@@ -113,6 +202,12 @@ async function renderElementToCanvas(
 
   // Allow the browser to recalculate layout with the enforced width
   await new Promise((resolve) => requestAnimationFrame(resolve));
+
+  // Ensure images inside the clone are loaded and the layout is stable before measuring
+  await waitForImages(clone).catch(() => undefined);
+  await waitForStableLayout(clone).catch(() => undefined);
+  // Small additional settle delay to match cached second-run behavior
+  await sleep(50);
 
   // Measure the visible content by finding the innermost z-10 wrapper
   // The card structure is: <card p-8> <div z-10> {content} </div> </card>
@@ -133,34 +228,63 @@ async function renderElementToCanvas(
     // Calculate total: top padding + content + minimal bottom spacing (4px)
     naturalHeight = paddingTop + contentHeight + 4;
     
-    console.log('[Export Debug] Content-based measurement:', {
-      cardPaddingTop: paddingTop,
-      cardPaddingBottom: paddingBottom,
-      contentWrapperHeight: contentHeight,
-      calculatedHeight: naturalHeight,
-      originalScrollHeight: clone.scrollHeight,
-      savedPixels: clone.scrollHeight - naturalHeight
-    });
+    // Measurements computed for content-driven export height
   } else {
     // Fallback: just remove bottom padding from scrollHeight
     const cardStyle = window.getComputedStyle(clone);
     const paddingBottom = parseFloat(cardStyle.paddingBottom) || 0;
     naturalHeight = clone.scrollHeight - paddingBottom + 4;
     
-    console.log('[Export Debug] Fallback padding removal:', {
-      paddingBottom: paddingBottom,
-      calculatedHeight: naturalHeight,
-      savedPixels: paddingBottom - 4
-    });
+    // Fallback measurement path for content-driven export height
+  }
+
+  // Guard against zero-height measurements on some mobile browsers
+  if (!naturalHeight || naturalHeight < 1) {
+    naturalHeight = (typeof desiredHeight === 'number' && desiredHeight > 0)
+      ? desiredHeight
+      : CANONICAL_CARD_DIMENSIONS.height;
   }
 
   // If a desired height is supplied, use that as the export height; otherwise
   // use the natural content-measured height so the export fits the layout.
   const exportHeight = typeof desiredHeight === 'number' && desiredHeight > 0 ? desiredHeight : naturalHeight;
 
-  clone.style.height = `${exportHeight}px`;
-  clone.style.minHeight = `${exportHeight}px`;
-  clone.style.maxHeight = `${exportHeight}px`;
+  // Deterministic framing: if fitToFrame is enabled, ALWAYS scale content to exactly
+  // fill the requested export frame height. This eliminates tiny cross-device differences
+  // (font metrics, layout rounding) by normalizing to a fixed frame.
+  if (fitToFrame) {
+  const scale = Number((exportHeight / naturalHeight).toFixed(6));
+    const scaledWidth = captureWidth * scale;
+    const scaledHeight = naturalHeight * scale; // equals exportHeight
+
+    // Center the scaled content within the frame
+    clone.style.position = 'absolute';
+    // Expand clone's logical width so that after scaling it exactly fills the frame width.
+    // This avoids side letterboxing when scale < 1 on some devices.
+    if (scale > 0 && scale !== 1) {
+      clone.style.width = `${captureWidth / scale}px`;
+      clone.style.minWidth = `${captureWidth / scale}px`;
+      clone.style.maxWidth = `${captureWidth / scale}px`;
+    }
+    clone.style.left = `${(captureWidth - (captureWidth)) / 2}px`;
+    clone.style.top = `${(exportHeight - scaledHeight) / 2}px`;
+    clone.style.transformOrigin = 'top left';
+    clone.style.transform = `scale(${scale})`;
+
+    // Set wrapper (parent) to the fixed frame size
+    const parent = clone.parentElement as HTMLDivElement;
+    parent.style.width = `${captureWidth}px`;
+    parent.style.height = `${exportHeight}px`;
+    parent.style.position = 'fixed';
+    parent.style.left = '0';
+    parent.style.top = '-100000px';
+  } else {
+    // Lock to explicit height (no scaling)
+    clone.style.height = `${exportHeight}px`;
+    clone.style.minHeight = `${exportHeight}px`;
+    clone.style.maxHeight = `${exportHeight}px`;
+    (clone.parentElement as HTMLDivElement).style.height = `${exportHeight}px`;
+  }
 
   const canvas = await toCanvas(clone, {
     cacheBust: true,
@@ -233,7 +357,8 @@ export async function exportHtmlToPng(
       element,
       captureWidth,
       desiredHeight,
-      options.backgroundColor ?? null
+      options.backgroundColor ?? null,
+      options.fitToFrame ?? true
     );
 
     await new Promise<void>((resolve, reject) => {
@@ -243,11 +368,11 @@ export async function exportHtmlToPng(
           return;
         }
 
-        const downloadUrl = URL.createObjectURL(blob);
+    const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = downloadUrl;
-  // Use the actual logical height (measured) for the filename.
-  link.download = `${filename}-${size.width}x${Math.round(logicalHeight)}.png`;
+    // Always use the requested export dimensions in the filename for consistency
+    link.download = `${filename}-${size.width}x${size.height}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -4,11 +4,13 @@ export default function Document() {
   return (
     <Html lang="en" className="dark">
       <Head>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-  {/* Add display parameter to satisfy Next.js font-display recommendation */}
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=optional" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional" rel="stylesheet" />
+  {/* Preload self-hosted Space Grotesk font files (TTF) for deterministic layout */}
+  <link rel="preload" href="/fonts/SpaceGrotesk-Regular.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+  <link rel="preload" href="/fonts/SpaceGrotesk-Medium.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+  <link rel="preload" href="/fonts/SpaceGrotesk-SemiBold.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+  <link rel="preload" href="/fonts/SpaceGrotesk-Bold.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+  {/* Material Symbols (kept as remote CDN for now) */}
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
       </Head>
       <body>
         <Main />

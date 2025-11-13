@@ -35,6 +35,14 @@ export const userStatsSchema = z.object({
       count: z.number(),
     })
   ),
+  // New fields for growth indicators and anniversary
+  githubAnniversary: z.number(), // Years since account creation
+  yearOverYearGrowth: z.object({
+    commitsGrowth: z.number(),
+    prsGrowth: z.number(),
+    issuesGrowth: z.number(),
+    overallGrowth: z.number(),
+  }).optional(),
 });
 
 export type UserStats = z.infer<typeof userStatsSchema>;

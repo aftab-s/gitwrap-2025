@@ -10,7 +10,7 @@ Create beautiful, shareable GitHub "year in review" cards for 2025. This is a fr
 
 - Themeable cards (Space, Sunset, Retro, Minimal, High-contrast)
 - Contribution heatmap and activity stats
-- High-fidelity PNG export optimized for Instagram Story (1080×1920)
+- High-fidelity PNG export optimized for stories (1080×1920, 9:16 ratio)
 
 ---
 
@@ -50,7 +50,7 @@ Type a GitHub username and the card will generate automatically.
 
 ## Exporting images
 
-- Click the "Download Story PNG" button to export a 1080×1920 PNG optimized for Instagram Story.
+- Click the "Download Card PNG" button to export a 1080×1920 PNG optimized for stories (9:16 aspect ratio).
 - Filenames include pixel dimensions to make it easy to confirm the output (e.g. `username-github-unwrapped-2025-1080x1920.png`).
 
 Tips
@@ -62,7 +62,7 @@ Tips
 ## Troubleshooting
 
 - Blank or cropped images: ensure avatar images loaded and try exporting again.
-- Export dimensions off: confirm the export button selected the Story export size (UI shows size label).
+- Export dimensions off: confirm the export button shows the correct size (1080×1920).
 - Still broken? Open developer tools (F12) and check console for errors.
 
 ---

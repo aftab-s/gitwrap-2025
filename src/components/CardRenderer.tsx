@@ -318,68 +318,86 @@ export const CardRenderer = React.forwardRef<SVGSVGElement, CardRendererProps>(
             </g>
           )}
 
-          {/* Top Languages - Show top 3 */}
-          {stats.topLanguages.length > 0 && (
-            <g transform="translate(40, 650)">
-              <rect
-                width="800"
-                height={175}
-                rx="12"
-                fill={colors.statBg}
-                stroke={colors.statBorder}
-                strokeWidth="1"
-              />
-              <text
-                x="20"
-                y="35"
-                fontSize="16"
-                fontWeight="700"
-                fill={colors.textPrimary}
-              >
-                💻 Top Languages
-              </text>
-              {stats.topLanguages.slice(0, 3).map((lang, index) => (
-                <g key={index} transform={`translate(20, ${55 + index * 35})`}>
-                  <text
-                    x="0"
-                    y="15"
-                    fontSize="13"
-                    fontFamily="monospace"
-                    fill={colors.textSecondary}
-                    textAnchor="end"
-                    transform="translate(90, 0)"
-                  >
-                    {lang.name}
-                  </text>
-                  <rect
-                    x="105"
-                    y="5"
-                    width="520"
-                    height="12"
-                    rx="6"
-                    fill={theme === 'minimal' ? '#e2e8f0' : theme === 'retro' ? 'rgba(131, 24, 67, 0.5)' : theme === 'sunset' ? 'rgba(63, 63, 70, 0.5)' : 'rgba(55, 65, 81, 0.5)'}
-                  />
-                  <rect
-                    x="105"
-                    y="5"
-                    width={lang.percent * 520}
-                    height="12"
-                    rx="6"
-                    fill={index === 0 ? 'url(#lang1Gradient)' : index === 1 ? 'url(#lang2Gradient)' : 'url(#lang3Gradient)'}
-                  />
-                  <text
-                    x="640"
-                    y="15"
-                    fontSize="13"
-                    fontWeight="600"
-                    fill={colors.textPrimary}
-                  >
-                    {Math.round(lang.percent * 100)}%
-                  </text>
-                </g>
-              ))}
-            </g>
-          )}
+          {/* Top Languages - up to top 5, using per-language color if provided */}
+          {stats.topLanguages.length > 0 && (() => {
+            const itemCount = Math.min(stats.topLanguages.length, 5);
+            const rectHeight = 80 + itemCount * 35; // dynamic height based on items
+            return (
+              <g transform="translate(40, 650)">
+                <rect
+                  width="800"
+                  height={rectHeight}
+                  rx="12"
+                  fill={colors.statBg}
+                  stroke={colors.statBorder}
+                  strokeWidth="1"
+                />
+                <text
+                  x="20"
+                  y="35"
+                  fontSize="16"
+                  fontWeight="700"
+                  fill={colors.textPrimary}
+                >
+                  💻 Top Languages
+                </text>
+                {stats.topLanguages.slice(0, itemCount).map((lang, index) => {
+                  const fallbackFill = index === 0
+                    ? 'url(#lang1Gradient)'
+                    : index === 1
+                    ? 'url(#lang2Gradient)'
+                    : 'url(#lang3Gradient)';
+                  const barWidth = Math.max(10, Math.round(lang.percent * 520));
+                  return (
+                    <g key={index} transform={`translate(20, ${55 + index * 35})`}>
+                      {/* Color dot */}
+                      <circle cx="86" cy="11" r="4" fill={lang.color || colors.iconColor} stroke={colors.statBorder} strokeWidth="1" />
+                      {/* Label */}
+                      <text
+                        x="0"
+                        y="15"
+                        fontSize="13"
+                        fontFamily="monospace"
+                        fill={colors.textSecondary}
+                        textAnchor="end"
+                        transform="translate(90, 0)"
+                      >
+                        {lang.name}
+                      </text>
+                      {/* Track */}
+                      <rect
+                        x="105"
+                        y="5"
+                        width="520"
+                        height="12"
+                        rx="6"
+                        fill={theme === 'minimal' ? '#e2e8f0' : theme === 'retro' ? 'rgba(131, 24, 67, 0.5)' : theme === 'sunset' ? 'rgba(63, 63, 70, 0.5)' : 'rgba(55, 65, 81, 0.5)'}
+                      />
+                      {/* Fill */}
+                      <rect
+                        x="105"
+                        y="5"
+                        width={barWidth}
+                        height="12"
+                        rx="6"
+                        fill={lang.color || fallbackFill}
+                      />
+                      {/* Percentage */}
+                      <text
+                        x="640"
+                        y="15"
+                        fontSize="13"
+                        fontWeight="600"
+                        fill={colors.textPrimary}
+                      >
+                        {(lang.percent * 100).toFixed(1)}%
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            );
+          })()}
 
           {/* Top Repository */}
           {stats.topRepos.length > 0 && (

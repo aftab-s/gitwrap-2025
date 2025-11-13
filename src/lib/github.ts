@@ -5,6 +5,10 @@ import type { UserStats } from '@/types';
 export const YEAR_2025_START = '2025-01-01T00:00:00Z';
 export const YEAR_2025_END = '2025-12-31T23:59:59Z';
 
+// 2024 date range constants for comparison
+export const YEAR_2024_START = '2024-01-01T00:00:00Z';
+export const YEAR_2024_END = '2024-12-31T23:59:59Z';
+
 const GITHUB_GRAPHQL_API = 'https://api.github.com/graphql';
 
 // Create GraphQL client
@@ -24,14 +28,15 @@ export function createGitHubClient(token?: string) {
   });
 }
 
-// Main GraphQL query for 2025 data
+// Main GraphQL query for 2025 data with 2024 comparison and account info
 const YEAR_SUMMARY_QUERY = `
-  query YearSummary($login: String!, $from: DateTime!, $to: DateTime!) {
+  query YearSummary($login: String!, $from2025: DateTime!, $to2025: DateTime!, $from2024: DateTime!, $to2024: DateTime!) {
     user(login: $login) {
       login
       name
       avatarUrl
-      contributionsCollection(from: $from, to: $to) {
+      createdAt
+      contributionsCollection2025: contributionsCollection(from: $from2025, to: $to2025) {
         totalCommitContributions
         totalIssueContributions
         totalPullRequestContributions
@@ -60,6 +65,12 @@ const YEAR_SUMMARY_QUERY = `
           }
         }
       }
+      contributionsCollection2024: contributionsCollection(from: $from2024, to: $to2024) {
+        totalCommitContributions
+        totalIssueContributions
+        totalPullRequestContributions
+        totalPullRequestReviewContributions
+      }
       repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: STARGAZERS, direction: DESC}) {
         nodes {
           name
@@ -80,7 +91,8 @@ interface GitHubAPIResponse {
     login: string;
     name?: string;
     avatarUrl: string;
-    contributionsCollection: {
+    createdAt: string;
+    contributionsCollection2025: {
       totalCommitContributions: number;
       totalIssueContributions: number;
       totalPullRequestContributions: number;
@@ -108,6 +120,12 @@ interface GitHubAPIResponse {
           totalCount: number;
         };
       }>;
+    };
+    contributionsCollection2024: {
+      totalCommitContributions: number;
+      totalIssueContributions: number;
+      totalPullRequestContributions: number;
+      totalPullRequestReviewContributions: number;
     };
     repositories: {
       nodes: Array<{
@@ -280,6 +298,59 @@ function getTopRepos(
     .slice(0, 5);
 }
 
+// Calculate year-over-year growth percentages
+function calculateYearOverYearGrowth(
+  collection2025: {
+    totalCommitContributions: number;
+    totalIssueContributions: number;
+    totalPullRequestContributions: number;
+    totalPullRequestReviewContributions: number;
+  },
+  collection2024: {
+    totalCommitContributions: number;
+    totalIssueContributions: number;
+    totalPullRequestContributions: number;
+    totalPullRequestReviewContributions: number;
+  }
+): {
+  commitsGrowth: number;
+  prsGrowth: number;
+  issuesGrowth: number;
+  overallGrowth: number;
+} | undefined {
+  // Only calculate growth if 2024 has meaningful data
+  const total2024 = collection2024.totalCommitContributions + collection2024.totalIssueContributions + collection2024.totalPullRequestContributions;
+  const total2025 = collection2025.totalCommitContributions + collection2025.totalIssueContributions + collection2025.totalPullRequestContributions;
+
+  // If 2024 has less than 10 total contributions, don't show growth (likely new user)
+  if (total2024 < 10) {
+    return undefined;
+  }
+
+  const commitsGrowth = collection2024.totalCommitContributions > 0
+    ? ((collection2025.totalCommitContributions - collection2024.totalCommitContributions) / collection2024.totalCommitContributions) * 100
+    : collection2025.totalCommitContributions > 0 ? 100 : 0;
+
+  const prsGrowth = collection2024.totalPullRequestContributions > 0
+    ? ((collection2025.totalPullRequestContributions - collection2024.totalPullRequestContributions) / collection2024.totalPullRequestContributions) * 100
+    : collection2025.totalPullRequestContributions > 0 ? 100 : 0;
+
+  const issuesGrowth = collection2024.totalIssueContributions > 0
+    ? ((collection2025.totalIssueContributions - collection2024.totalIssueContributions) / collection2024.totalIssueContributions) * 100
+    : collection2025.totalIssueContributions > 0 ? 100 : 0;
+
+  const overallGrowth = total2024 > 0
+    ? ((total2025 - total2024) / total2024) * 100
+    : total2025 > 0 ? 100 : 0;
+
+  return {
+    commitsGrowth: Math.round(commitsGrowth),
+    prsGrowth: Math.round(prsGrowth),
+    issuesGrowth: Math.round(issuesGrowth),
+    overallGrowth: Math.round(overallGrowth),
+  };
+}
+
 // Fetch and normalize GitHub stats for 2025
 export async function fetchGitHubStats(
   username: string,
@@ -290,8 +361,10 @@ export async function fetchGitHubStats(
   try {
     const data = await client.request<GitHubAPIResponse>(YEAR_SUMMARY_QUERY, {
       login: username,
-      from: YEAR_2025_START,
-      to: YEAR_2025_END,
+      from2025: YEAR_2025_START,
+      to2025: YEAR_2025_END,
+      from2024: YEAR_2024_START,
+      to2024: YEAR_2024_END,
     });
 
     if (!data.user) {
@@ -299,10 +372,11 @@ export async function fetchGitHubStats(
     }
 
     const { user } = data;
-    const collection = user.contributionsCollection;
+    const collection2025 = user.contributionsCollection2025;
+    const collection2024 = user.contributionsCollection2024;
 
     // Flatten contribution calendar
-    const calendar = collection.contributionCalendar.weeks.flatMap((week) =>
+    const calendar = collection2025.contributionCalendar.weeks.flatMap((week) =>
       week.contributionDays.map((day) => ({
         date: day.date,
         count: day.contributionCount,
@@ -313,8 +387,8 @@ export async function fetchGitHubStats(
     const longestStreakDays = calculateLongestStreak(calendar);
     const bestDayOfWeek = calculateBestDayOfWeek(calendar);
     const bestHour = calculateBestHour(calendar);
-    const topLanguages = aggregateLanguages(collection.commitContributionsByRepository);
-    const topRepos = getTopRepos(collection.commitContributionsByRepository);
+    const topLanguages = aggregateLanguages(collection2025.commitContributionsByRepository);
+    const topRepos = getTopRepos(collection2025.commitContributionsByRepository);
 
     // Count total stars given (heuristic: starred repos they own or contributed to)
     const totalStarsGiven = user.repositories.nodes.reduce(
@@ -325,14 +399,22 @@ export async function fetchGitHubStats(
     // Total repositories (up to 100 fetched)
     const totalRepositories = user.repositories.nodes.length;
 
+    // Calculate GitHub anniversary (years since account creation)
+    const accountCreated = new Date(user.createdAt);
+    const now = new Date();
+    const githubAnniversary = Math.floor((now.getTime() - accountCreated.getTime()) / (1000 * 60 * 60 * 24 * 365));
+
+    // Calculate year-over-year growth
+    const yearOverYearGrowth = calculateYearOverYearGrowth(collection2025, collection2024);
+
     return {
       login: user.login,
       name: user.name,
       avatarUrl: user.avatarUrl,
-      totalCommits: collection.totalCommitContributions,
-      totalPRs: collection.totalPullRequestContributions,
-      totalIssues: collection.totalIssueContributions,
-      totalPRReviews: collection.totalPullRequestReviewContributions,
+      totalCommits: collection2025.totalCommitContributions,
+      totalPRs: collection2025.totalPullRequestContributions,
+      totalIssues: collection2025.totalIssueContributions,
+      totalPRReviews: collection2025.totalPullRequestReviewContributions,
       totalStarsGiven,
       totalRepositories,
       topLanguages,
@@ -341,6 +423,8 @@ export async function fetchGitHubStats(
       bestDayOfWeek,
       bestHour,
       contributionCalendar: calendar,
+      githubAnniversary,
+      yearOverYearGrowth,
     };
   } catch (error: any) {
     if (error.response?.errors?.[0]?.type === 'NOT_FOUND') {

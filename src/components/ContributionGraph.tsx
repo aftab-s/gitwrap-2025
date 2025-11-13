@@ -82,13 +82,15 @@ export function ContributionGraph({ data, theme = 'space', themeColors }: Contri
     }
   };
 
-  const cellSize = 10;
+  // Visual sizing is controlled via CSS variables for export overrides.
+  // Defaults are defined in globals.css (:root). We keep JS widths for layout calc.
+  const cellSize = 10; // used only for width calc (minWidth)
   const cellGap = 2;
   const totalWidth = weeks.length * (cellSize + cellGap);
 
   return (
     <div 
-      className="border rounded-xl p-3 sm:p-4"
+      className="border rounded-xl p-3 sm:p-4 contrib-graph"
       style={{
         backgroundColor: themeColors?.statBg || (theme === 'minimal' ? '#ffffff' : 'rgba(31, 41, 55, 0.5)'),
         borderColor: themeColors?.statBorder || (theme === 'minimal' ? '#e2e8f0' : '#374151'),
@@ -124,7 +126,7 @@ export function ContributionGraph({ data, theme = 'space', themeColors }: Contri
           msOverflowStyle: 'none', /* IE and Edge */
         }}
       >
-        <div style={{ minWidth: totalWidth }}>
+  <div style={{ minWidth: `calc(${weeks.length} * (var(--cg-cell-w) + ${cellGap}px))` }}>
           <div className="flex gap-[2px]">
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} className="flex flex-col gap-[2px]">
@@ -136,8 +138,8 @@ export function ContributionGraph({ data, theme = 'space', themeColors }: Contri
                       key={dayIndex}
                       className="rounded-sm transition-all hover:ring-1 cursor-pointer"
                       style={{
-                        width: cellSize,
-                        height: cellSize,
+                        width: 'var(--cg-cell-w)',
+                        height: 'var(--cg-cell-h)',
                         backgroundColor: day ? getColor(day.count) : 'transparent',
                         boxShadow: day && day.count > 0 && theme === 'retro' ? `0 0 3px ${getColor(day.count)}` : 'none',
                       }}

@@ -20,6 +20,58 @@
   --theme-text: #f3f4f6;
   --theme-text-secondary: #9ca3af;
   --theme-card-bg: rgba(31, 41, 55, 0.8);
+  
+  /* Contribution graph defaults */
+  --cg-cell-w: 10px;
+  --cg-cell-h: 10px;
+}
+
+/* Self-hosted Space Grotesk font declarations
+   Place the SpaceGrotesk font files you added into public/fonts/ with these names (TTF):
+     - SpaceGrotesk-Light.ttf    (300)
+     - SpaceGrotesk-Regular.ttf  (400)
+     - SpaceGrotesk-Medium.ttf   (500)
+     - SpaceGrotesk-SemiBold.ttf (600)
+     - SpaceGrotesk-Bold.ttf     (700)
+
+   Using font-display: swap so text renders immediately with a fallback.
+   We also preload the TTF files in src/pages/_document.tsx to make cold-loads deterministic
+   for exported images.
+*/
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/SpaceGrotesk-Light.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/SpaceGrotesk-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/SpaceGrotesk-Medium.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/SpaceGrotesk-SemiBold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/SpaceGrotesk-Bold.ttf') format('truetype');
+  font-display: swap;
 }
 
 [data-theme='space'] {
@@ -117,7 +169,10 @@ body > * {
 
 /* Button styles */
 .btn {
-  @apply px-6 py-3 rounded-lg font-bold transition-all duration-200;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  transition: all 200ms;
   background: var(--primary);
   color: white;
   box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
@@ -219,9 +274,188 @@ body > * {
   transition: none !important;
 }
 
-/* Material icons */
+/* Export-specific styles for downloadable card */
+[data-exporting='true'] {
+  /* Lock base typography to pixel baseline for consistent measurements */
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+  /* Prevent iOS Safari from auto-scaling text in landscape */
+  -webkit-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+  /* Freeze font family to self-hosted Space Grotesk for identical metrics */
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji' !important;
+  overflow: visible !important;
+
+  /* Add spacing after profile/title header section */
+  & > div > div:first-child {
+    margin-bottom: 2.5rem !important;
+    padding-bottom: 1.5rem !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Increase profile section sizes specifically */
+  & > div > div:first-child img.rounded-full {
+    width: 7rem !important;
+    height: 7rem !important;
+  }
+
+  & > div > div:first-child h2 {
+    font-size: 2.25rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  & > div > div:first-child p {
+    font-size: 1.375rem !important;
+  }
+
+  & > div > div:first-child .text-right div {
+    font-size: 1.75rem !important;
+    line-height: 1.3 !important;
+  }
+
+  & > div > div:first-child .text-right span {
+    font-size: 1.75rem !important;
+  }
+
+  & > div > div:first-child .font-bold.text-2xl,
+  & > div > div:first-child .font-bold.leading-none {
+    font-size: 4.5rem !important;
+    line-height: 1 !important;
+  }
+  
+  /* Tighten padding for stat blocks to save space */
+  & .border.rounded-xl {
+    padding: 1rem !important;
+  }
+
+  & .border.rounded-2xl {
+    padding: 1.125rem !important;
+  }
+  
+  /* Increase text sizes for headers */
+  & h1, & h2 {
+    font-size: 1.875rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  & h3 {
+    font-size: 1.125rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Increase username text */
+  & p {
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Increase stat numbers */
+  & .text-2xl,
+  & .text-3xl {
+    font-size: 2rem !important;
+  }
+
+  & .text-4xl {
+    font-size: 2.5rem !important;
+  }
+  
+  /* Increase stat labels */
+  & .text-xs,
+  & .text-sm {
+    font-size: 0.875rem !important;
+  }
+  
+  & .text-base {
+    font-size: 1rem !important;
+  }
+  
+  & .text-lg {
+    font-size: 1.25rem !important;
+  }
+  
+  & .text-xl {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Increase icon sizes */
+  & .material-symbols-outlined {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Circle badges - excluding profile avatar */
+  & .w-8:not(img), & .w-12:not(img) {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    font-size: 1.25rem !important;
+  }
+  
+  /* Tighten gaps to save vertical space */
+  & .gap-2, & .gap-3, & .gap-4 {
+    gap: 0.75rem !important;
+  }
+
+  & .space-y-4 > *:not(:first-child),
+  & .space-y-5 > *:not(:first-child) {
+    margin-top: 1rem !important;
+  }
+  
+  /* Increase grid gaps */
+  & .space-y-3 > *:not(:first-child) {
+    margin-top: 0.75rem !important;
+  }
+  
+  /* Increase contribution graph cell size */
+  & svg rect {
+    rx: 3 !important;
+  }
+  
+  /* Increase language bar height */
+  & .h-2, & .h-3 {
+    height: 0.75rem !important;
+  }
+  
+  /* Moderate spacing for specific sections */
+  & .mb-5, & .mb-6, & .mb-8 {
+    margin-bottom: 1.25rem !important;
+  }
+
+  /* Increase contribution graph row height for export only */
+  --cg-cell-w: 12px;
+  --cg-cell-h: 12px;
+
+  /* Increase contribution graph gaps */
+  & .contrib-graph .gap-\[2px\] {
+    gap: 3px !important;
+  }
+
+  /* Scale legend swatches */
+  & .contrib-graph .w-2\.5 { width: 10px !important; }
+  & .contrib-graph .h-2\.5 { height: 10px !important; }
+
+  /* Reduce decorative elements opacity for export */
+  & [class*='blur-'] {
+    opacity: 0.12 !important;
+  }
+
+  /* Show export-only elements */
+  & [data-export-only='true'] {
+    display: block !important;
+  }
+}/* Material icons */
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
 }
 
 /* Card glow effect */
@@ -236,6 +470,7 @@ body > * {
   border-radius: 1.5rem;
   padding: 2px;
   background: linear-gradient(145deg, rgba(20, 184, 166, 0.4), rgba(99, 102, 241, 0.4), rgba(20, 184, 166, 0.4));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
