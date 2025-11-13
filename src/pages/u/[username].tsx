@@ -619,7 +619,10 @@ export default function UserPage() {
                                   className="text-lg sm:text-xl font-bold mt-auto"
                                   style={{ color: currentTheme.textPrimary }}
                                 >
-                                  {stats.bestHour}:00
+                                  {stats.bestHour === 0 ? '12:00 AM' : 
+                                   stats.bestHour === 12 ? '12:00 PM' : 
+                                   stats.bestHour < 12 ? `${stats.bestHour}:00 AM` : 
+                                   `${stats.bestHour - 12}:00 PM`}
                                 </p>
                               </div>
                               <div 
@@ -1070,11 +1073,7 @@ export default function UserPage() {
 
                   {/* Grateful Footer - Export only */}
                   <div 
-                    className="border p-3 sm:p-4 rounded-xl text-center hidden"
-                    style={{
-                      backgroundColor: currentTheme.statBg,
-                      borderColor: currentTheme.statBorder,
-                    }}
+                    className="text-center hidden pt-4"
                     data-export-only="true"
                   >
                     <p 
@@ -1083,14 +1082,14 @@ export default function UserPage() {
                     >
                       The open source community is grateful to have passionate contributors like you. 
                       <span style={{ color: currentTheme.accent }}>
-                        {' '}Your code, ideas, and dedication help shape the future of technology.
+                        {' '}Keep building, keep contributing, keep inspiring. 💜
                       </span>
                     </p>
                     <p 
-                      className="text-xs sm:text-sm mt-3"
+                      className="text-xs mt-2 font-semibold tracking-wide opacity-60"
                       style={{ color: currentTheme.textSecondary }}
                     >
-                      Keep building, keep contributing, keep inspiring. 💜
+                      GitWrap '25
                     </p>
                   </div>
                   </div>

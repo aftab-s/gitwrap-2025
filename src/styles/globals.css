@@ -324,6 +324,14 @@ body > * {
     line-height: 1 !important;
   }
   
+  /* Footer bottom margin for export - add breathing room */
+  & [data-export-only='true'] {
+    margin-top: 2.5rem !important;
+    margin-bottom: 3rem !important;
+    padding-top: 2rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  
   /* Tighten padding for stat blocks to save space */
   & .border.rounded-xl {
     padding: 1rem !important;

@@ -184,11 +184,95 @@ function calculateBestDayOfWeek(calendar: Array<{ date: string; count: number }>
   return dayNames[maxIndex];
 }
 
-// Calculate best hour (heuristic based on contribution patterns)
-function calculateBestHour(calendar: Array<{ date: string; count: number }>): number {
-  // GitHub API doesn't provide hour-level data in contributionCalendar
-  // We use a reasonable heuristic based on contribution patterns
+// Fetch actual commit times from GitHub REST API for accurate hour calculation
+// This fetches up to 300 recent commits and extracts the hour each commit was made
+async function fetchCommitTimes(username: string, token?: string): Promise<number[]> {
+  const commitHours: number[] = [];
   
+  try {
+    // Fetch commits using GitHub REST API (up to 300 commits across 3 pages)
+    for (let page = 1; page <= 3; page++) {
+      const headers: Record<string, string> = {
+        'Accept': 'application/vnd.github.v3+json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(
+        `https://api.github.com/search/commits?q=author:${username}+merge:false&sort=author-date&order=desc&page=${page}&per_page=100`,
+        { headers }
+      );
+      
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 429) {
+          console.warn('Rate limit hit while fetching commit times');
+          break;
+        }
+        throw new Error(`Failed to fetch commits: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.items || data.items.length === 0) {
+        break;
+      }
+      
+      // Extract hour from each commit
+      for (const commit of data.items) {
+        if (!commit.commit?.author?.date) continue;
+        
+        const commitDate = commit.commit.author.date;
+        // Check if commit is from 2025
+        if (!commitDate.startsWith('2025')) continue;
+        
+        // Extract hour from ISO timestamp (e.g., "2025-03-15T14:23:45Z" -> 14)
+        const hourMatch = commitDate.match(/T(\d{2}):/);
+        if (hourMatch) {
+          commitHours.push(parseInt(hourMatch[1], 10));
+        }
+      }
+      
+      // If we got less than 100 results, we've reached the end
+      if (data.items.length < 100) {
+        break;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching commit times:', error);
+    // Return empty array if fetch fails - will fallback to heuristic
+  }
+  
+  return commitHours;
+}
+
+// Calculate best hour from actual commit timestamps (with heuristic fallback)
+// This now uses REAL commit times from the REST API instead of just estimating
+// based on weekday/weekend patterns. Falls back to heuristic if API fails.
+async function calculateBestHour(
+  calendar: Array<{ date: string; count: number }>,
+  username: string,
+  token?: string
+): Promise<number> {
+  // Try to get actual commit times first
+  const commitHours = await fetchCommitTimes(username, token);
+  
+  if (commitHours.length > 0) {
+    // Count commits by hour
+    const hourCounts = new Array(24).fill(0);
+    for (const hour of commitHours) {
+      hourCounts[hour]++;
+    }
+    
+    // Find hour with most commits
+    const maxCount = Math.max(...hourCounts);
+    const bestHour = hourCounts.indexOf(maxCount);
+    
+    return bestHour;
+  }
+  
+  // Fallback to heuristic if we couldn't fetch commit times
   const totalContributions = calendar.reduce((sum, day) => sum + day.count, 0);
   
   if (totalContributions === 0) {
@@ -206,18 +290,11 @@ function calculateBestHour(calendar: Array<{ date: string; count: number }>): nu
     return sum;
   }, 0);
   
-  const weekendContributions = totalContributions - weekdayContributions;
   const weekdayRatio = weekdayContributions / totalContributions;
-  
-  // Heuristic mapping based on work patterns:
-  // High weekday ratio (>0.7) = likely working hours (10 AM - 4 PM)
-  // Balanced ratio = flexible hours (11 AM - 3 PM)
-  // High weekend ratio = night owl or flexible (2 PM - 6 PM)
-  
   const avgDailyContributions = totalContributions / Math.max(calendar.filter(d => d.count > 0).length, 1);
   
   if (weekdayRatio > 0.75) {
-    // Strong weekday pattern - likely 9-5 job
+    // Strong weekday pattern - likely working hours (10 AM - 4 PM)
     if (avgDailyContributions > 10) {
       return 14; // 2 PM - peak afternoon productivity
     } else {
@@ -386,7 +463,7 @@ export async function fetchGitHubStats(
     // Calculate derived stats
     const longestStreakDays = calculateLongestStreak(calendar);
     const bestDayOfWeek = calculateBestDayOfWeek(calendar);
-    const bestHour = calculateBestHour(calendar);
+    const bestHour = await calculateBestHour(calendar, username, token);
     const topLanguages = aggregateLanguages(collection2025.commitContributionsByRepository);
     const topRepos = getTopRepos(collection2025.commitContributionsByRepository);
 
