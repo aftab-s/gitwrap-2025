@@ -5,7 +5,7 @@ import UserPage from './pages/UserPage';
 import TokenWarningBanner from './components/TokenWarningBanner';
 
 // This check determines if the warning banner should be displayed.
-const isTokenMissing = !process.env.GITHUB_APP_TOKEN;
+const isTokenMissing = !process.env.VITE_GITHUB_APP_TOKEN;
 
 function App() {
   return (
