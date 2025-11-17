@@ -148,8 +148,11 @@ const UserPage: React.FC = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2">
-            <div className="aspect-[3/4] max-w-xl mx-auto lg:max-w-none">
-              <GitWrapCard ref={cardRef} userData={userData} funMessage={funMessage} theme={activeTheme} layout={CardLayout.Classic} />
+            {/* Mobile: Remove aspect ratio constraint, Desktop: Keep 3:4 ratio */}
+            <div className="w-full max-w-xl mx-auto lg:max-w-none">
+              <div className="sm:aspect-[3/4]">
+                <GitWrapCard ref={cardRef} userData={userData} funMessage={funMessage} theme={activeTheme} layout={CardLayout.Classic} />
+              </div>
             </div>
         </div>
         <div className="space-y-8">
