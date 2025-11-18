@@ -56,6 +56,6 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ env.REPO_TOKEN }}
+          repoToken: ${{ env.VITE_GITHUB_APP_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTFOLIO_V1_F2BDD }}
           projectId: portfolio-v1-f2bdd

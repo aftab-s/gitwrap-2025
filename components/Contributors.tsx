@@ -82,8 +82,21 @@ const Contributors: React.FC = () => {
         return;
       }
 
-      // 2) Try GitHub API (may be rate limited if unauthenticated)
-      const ghData = await loadFromGitHubApi();
+      // 2) Try GitHub API (may be rate limited if unauthenticated).
+      // Only attempt client-side GitHub API calls when explicitly allowed:
+      // - running in development (`DEV`), or
+      // - `VITE_GITHUB_TOKEN` is present (explicit token), or
+      // - `VITE_ALLOW_CLIENT_GITHUB` is set to 'true' (opt-in).
+      const allowClientFetch = Boolean(_env.VITE_GITHUB_TOKEN) || Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
+      let ghData: Contributor[] | null = null;
+      if (allowClientFetch) {
+        ghData = await loadFromGitHubApi();
+      } else {
+        // In production without a public contributors.json and without client fetch permission,
+        // we will not attempt an unauthenticated call to the GitHub API to avoid rate limits.
+        // Instead, fall back to the static fallback list and let CI populate `public/contributors.json`.
+        ghData = null;
+      }
       if (ghData && mounted) {
         setContributors(ghData);
         try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ghData })); } catch (e) {}
