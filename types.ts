@@ -5,6 +5,7 @@ export const userStatsSchema = z.object({
   login: z.string(),
   name: z.string().optional(),
   avatarUrl: z.string(),
+  totalContributions: z.number(),
   totalCommits: z.number(),
   totalPRs: z.number(),
   totalIssues: z.number(),

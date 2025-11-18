@@ -82,6 +82,14 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   
   // Build heatmap weeks from flat calendar
   const heatmapWeeks = useMemo(() => buildHeatmapWeeks(userData.contributionCalendar), [userData.contributionCalendar]);
+  
+  // Compute "other" contributions that GitHub counts but we don't list explicitly
+  const otherCount = Math.max(
+    0,
+    userData.totalContributions - (
+      userData.totalCommits + userData.totalPRs + userData.totalIssues + userData.totalPRReviews
+    )
+  );
 
   const Heatmap: React.FC<{ weeks: { monthLabel: string; days: number[] }[] }> = ({ weeks }) => {
     const normalizedWeeks = weeks.length > 0
@@ -210,7 +218,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="text-center">
                 <div className={`text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-2`}>Total Contributions</div>
                 <div className={`text-5xl font-black ${classes.accent} mb-3`}>
-                  {(userData.totalCommits + userData.totalPRs + userData.totalIssues).toLocaleString()}
+                  {userData.totalContributions.toLocaleString()}
                 </div>
                 <div className="flex justify-center items-center gap-3 text-xs">
                   <span className={classes.textSecondary}>💜 {userData.totalCommits.toLocaleString()}</span>
@@ -218,6 +226,14 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                   <span className={classes.textSecondary}>💙 {userData.totalPRs}</span>
                   <span className={classes.textSecondary}>•</span>
                   <span className={classes.textSecondary}>💚 {userData.totalIssues}</span>
+                  <span className={classes.textSecondary}>•</span>
+                  <span className={classes.textSecondary}>👀 {userData.totalPRReviews}</span>
+                  {otherCount > 0 && (
+                    <>
+                      <span className={classes.textSecondary}>•</span>
+                      <span className={classes.textSecondary}>✨ {otherCount}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -258,7 +274,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="relative z-10">
                 <div className={`text-xs sm:text-sm font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-3`}>Total Contributions</div>
                 <div className={`text-4xl sm:text-5xl md:text-6xl font-black ${classes.accent} mb-1 sm:mb-2`}>
-                  {(userData.totalCommits + userData.totalPRs + userData.totalIssues).toLocaleString()}
+                  {userData.totalContributions.toLocaleString()}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-4">
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -273,6 +289,16 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
                     <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalIssues} issues</span>
                   </div>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="w-2 h-2 rounded-full bg-pink-400"></div>
+                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalPRReviews} reviews</span>
+                  </div>
+                  {otherCount > 0 && (
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                      <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{otherCount} other</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,11 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
 import type { UserStats } from '../types';
 
-// 2025 date range constants
+// 2025 date range constants - use current date as end to show accurate YTD stats
 export const YEAR_2025_START = '2025-01-01T00:00:00Z';
-export const YEAR_2025_END = '2025-12-31T23:59:59Z';
+export const YEAR_2025_END = new Date().toISOString(); // Current date/time
 
-// 2024 date range constants for comparison
+// 2024 date range constants for comparison - use full year
 export const YEAR_2024_START = '2024-01-01T00:00:00Z';
 export const YEAR_2024_END = '2024-12-31T23:59:59Z';
 
@@ -486,6 +486,7 @@ export async function fetchGitHubStats(
       login: user.login,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      totalContributions: collection2025.contributionCalendar.totalContributions,
       totalCommits: collection2025.totalCommitContributions,
       totalPRs: collection2025.totalPullRequestContributions,
       totalIssues: collection2025.totalIssueContributions,

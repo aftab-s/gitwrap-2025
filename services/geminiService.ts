@@ -2,48 +2,59 @@
 import { GoogleGenAI } from "@google/genai";
 import type { UserStats } from "../types";
 
+// Lightweight deterministic template fallback (always one sentence)
+function templateOneLiner(stats: UserStats) {
+  const topLang = stats.topLanguages?.[0]?.name || 'your top language';
+  const templates = [
+    `${stats.login}: ${stats.totalContributions} contributions — you've been committing like it's cardio!`,
+    `${stats.login} made ${stats.totalContributions} contributions in 2025; your keyboard must be legendary.`,
+    `${stats.login} clocked ${stats.totalContributions} contributions — who needs sleep anyway?`,
+    `${stats.login} — ${stats.totalContributions} contributions, coding and chaos in perfect harmony.`,
+  ];
+  // deterministic pick by username
+  const idx = Math.abs([...stats.login].reduce((s, ch) => s * 31 + ch.charCodeAt(0), 7)) % templates.length;
+  let msg = templates[idx];
+  // ensure single sentence and trailing punctuation
+  const first = msg.split(/[.!?]\s+/)[0].trim();
+  return first.endsWith('.') || first.endsWith('!') || first.endsWith('?') ? first : `${first}.`;
+}
+
 export const generateFunMessage = async (stats: UserStats): Promise<string> => {
-  // Read Vite client env `VITE_GEMINI_API_KEY` first, then fall back to server env vars.
-  const viteEnv = (import.meta as any).env;
-  const apiKey = viteEnv?.VITE_GEMINI_API_KEY || (process.env as any)?.API_KEY || (process.env as any)?.GEMINI_API_KEY;
+  // Prefer server-side secret `GEMINI_API_KEY`. Fall back to Vite client key only if server key missing.
+  const serverKey = (process.env as any)?.GEMINI_API_KEY || (process.env as any)?.API_KEY;
+  const viteEnv = (import.meta as any).env || {};
+  const clientKey = viteEnv?.VITE_GEMINI_API_KEY;
+  const apiKey = serverKey || clientKey;
 
   if (!apiKey) {
-    console.warn("VITE_GEMINI_API_KEY / API_KEY / GEMINI_API_KEY not set. Returning mock message.");
-    return `With ${stats.totalCommits} commits, you were a coding machine in 2025! Keep up the fantastic work!`;
+    console.warn("No Gemini API key found. Using template fallback.");
+    return templateOneLiner(stats);
   }
 
+  // Use server-side key when possible to avoid exposing secrets in the browser
   const ai = new GoogleGenAI({ apiKey });
 
-  const prompt = `
-    Analyze the following GitHub user's statistics for 2025 and generate a fun, encouraging, and slightly witty message for their "GitWrap 2025" summary.
-    The message MUST be exactly 2 sentences or less. Keep it concise and punchy.
-    Mention one or two specific stats to make it personal.
-
-    User Stats:
-    - Username: ${stats.login}
-    - Total Commits: ${stats.totalCommits}
-    - Total Pull Requests: ${stats.totalPRs}
-    - Top Language: ${stats.topLanguages[0]?.name}
-    - Longest Streak: ${stats.longestStreakDays} days
-    - Most Productive Day: ${stats.bestDayOfWeek}
-
-    Example Output:
-    "Wow, ${stats.login}! ${stats.totalCommits} commits in 2025 is epic. Keep shipping that awesome code!"
-  `;
+  // Compact prompt to reduce input tokens and focus the model on producing a funny one-liner.
+  const prompt = `One funny, single-sentence GitHub one-liner (no line breaks). Be cheeky and mention at most two stats.`
+    + ` User:${stats.login} Contributions:${stats.totalContributions} Commits:${stats.totalCommits} PRs:${stats.totalPRs} Reviews:${stats.totalPRReviews} Lang:${stats.topLanguages[0]?.name} Streak:${stats.longestStreakDays}`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite-preview-09-2025",
       contents: prompt,
-      config: {
-        maxOutputTokens: 100, // Limit output length
-      },
+      // Reduce output token budget (shorter response) and increase temperature for funnier, creative lines
+      config: { maxOutputTokens: 32, temperature: 0.9 },
     });
 
-    const text = response.text.trim();
-    return text;
+    let text = (response.text || '').trim();
+    if (!text) return templateOneLiner(stats);
+
+    // Post-process: ensure one sentence only
+    const first = text.split(/[\.!?]\s+/)[0].trim();
+    const out = /[\.!?]$/.test(first) ? first : `${first}.`;
+    return out;
   } catch (error) {
     console.error("Error generating fun message with Gemini:", error);
-    return `With ${stats.totalCommits} commits, you were a coding machine in 2025! Keep up the great work.`;
+    return templateOneLiner(stats);
   }
 };
