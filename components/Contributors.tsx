@@ -40,7 +40,7 @@ const Contributors: React.FC = () => {
 
     async function loadFromGitHubApi(): Promise<Contributor[] | null> {
       try {
-        const token = _env.VITE_GITHUB_TOKEN;
+        const token = _env.VITE_GITHUB_APP_TOKEN;
         const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
         if (token) headers.Authorization = `token ${token}`;
         const res = await fetch(GITHUB_API, { headers, cache: 'no-store' });
@@ -85,9 +85,9 @@ const Contributors: React.FC = () => {
       // 2) Try GitHub API (may be rate limited if unauthenticated).
       // Only attempt client-side GitHub API calls when explicitly allowed:
       // - running in development (`DEV`), or
-      // - `VITE_GITHUB_TOKEN` is present (explicit token), or
+      // - `VITE_GITHUB_APP_TOKEN` is present (explicit token), or
       // - `VITE_ALLOW_CLIENT_GITHUB` is set to 'true' (opt-in).
-      const allowClientFetch = Boolean(_env.VITE_GITHUB_TOKEN) || Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
+      const allowClientFetch = Boolean(_env.VITE_GITHUB_APP_TOKEN) || Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
       let ghData: Contributor[] | null = null;
       if (allowClientFetch) {
         ghData = await loadFromGitHubApi();

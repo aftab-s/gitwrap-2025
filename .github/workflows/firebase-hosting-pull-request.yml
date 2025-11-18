@@ -34,7 +34,11 @@ jobs:
       - name: Fetch repository contributors
         run: |
           mkdir -p public
-          TOKEN="${VITE_GITHUB_APP_TOKEN:-${GITHUB_TOKEN:-${PAT_GITHUB_TOKEN:-${REPO_TOKEN:-}}}}"
+          # Prefer the repository secret `VITE_GITHUB_APP_TOKEN` (from repo secrets), fall back to the runner's GITHUB_TOKEN
+          TOKEN="${{ secrets.VITE_GITHUB_APP_TOKEN }}"
+          if [ -z "$TOKEN" ] && [ -n "$GITHUB_TOKEN" ]; then
+            TOKEN="$GITHUB_TOKEN"
+          fi
           if [ -n "$TOKEN" ]; then
             echo "Fetching contributors with token from environment"
             curl -sSL -H "Accept: application/vnd.github+json" -H "Authorization: token $TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY:-${{ github.repository }}}/contributors?per_page=100" > public/contributors.json || true
@@ -43,19 +47,12 @@ jobs:
             curl -sSL -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/contributors?per_page=100" > public/contributors.json || true
           fi
 
-      - name: Prepare REPO_TOKEN for deploy
-        run: |
-          TOKEN="${VITE_GITHUB_APP_TOKEN:-${GITHUB_TOKEN:-${PAT_GITHUB_TOKEN:-${REPO_TOKEN:-}}}}"
-          if [ -n "$TOKEN" ]; then
-            echo "REPO_TOKEN=$TOKEN" >> $GITHUB_ENV
-          fi
-
       - name: Build
         run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ env.VITE_GITHUB_APP_TOKEN }}
+          repoToken: ${{ secrets.VITE_GITHUB_APP_TOKEN || github.token }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTFOLIO_V1_F2BDD }}
           projectId: portfolio-v1-f2bdd
