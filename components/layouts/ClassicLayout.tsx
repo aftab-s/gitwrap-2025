@@ -137,9 +137,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   };
 
   return (
-    <div ref={ref} className={`relative w-full h-auto sm:h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
+    <div ref={ref} className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
       {/* Mobile-first responsive padding */}
-      <div className="p-4 sm:p-6 md:p-8 flex flex-col sm:h-full min-h-full">
+      <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full w-full">
       {/* Decorative corner elements - hidden on mobile */}
       <div className={`hidden sm:block absolute top-0 left-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-br-full`}></div>
       <div className={`hidden sm:block absolute bottom-0 right-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-tl-full`}></div>

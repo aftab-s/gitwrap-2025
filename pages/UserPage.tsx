@@ -72,35 +72,28 @@ const UserPage: React.FC = () => {
     setIsDownloading(aspectRatio);
 
     const cardElement = cardRef.current;
-    
-    // Get the actual rendered size
-    const rect = cardElement.getBoundingClientRect();
+    const originalStyle = cardElement.getAttribute('style');
     
     // Define target dimensions based on aspect ratio
-    const baseWidth = 1200;
+    // For 3:4 (Social Post), use standardized mobile-friendly dimensions
     let targetWidth: number;
     let targetHeight: number;
 
     if (aspectRatio === AspectRatio.Social) { // "3:4"
-      targetWidth = baseWidth;
-      targetHeight = Math.round(targetWidth * 4 / 3);
+      // Use 1080x1440 which is a standard mobile post size (maintains 3:4 ratio)
+      targetWidth = 1080;
+      targetHeight = 1440;
     }
 
-    // Calculate scale factor based on actual size vs target size
-    const scale = targetWidth / rect.width;
-
     try {
+      // Temporarily set explicit dimensions on the card element to ensure proper rendering
+      cardElement.style.width = `${targetWidth}px`;
+      cardElement.style.height = `${targetHeight}px`;
+
       const dataUrl = await htmlToImage.toPng(cardElement, {
-        width: targetWidth,
-        height: targetHeight,
-        style: {
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-        },
-        pixelRatio: 1,
+        pixelRatio: 2, // Higher quality on download
         cacheBust: true,
+        allowTaint: false,
       });
 
       const link = document.createElement('a');
@@ -114,6 +107,12 @@ const UserPage: React.FC = () => {
       const message = err instanceof Error ? err.message : String(err);
       alert(`Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`);
     } finally {
+      // Restore original styles
+      if (originalStyle) {
+        cardElement.setAttribute('style', originalStyle);
+      } else {
+        cardElement.removeAttribute('style');
+      }
       setIsDownloading(null);
     }
   };
@@ -149,8 +148,8 @@ const UserPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2">
             {/* Mobile: Remove aspect ratio constraint, Desktop: Keep 3:4 ratio */}
-            <div className="w-full max-w-xl mx-auto lg:max-w-none">
-              <div className="sm:aspect-[3/4]">
+            <div className="w-full max-w-xl mx-auto lg:max-w-none overflow-hidden">
+              <div className="sm:aspect-[3/4] w-full">
                 <GitWrapCard ref={cardRef} userData={userData} funMessage={funMessage} theme={activeTheme} layout={CardLayout.Classic} />
               </div>
             </div>
