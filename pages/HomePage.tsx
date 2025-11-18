@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SparklesIcon } from '../components/icons/SparklesIcon';
+import Contributors from '../components/Contributors';
 
 const HomePage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -18,8 +19,8 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 to-purple-900/50">
-      <div className="text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 relative">
+      <div className="text-center relative z-10">
         <div className="inline-block bg-white/10 p-4 rounded-full mb-6">
           <SparklesIcon className="w-12 h-12 text-purple-300" />
         </div>
@@ -31,7 +32,7 @@ const HomePage: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-10 w-full max-w-md">
+      <form onSubmit={handleSubmit} className="mt-10 w-full max-w-md relative z-10">
         <div className="relative">
           <input
             type="text"
@@ -54,7 +55,11 @@ const HomePage: React.FC = () => {
         {error && <p className="mt-2 text-center text-red-400">{error}</p>}
       </form>
 
-      <footer className="absolute bottom-4 text-gray-500 text-sm">
+      <div className="mt-8 relative z-10">
+        <Contributors />
+      </div>
+
+      <footer className="absolute bottom-4 text-gray-500 text-sm z-10">
         Built with React, Tailwind CSS, and Gemini
       </footer>
     </div>

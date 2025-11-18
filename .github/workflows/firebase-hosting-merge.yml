@@ -12,6 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Load .env into environment (if present)
+        run: |
+          if [ -f .env ]; then
+            echo "Loading .env into environment"
+            # Skip comments and empty lines, append to GITHUB_ENV so subsequent steps can use them
+            grep -v '^\s*#' .env | sed '/^\s*$/d' | while IFS= read -r line; do echo "$line" >> $GITHUB_ENV; done
+          else
+            echo ".env not found, skipping"
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -20,13 +30,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Fetch repository contributors
+        run: |
+          mkdir -p public
+          # Prefer token from .env (exported to env via previous step), fall back to built-in GITHUB_TOKEN
+          TOKEN="${VITE_GITHUB_APP_TOKEN:-${GITHUB_TOKEN:-${PAT_GITHUB_TOKEN:-${REPO_TOKEN:-}}}}"
+          if [ -n "$TOKEN" ]; then
+            echo "Fetching contributors with token from environment"
+            curl -sSL -H "Accept: application/vnd.github+json" -H "Authorization: token $TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY:-${{ github.repository }}}/contributors?per_page=100" > public/contributors.json || true
+          else
+            echo "No token found in environment, fetching unauthenticated (rate-limited)"
+            curl -sSL -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/contributors?per_page=100" > public/contributors.json || true
+          fi
+
+      - name: Prepare REPO_TOKEN for deploy
+        run: |
+          # Determine repo token preference order and export for subsequent step
+          TOKEN="${VITE_GITHUB_APP_TOKEN:-${GITHUB_TOKEN:-${PAT_GITHUB_TOKEN:-${REPO_TOKEN:-}}}}"
+          if [ -n "$TOKEN" ]; then
+            echo "REPO_TOKEN=$TOKEN" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ secrets.PAT_GITHUB_TOKEN }}
+          repoToken: ${{ env.REPO_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTFOLIO_V1_F2BDD }}
           channelId: live
           projectId: portfolio-v1-f2bdd
