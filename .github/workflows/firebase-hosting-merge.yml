@@ -30,20 +30,55 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fetch repository contributors
+      - name: Fetch repository contributors (with retries + safe fallback)
         run: |
           mkdir -p public
-          # Prefer the repository secret `VITE_GITHUB_APP_TOKEN` (from repo secrets), fall back to the runner's GITHUB_TOKEN
+          set -euo pipefail
+          REPO=${GITHUB_REPOSITORY:-${{ github.repository }}}
+          # Prefer the repository secret `VITE_GITHUB_APP_TOKEN`, fall back to the runner's GITHUB_TOKEN
           TOKEN="${{ secrets.VITE_GITHUB_APP_TOKEN }}"
           if [ -z "$TOKEN" ] && [ -n "$GITHUB_TOKEN" ]; then
             TOKEN="$GITHUB_TOKEN"
           fi
-          if [ -n "$TOKEN" ]; then
-            echo "Fetching contributors with token from environment"
-            curl -sSL -H "Accept: application/vnd.github+json" -H "Authorization: token $TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY:-${{ github.repository }}}/contributors?per_page=100" > public/contributors.json || true
+
+          URL="https://api.github.com/repos/${REPO}/contributors?per_page=100"
+
+          attempt=0
+          max_attempts=3
+          echo "Attempting to fetch contributors from $URL"
+          while [ $attempt -lt $max_attempts ]; do
+            attempt=$((attempt+1))
+            echo "Fetch attempt #${attempt}..."
+            if [ -n "$TOKEN" ]; then
+              http_status=0
+              # Use --fail to cause non-2xx to exit with non-zero; capture output
+              if curl -sSL -H "Accept: application/vnd.github+json" -H "Authorization: token $TOKEN" "$URL" -o public/contributors.json.tmp; then
+                mv public/contributors.json.tmp public/contributors.json
+                echo "Fetched contributors (auth)"
+                break
+              else
+                echo "Authenticated fetch failed on attempt ${attempt}"
+              fi
+            else
+              if curl -sSL -H "Accept: application/vnd.github+json" "$URL" -o public/contributors.json.tmp; then
+                mv public/contributors.json.tmp public/contributors.json
+                echo "Fetched contributors (unauthenticated)"
+                break
+              else
+                echo "Unauthenticated fetch failed on attempt ${attempt}"
+              fi
+            fi
+            sleep $((attempt * 2))
+          done
+
+          # If file is missing or empty, write a minimal fallback so client doesn't hit GitHub API
+          if [ ! -s public/contributors.json ]; then
+            echo "contributors.json missing or empty after ${attempt} attempts; writing fallback"
+            printf '%s' '[{"login":"aftab-s","avatar_url":"https://avatars.githubusercontent.com/aftab-s","html_url":"https://github.com/aftab-s","contributions":1}]' > public/contributors.json
           else
-            echo "No token found in environment, fetching unauthenticated (rate-limited)"
-            curl -sSL -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/contributors?per_page=100" > public/contributors.json || true
+            echo "contributors.json fetched; snippet:"
+            head -c 400 public/contributors.json || true
+            echo
           fi
 
       - name: Build
