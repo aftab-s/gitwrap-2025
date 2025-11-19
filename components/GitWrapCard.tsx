@@ -11,10 +11,11 @@ interface GitWrapCardProps {
   funMessage: string;
   theme: Theme;
   layout: CardLayout;
+  isExport?: boolean;
 }
 
-const GitWrapCard = forwardRef<HTMLDivElement, GitWrapCardProps>(({ userData, funMessage, theme, layout }, ref) => {
-  const props = { userData, funMessage, theme };
+const GitWrapCard = forwardRef<HTMLDivElement, GitWrapCardProps>(({ userData, funMessage, theme, layout, isExport = false }, ref) => {
+  const props = { userData, funMessage, theme, isExport };
 
   switch (layout) {
     case CardLayout.Modern:

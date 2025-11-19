@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useParams, Link } from 'react-router-dom';
 import type { UserStats, Theme } from '../types';
 import { AspectRatio, CardLayout } from '../types';
@@ -6,6 +7,7 @@ import { fetchGitHubStats } from '../services/github';
 import { generateFunMessage } from '../services/geminiService';
 import { THEMES } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
+import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import { DownloadIcon } from '../components/icons/DownloadIcon';
@@ -67,32 +69,88 @@ const UserPage: React.FC = () => {
   }, [fetchData]);
 
   const handleDownload = async (aspectRatio: AspectRatio) => {
-    if (!cardRef.current) return;
+    if (!userData) return;
     setIsDownloading(aspectRatio);
 
-    const cardElement = cardRef.current;
-    const originalStyle = cardElement.getAttribute('style');
-    
-    // Define target dimensions based on aspect ratio
-    // For 3:4 (Social Post), use standardized mobile-friendly dimensions
-    let targetWidth: number;
-    let targetHeight: number;
+    const targetWidth = 1080;
+    const targetHeight = 1440;
 
-    if (aspectRatio === AspectRatio.Social) { // "3:4"
-      // Use 1080x1440 which is a standard mobile post size (maintains 3:4 ratio)
-      targetWidth = 1080;
-      targetHeight = 1440;
-    }
+    const exportContainer = document.createElement('div');
+  exportContainer.style.position = 'fixed';
+  exportContainer.style.left = '0';
+  exportContainer.style.top = '0';
+  exportContainer.style.width = `${targetWidth}px`;
+  exportContainer.style.height = `${targetHeight}px`;
+  exportContainer.style.opacity = '0';
+  exportContainer.style.pointerEvents = 'none';
+  exportContainer.style.overflow = 'hidden';
+  exportContainer.style.zIndex = '-1';
+  exportContainer.setAttribute('aria-hidden', 'true');
+
+    document.body.appendChild(exportContainer);
+
+    const root = createRoot(exportContainer);
+    root.render(
+      <ExportCard
+        userData={userData}
+        funMessage={funMessage}
+        theme={activeTheme}
+        layout={CardLayout.Classic}
+      />
+    );
 
     try {
-      // Temporarily set explicit dimensions on the card element to ensure proper rendering
-      cardElement.style.width = `${targetWidth}px`;
-      cardElement.style.height = `${targetHeight}px`;
+      // Allow React to flush and layout to settle
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const dataUrl = await htmlToImage.toPng(cardElement, {
-        pixelRatio: 2, // Higher quality on download
+      // Ensure fonts (if available) are loaded before capture
+      const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
+      if (fontSet?.ready) {
+        await fontSet.ready.catch(() => undefined);
+      }
+
+      // Wait for images to load
+      const images: HTMLImageElement[] = Array.from(exportContainer.querySelectorAll('img'));
+      if (images.length > 0) {
+        await Promise.race([
+          Promise.all(
+            images.map(
+              (img) =>
+                new Promise<void>((resolve) => {
+                  if (img.complete) {
+                    resolve();
+                  } else {
+                    img.addEventListener('load', () => resolve(), { once: true });
+                    img.addEventListener('error', () => resolve(), { once: true });
+                  }
+                })
+            )
+          ),
+          new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+        ]);
+      }
+
+      const cardElement = exportContainer.firstElementChild as HTMLElement | null;
+      const captureTarget = cardElement ?? exportContainer;
+      const computedStyles = getComputedStyle(captureTarget);
+      const backgroundColor = computedStyles.backgroundColor;
+
+      const dataUrl = await htmlToImage.toPng(captureTarget, {
+        pixelRatio: 1, // Force exact 1080x1440 output
         cacheBust: true,
-        allowTaint: false,
+        width: targetWidth,
+        height: targetHeight,
+        style: {
+          opacity: '1',
+          visibility: 'visible',
+          transform: 'none',
+          filter: 'none',
+        },
+        backgroundColor:
+          backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)'
+            ? backgroundColor
+            : undefined,
       });
 
       const link = document.createElement('a');
@@ -101,17 +159,15 @@ const UserPage: React.FC = () => {
       link.download = `gitwrap-2025-${safeUsername}-classic-${safeAspectRatio}.png`;
       link.href = dataUrl;
       link.click();
-    } catch(err) {
+    } catch (err) {
       console.error('Failed to download image:', err);
       const message = err instanceof Error ? err.message : String(err);
-      alert(`Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`);
+      alert(
+        `Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`
+      );
     } finally {
-      // Restore original styles
-      if (originalStyle) {
-        cardElement.setAttribute('style', originalStyle);
-      } else {
-        cardElement.removeAttribute('style');
-      }
+      root.unmount();
+      document.body.removeChild(exportContainer);
       setIsDownloading(null);
     }
   };

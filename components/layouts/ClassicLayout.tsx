@@ -10,6 +10,7 @@ interface LayoutProps {
   userData: UserStats;
   funMessage: string;
   theme: Theme;
+  isExport?: boolean;
 }
 
 // Helper to convert flat calendar to heatmap weeks structure
@@ -77,7 +78,7 @@ function buildHeatmapWeeks(calendar: Array<{ date: string; count: number }>) {
   return weeks;
 }
 
-const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme }, ref) => {
+const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme, isExport = false }, ref) => {
   const { classes } = theme;
   const isRetro = theme.name === 'Retro';
   const isSpace = theme.name === 'Space';
@@ -148,7 +149,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   };
 
   return (
-    <div ref={ref} className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
+    <div
+      ref={ref}
+      className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden ${
+        isExport ? 'export-mode' : ''
+      }`}
+    >
       {/* Retro LCD scan lines overlay */}
       {isRetro && (
         <>
