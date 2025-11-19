@@ -59,6 +59,7 @@ export interface Theme {
     accent: string;
     highlight: string;
     heatmapColors: string[];
+    bgImage?: string;
   };
 }
 

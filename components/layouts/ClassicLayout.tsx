@@ -79,6 +79,9 @@ function buildHeatmapWeeks(calendar: Array<{ date: string; count: number }>) {
 
 const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme }, ref) => {
   const { classes } = theme;
+  const isRetro = theme.name === 'Retro';
+  const isSpace = theme.name === 'Space';
+  const isSunset = theme.name === 'Sunset';
   
   // Build heatmap weeks from flat calendar
   const heatmapWeeks = useMemo(() => buildHeatmapWeeks(userData.contributionCalendar), [userData.contributionCalendar]);
@@ -146,6 +149,96 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
   return (
     <div ref={ref} className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
+      {/* Retro LCD scan lines overlay */}
+      {isRetro && (
+        <>
+          {/* Horizontal scan lines */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-50"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.15) 3px)',
+              backgroundSize: '100% 4px',
+            }}
+          />
+          {/* Subtle CRT curvature vignette */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-40"
+            style={{
+              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 70%, rgba(0, 0, 0, 0.3) 100%)',
+              boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.5)'
+            }}
+          />
+        </>
+      )}
+      
+      {/* Space theme: Starfield particles */}
+      {isSpace && (
+        <>
+          {/* Animated stars */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              backgroundImage: `
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent),
+                radial-gradient(2px 2px at 90% 60%, white, transparent),
+                radial-gradient(1px 1px at 33% 80%, white, transparent),
+                radial-gradient(1px 1px at 15% 15%, white, transparent)
+              `,
+              backgroundSize: '200% 200%',
+              backgroundPosition: '0% 0%',
+              opacity: 0.4,
+              animation: 'twinkle 20s ease-in-out infinite'
+            }}
+          />
+          {/* Subtle blue glow effect */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              background: 'radial-gradient(ellipse at top, rgba(34, 211, 238, 0.15) 0%, transparent 50%)',
+            }}
+          />
+        </>
+      )}
+      
+      {/* Sunset theme: Warm gradient overlay */}
+      {isSunset && (
+        <>
+          {/* Soft light rays */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              background: `
+                radial-gradient(ellipse at 80% 20%, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(251, 191, 36, 0.1) 0%, transparent 50%)
+              `,
+            }}
+          />
+          {/* Subtle warm glow */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              boxShadow: 'inset 0 0 150px rgba(251, 146, 60, 0.08)'
+            }}
+          />
+        </>
+      )}
+      
+      {/* Subtle theme background image (non-interactive) */}
+      {classes.bgImage && theme.name !== 'Minimal' && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: `url(${classes.bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.06,
+            filter: 'brightness(0.9) saturate(0.9)'
+          }}
+        />
+      )}
       {/* Mobile-first responsive padding */}
       <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full w-full">
       {/* Decorative corner elements - hidden on mobile */}
@@ -211,10 +304,15 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         {/* Main Content - Mobile-first redesign */}
         <main className="flex-grow mt-3 sm:mt-6 flex flex-col gap-2 sm:gap-4">
           
-          {/* Mobile: Single column big number showcase */}
+            {/* Mobile: Single column big number showcase */}
           <div className="sm:hidden">
             {/* Hero Number - Total Contributions */}
-            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 overflow-hidden mb-2">
+            <div className={`relative p-4 rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden mb-2 ${
+              isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.3)]' :
+              isSpace ? 'border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' :
+              isSunset ? 'border border-orange-400/30 shadow-[0_0_15px_rgba(251,146,60,0.2)]' :
+              'border border-white/10'
+            }`}>
               <div className="text-center">
                 <div className={`text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-2`}>Total Contributions</div>
                 <div className={`text-5xl font-black ${classes.accent} mb-3`}>
@@ -240,25 +338,45 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
             {/* Mobile: 2x2 Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/15 to-pink-500/10 border border-orange-400/20 text-center">
+              <div className={`p-3 rounded-xl bg-gradient-to-br from-orange-500/15 to-pink-500/10 text-center ${
+                isRetro ? 'border-2 border-pink-400/50 shadow-[0_0_15px_rgba(236,72,153,0.3)]' :
+                isSpace ? 'border border-cyan-400/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]' :
+                isSunset ? 'border border-orange-400/30 shadow-[0_0_10px_rgba(251,146,60,0.2)]' :
+                'border border-orange-400/20'
+              }`}>
                 <div className="text-2xl mb-1">⏰</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.bestHour}:00</div>
                 <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Best Hour</div>
               </div>
               
-              <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 border border-cyan-400/20 text-center">
+              <div className={`p-3 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-center ${
+                isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]' :
+                isSpace ? 'border border-cyan-400/30 shadow-[0_0_10px_rgba(34,211,238,0.15)]' :
+                isSunset ? 'border border-orange-400/30 shadow-[0_0_10px_rgba(251,146,60,0.2)]' :
+                'border border-cyan-400/20'
+              }`}>
                 <div className="text-2xl mb-1">👀</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.totalPRReviews}</div>
                 <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Reviews</div>
               </div>
               
-              <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/15 to-amber-500/10 border border-yellow-400/20 text-center">
+              <div className={`p-3 rounded-xl bg-gradient-to-br from-yellow-500/15 to-amber-500/10 text-center ${
+                isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_15px_rgba(250,204,21,0.3)]' :
+                isSpace ? 'border border-cyan-400/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]' :
+                isSunset ? 'border border-amber-400/30 shadow-[0_0_10px_rgba(251,191,36,0.2)]' :
+                'border border-yellow-400/20'
+              }`}>
                 <div className="text-2xl mb-1">⭐</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.totalStarsGiven}</div>
                 <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Stars Given</div>
               </div>
               
-              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/15 to-indigo-500/10 border border-purple-400/20 text-center">
+              <div className={`p-3 rounded-xl bg-gradient-to-br from-purple-500/15 to-indigo-500/10 text-center ${
+                isRetro ? 'border-2 border-fuchsia-400/50 shadow-[0_0_15px_rgba(232,121,249,0.3)]' :
+                isSpace ? 'border border-cyan-400/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]' :
+                isSunset ? 'border border-orange-400/30 shadow-[0_0_10px_rgba(251,146,60,0.2)]' :
+                'border border-purple-400/20'
+              }`}>
                 <div className="text-2xl mb-1">🔥</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.longestStreakDays}</div>
                 <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Day Streak</div>
@@ -269,7 +387,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           {/* Desktop: Original layout */}
           <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
             {/* Left: Main Contribution Metric */}
-            <div className="relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 overflow-hidden">
+            <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden ${
+              isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_25px_rgba(34,211,238,0.4)]' :
+              isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+              isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.25)]' :
+              'border border-white/10'
+            }`}>
               <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-full blur-2xl"></div>
               <div className="relative z-10">
                 <div className={`text-xs sm:text-sm font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-3`}>Total Contributions</div>
@@ -305,7 +428,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
             {/* Right: Split Stats */}
             <div className="grid grid-rows-2 gap-2 sm:gap-4">
-              <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-500/10 to-pink-500/10 border border-orange-400/20">
+              <div className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-500/10 to-pink-500/10 ${
+                isRetro ? 'border-2 border-pink-400/50 shadow-[0_0_20px_rgba(236,72,153,0.3)]' :
+                isSpace ? 'border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' :
+                isSunset ? 'border border-orange-400/30 shadow-[0_0_15px_rgba(251,146,60,0.25)]' :
+                'border border-orange-400/20'
+              }`}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Best Hour</div>
@@ -316,7 +444,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20">
+                <div className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 ${
+                  isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.3)]' :
+                  isSpace ? 'border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' :
+                  isSunset ? 'border border-orange-400/30 shadow-[0_0_15px_rgba(251,146,60,0.2)]' :
+                  'border border-cyan-400/20'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Reviews</div>
@@ -326,7 +459,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     <div className="text-3xl sm:text-4xl md:text-5xl">👀</div>
                   </div>
                 </div>
-                <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-400/20">
+                <div className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 ${
+                  isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.3)]' :
+                  isSpace ? 'border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' :
+                  isSunset ? 'border border-amber-400/30 shadow-[0_0_15px_rgba(251,191,36,0.25)]' :
+                  'border border-yellow-400/20'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Stars</div>
@@ -366,7 +504,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           {/* Desktop: Original Language Cards */}
           <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 gap-2">
             {userData.topLanguages.map((lang, idx) => (
-              <div key={lang.name} className="relative group p-2 sm:p-5 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300">
+              <div key={lang.name} className={`relative group p-2 sm:p-5 rounded-xl sm:rounded-2xl bg-white/5 transition-all duration-300 ${
+                isRetro ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]' :
+                isSpace ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]' :
+                isSunset ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]' :
+                'border border-white/10 hover:border-white/20'
+              }`}>
                 <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle at 50% 0%, ${lang.color}15, transparent 70%)` }}></div>
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-1 sm:mb-3">
@@ -421,7 +564,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
           {/* Desktop: Original Activity Grid */}
           <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-            <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500/15 via-purple-500/10 to-transparent border border-purple-400/30">
+            <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500/15 via-purple-500/10 to-transparent ${
+              isRetro ? 'border-2 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' :
+              isSpace ? 'border border-cyan-400/25 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
+              isSunset ? 'border border-orange-400/25 shadow-[0_0_12px_rgba(251,146,60,0.2)]' :
+              'border border-purple-400/30'
+            }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <CommitIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">🔥</div>
@@ -431,7 +579,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>days</div>
             </div>
 
-            <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500/15 via-blue-500/10 to-transparent border border-blue-400/30">
+            <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500/15 via-blue-500/10 to-transparent ${
+              isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]' :
+              isSpace ? 'border border-cyan-400/30 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
+              isSunset ? 'border border-orange-400/25 shadow-[0_0_12px_rgba(251,146,60,0.2)]' :
+              'border border-blue-400/30'
+            }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <PRIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">📅</div>
@@ -441,7 +594,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>most active</div>
             </div>
 
-            <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-500/15 via-green-500/10 to-transparent border border-green-400/30">
+            <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-500/15 via-green-500/10 to-transparent ${
+              isRetro ? 'border-2 border-pink-400/50 shadow-[0_0_15px_rgba(236,72,153,0.3)]' :
+              isSpace ? 'border border-cyan-400/25 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
+              isSunset ? 'border border-orange-400/25 shadow-[0_0_12px_rgba(251,146,60,0.2)]' :
+              'border border-green-400/30'
+            }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <IssueIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">📦</div>
@@ -451,7 +609,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>projects</div>
             </div>
 
-            <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-pink-500/15 via-pink-500/10 to-transparent border border-pink-400/30">
+            <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-pink-500/15 via-pink-500/10 to-transparent ${
+              isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_15px_rgba(250,204,21,0.3)]' :
+              isSpace ? 'border border-cyan-400/25 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
+              isSunset ? 'border border-orange-400/25 shadow-[0_0_12px_rgba(251,146,60,0.2)]' :
+              'border border-pink-400/30'
+            }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <ReviewIcon className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
@@ -466,7 +629,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
           {/* Top Repository Spotlight */}
           {userData.topRepos[0] && (
-            <div className="relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 border border-yellow-400/30 overflow-hidden">
+            <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
+              isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
+              isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+              isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
+              'border border-yellow-400/30'
+            }`}>
               <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
               <div className="relative z-10">
                 {/* Mobile: Centered layout */}
@@ -499,7 +667,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           )}
 
           {/* Contribution Heatmap */}
-          <div className="p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10">
+          <div className={`p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white/5 ${
+            isRetro ? 'border-2 border-fuchsia-400/50 shadow-[0_0_25px_rgba(232,121,249,0.4)]' :
+            isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+            isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.25)]' :
+            'border border-white/10'
+          }`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-4 gap-2">
               <h3 className={`text-xs sm:text-sm font-bold uppercase tracking-wider ${classes.accent}`}>2025 Activity</h3>
               <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
@@ -527,7 +700,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Fun Message - Redesigned */}
-          <div className="relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden">
+          <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 to-white/5 overflow-hidden ${
+            isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.3)]' :
+            isSpace ? 'border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' :
+            isSunset ? 'border border-orange-400/30 shadow-[0_0_15px_rgba(251,146,60,0.2)]' :
+            'border border-white/10'
+          }`}>
             <div className="absolute top-0 left-0 w-full h-full opacity-5">
               <div className="absolute top-2 sm:top-4 left-2 sm:left-4">✨</div>
               <div className="absolute top-4 sm:top-8 right-6 sm:right-12">⭐</div>
