@@ -25,7 +25,17 @@ const HomePage: React.FC = () => {
           <SparklesIcon className="w-12 h-12 text-purple-300" />
         </div>
         <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tighter">
-          GitWrap <span className="text-purple-400">2025</span>
+          GitWrap{' '}
+          <span
+            className="bg-clip-text text-transparent"
+            style={{
+              backgroundImage: 'linear-gradient(90deg, #06b6d4 0%, #34d399 20%, #fb923c 40%, #ec4899 60%, #38bdf8 80%, #64748b 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+            }}
+          >
+            2025
+          </span>
         </h1>
         <p className="mt-4 text-lg md:text-xl text-gray-300 max-w-xl mx-auto">
           Get your personalized GitHub year in review. See your coding journey, celebrate your achievements, and share your story.

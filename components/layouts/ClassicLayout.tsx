@@ -94,6 +94,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
     )
   );
 
+  // Overall year-over-year growth (percentage). Use 0 as fallback.
+  const overallGrowth = userData.yearOverYearGrowth?.overallGrowth ?? 0;
+
   const Heatmap: React.FC<{ weeks: { monthLabel: string; days: number[] }[] }> = ({ weeks }) => {
     const normalizedWeeks = weeks.length > 0
       ? weeks
@@ -152,20 +155,32 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       {/* Retro LCD scan lines overlay */}
       {isRetro && (
         <>
-          {/* Horizontal scan lines */}
-          <div 
+          {/* Stronger horizontal scan lines for clearer LCD/CRT feel */}
+          <div
             className="absolute inset-0 pointer-events-none z-50"
             style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.15) 3px)',
-              backgroundSize: '100% 4px',
+              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0px, transparent 2px, transparent 4px)',
+              backgroundSize: '100% 6px',
+              mixBlendMode: 'multiply',
             }}
           />
-          {/* Subtle CRT curvature vignette */}
-          <div 
+
+          {/* Colored micro-scan tints (very subtle) to give a retro RGB feel */}
+          <div
+            className="absolute inset-0 pointer-events-none z-51"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, rgba(236,72,153,0.06) 0px, rgba(236,72,153,0.06) 1px, transparent 1px, transparent 5px)',
+              opacity: 0.14,
+              mixBlendMode: 'screen'
+            }}
+          />
+
+          {/* Subtle CRT curvature vignette (deeper for Retro) */}
+          <div
             className="absolute inset-0 pointer-events-none z-40"
             style={{
-              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 70%, rgba(0, 0, 0, 0.3) 100%)',
-              boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.5)'
+              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.45) 100%)',
+              boxShadow: 'inset 0 0 140px rgba(0, 0, 0, 0.6)'
             }}
           />
         </>
@@ -552,11 +567,11 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2">
-                  <div className="text-xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
+                  <div className="text-xl">{overallGrowth > 0 ? '📈' : '📉'}</div>
                   <span className={`text-xs ${classes.textSecondary}`}>Year over Year</span>
                 </div>
-                <span className={`text-sm font-bold ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
+                <span className={`text-sm font-bold ${overallGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {overallGrowth > 0 ? '+' : '-'}{Math.abs(overallGrowth)}%
                 </span>
               </div>
             </div>
@@ -617,11 +632,11 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <ReviewIcon className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400" />
-                <div className="text-xl sm:text-2xl md:text-3xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
+                <div className="text-xl sm:text-2xl md:text-3xl">{overallGrowth > 0 ? '📈' : '📉'}</div>
               </div>
               <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Growth</div>
-              <div className={`text-2xl sm:text-3xl font-black ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
+              <div className={`text-2xl sm:text-3xl font-black ${overallGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {overallGrowth > 0 ? '+' : '-'}{Math.abs(overallGrowth)}%
               </div>
               <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>vs 2024</div>
             </div>
@@ -729,7 +744,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         
         {/* Footer */}
         <footer className={`mt-3 sm:mt-5 pt-2 sm:pt-4 text-center text-[10px] sm:text-xs ${classes.textSecondary} tracking-wider border-t border-white/10`}>
-          Powered by <span className={classes.accent}>GitWrap</span> • gitwrap.app
+          Powered by <span className={classes.accent}>GitWrap</span> • 2025
         </footer>
       </div>
       </div>
