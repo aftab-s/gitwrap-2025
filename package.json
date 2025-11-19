@@ -12,15 +12,15 @@
   "dependencies": {
     "@google/genai": "^1.29.1",
     "@upstash/redis": "^1.28.0",
+    "@vercel/analytics": "^1.5.0",
     "firebase": "^12.6.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
+    "styled-components": "^5.3.11",
     "zod": "^3.23.0"
-    ,
-    "styled-components": "^5.3.11"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

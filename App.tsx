@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import UserPage from './pages/UserPage';
 import LoaderTestPage from './pages/LoaderTestPage';
 import TokenWarningBanner from './components/TokenWarningBanner';
+import { Analytics } from "@vercel/analytics/react"
 
 // This check determines if the warning banner should be displayed.
 const isTokenMissing = !process.env.VITE_GITHUB_APP_TOKEN;
@@ -45,6 +46,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
+      <Analytics />
     </BrowserRouter>
   );
 }

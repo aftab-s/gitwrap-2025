@@ -234,7 +234,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             backgroundImage: `url(${classes.bgImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            opacity: 0.06,
+            opacity: 0.08,
             filter: 'brightness(0.9) saturate(0.9)'
           }}
         />
@@ -639,7 +639,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="relative z-10">
                 {/* Mobile: Centered layout */}
                 <div className="sm:hidden text-center">
-                  <div className="text-4xl mb-2">🏆</div>
+                  <div className="text-4xl mb-2 opacity-100">🏆</div>
                   <div className={`text-[10px] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
                   <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{userData.topRepos[0].name}</div>
                   <div className="flex justify-center items-center gap-3 text-xs">
@@ -660,7 +660,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
                     </div>
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">🏆</div>
+                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">🏆</div>
                 </div>
               </div>
             </div>
