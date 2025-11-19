@@ -16,8 +16,6 @@ html, body, #root {
   font-family: var(--font-grotesk) !important;
 }
 
-/* Keep monospace and serif utilities intact */
-
 /* Optional: small optimizations for headings and strong text */
 h1, h2, h3, h4, h5, h6, strong {
   font-weight: 600;
