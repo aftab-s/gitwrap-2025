@@ -735,7 +735,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         
         {/* Footer */}
   <footer className={`mt-3 sm:mt-5 pt-2 sm:pt-4 text-center text-[0.625rem] sm:text-xs ${classes.textSecondary} tracking-wider border-t border-white/10`}>
-          Powered by <span className={classes.accent}>GitWrap</span> • gitwrap.app
+          Powered by <span className={classes.accent}>GitWrap</span> • 2025
         </footer>
       </div>
       </div>
