@@ -125,7 +125,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
           <div className="text-right">
             <div className={`text-3xl font-black ${classes.accent} leading-none`}>2025</div>
-            <div className={`text-[10px] font-semibold ${classes.textSecondary} tracking-widest uppercase`}>GitWrap</div>
+            <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} tracking-widest uppercase`}>GitWrap</div>
           </div>
         </header>
 
@@ -136,22 +136,22 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             <div className={`p-3 rounded-lg bg-gradient-to-br from-purple-500/15 to-purple-600/5 border border-purple-400/20 text-center`}>
               <CommitIcon className="w-4 h-4 mx-auto mb-1 text-purple-400" />
               <div className={`text-lg font-bold ${classes.highlight} leading-none`}>{userData.totalCommits > 999 ? `${(userData.totalCommits / 1000).toFixed(1)}k` : userData.totalCommits}</div>
-              <div className={`text-[9px] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Commits</div>
+              <div className={`text-[0.5625rem] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Commits</div>
             </div>
             <div className={`p-3 rounded-lg bg-gradient-to-br from-blue-500/15 to-blue-600/5 border border-blue-400/20 text-center`}>
               <PRIcon className="w-4 h-4 mx-auto mb-1 text-blue-400" />
               <div className={`text-lg font-bold ${classes.highlight} leading-none`}>{userData.totalPRs}</div>
-              <div className={`text-[9px] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>PRs</div>
+              <div className={`text-[0.5625rem] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>PRs</div>
             </div>
             <div className={`p-3 rounded-lg bg-gradient-to-br from-green-500/15 to-green-600/5 border border-green-400/20 text-center`}>
               <IssueIcon className="w-4 h-4 mx-auto mb-1 text-green-400" />
               <div className={`text-lg font-bold ${classes.highlight} leading-none`}>{userData.totalIssues}</div>
-              <div className={`text-[9px] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Issues</div>
+              <div className={`text-[0.5625rem] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Issues</div>
             </div>
             <div className={`p-3 rounded-lg bg-gradient-to-br from-pink-500/15 to-pink-600/5 border border-pink-400/20 text-center`}>
               <ReviewIcon className="w-4 h-4 mx-auto mb-1 text-pink-400" />
               <div className={`text-lg font-bold ${classes.highlight} leading-none`}>{userData.totalPRReviews}</div>
-              <div className={`text-[9px] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Reviews</div>
+              <div className={`text-[0.5625rem] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Reviews</div>
             </div>
           </div>
 
@@ -159,7 +159,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           <div className="p-4 rounded-xl bg-white/5 border border-white/10">
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>2025 Activity</h3>
             <MiniHeatmap weeks={heatmapWeeks} />
-            <div className="flex items-center justify-end gap-1.5 mt-2 text-[10px]">
+            <div className="flex items-center justify-end gap-1.5 mt-2 text-[0.625rem]">
               <span className={classes.textSecondary}>Less</span>
               <div className="flex items-center gap-0.5">
                 {[0, 1, 2, 3, 4].map((level) => (
@@ -209,17 +209,17 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="space-y-3">
                 <div>
                   <div className={`text-2xl font-black ${classes.highlight} leading-none`}>{userData.longestStreakDays}</div>
-                  <div className={`text-[10px] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Day Streak 🔥</div>
+                  <div className={`text-[0.625rem] uppercase tracking-wider ${classes.textSecondary} mt-0.5`}>Day Streak 🔥</div>
                 </div>
                 <div className="h-px bg-white/10"></div>
                 <div className="flex justify-between items-center">
                   <div>
                     <div className={`text-sm font-bold ${classes.highlight}`}>{userData.bestDayOfWeek.slice(0, 3)}</div>
-                    <div className={`text-[9px] ${classes.textSecondary}`}>Peak Day</div>
+                    <div className={`text-[0.5625rem] ${classes.textSecondary}`}>Peak Day</div>
                   </div>
                   <div>
                     <div className={`text-sm font-bold ${classes.highlight}`}>{userData.githubAnniversary}Y</div>
-                    <div className={`text-[9px] ${classes.textSecondary}`}>On GitHub</div>
+                    <div className={`text-[0.5625rem] ${classes.textSecondary}`}>On GitHub</div>
                   </div>
                 </div>
               </div>
@@ -236,7 +236,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         </div>
 
         {/* Footer */}
-        <footer className={`mt-4 text-center text-[10px] ${classes.textSecondary} tracking-wider`}>
+  <footer className={`mt-4 text-center text-[0.625rem] ${classes.textSecondary} tracking-wider`}>
           <span className={classes.accent}>GitWrap</span> • Year in Review
         </footer>
       </div>
