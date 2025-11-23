@@ -39,6 +39,29 @@ export const THEMES: Theme[] = [
     },
   },
   {
+    name: 'Aurora',
+    classes: {
+      bg: 'bg-gradient-to-br from-[#021024] via-[#043a2d] to-[#3b0f4f]',
+      textPrimary: 'text-emerald-100',
+      textSecondary: 'text-emerald-300',
+      accent: 'text-emerald-400',
+      highlight: 'text-emerald-200',
+      heatmapColors: ['bg-slate-900', 'bg-emerald-900', 'bg-emerald-700', 'bg-emerald-500', 'bg-emerald-300'],
+      bgImage: '/images/aurora.jpg',
+    },
+  },
+  {
+    name: 'Nocturne',
+    classes: {
+      bg: 'bg-gradient-to-br from-[#030411] via-[#0b1220] to-[#07101a]',
+      textPrimary: 'text-gray-100',
+      textSecondary: 'text-gray-400',
+      accent: 'text-sky-400',
+      highlight: 'text-white',
+      heatmapColors: ['bg-slate-900', 'bg-slate-800', 'bg-slate-700', 'bg-slate-600', 'bg-slate-500'],
+    },
+  },
+  {
     name: 'Minimal',
     classes: {
       bg: 'bg-white',
