@@ -112,13 +112,12 @@ const Contributors: React.FC = () => {
   }, []);
 
   if (!contributors) {
-    return (
-      <div className="mt-8 flex items-center justify-center text-gray-400">Loading contributors…</div>
+    return (      <div className="flex items-center justify-center text-gray-400">Loading contributors…</div>
     );
   }
 
   return (
-    <div className="mt-8 w-full max-w-2xl mx-auto text-center">
+    <div className="w-full max-w-2xl mx-auto text-center">
       <h3 className="text-sm text-gray-300 font-semibold mb-3">Contributors</h3>
       <div className="flex flex-wrap items-center justify-center gap-3">
         {contributors.map((c) => (

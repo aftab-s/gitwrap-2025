@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useParams, Link } from 'react-router-dom';
 import type { UserStats, Theme } from '../types';
 import { AspectRatio, CardLayout } from '../types';
@@ -6,6 +7,7 @@ import { fetchGitHubStats } from '../services/github';
 import { generateFunMessage } from '../services/geminiService';
 import { THEMES } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
+import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import { DownloadIcon } from '../components/icons/DownloadIcon';
@@ -67,32 +69,88 @@ const UserPage: React.FC = () => {
   }, [fetchData]);
 
   const handleDownload = async (aspectRatio: AspectRatio) => {
-    if (!cardRef.current) return;
+    if (!userData) return;
     setIsDownloading(aspectRatio);
 
-    const cardElement = cardRef.current;
-    const originalStyle = cardElement.getAttribute('style');
-    
-    // Define target dimensions based on aspect ratio
-    // For 3:4 (Social Post), use standardized mobile-friendly dimensions
-    let targetWidth: number;
-    let targetHeight: number;
+    const targetWidth = 1080;
+    const targetHeight = 1440;
 
-    if (aspectRatio === AspectRatio.Social) { // "3:4"
-      // Use 1080x1440 which is a standard mobile post size (maintains 3:4 ratio)
-      targetWidth = 1080;
-      targetHeight = 1440;
-    }
+    const exportContainer = document.createElement('div');
+  exportContainer.style.position = 'fixed';
+  exportContainer.style.left = '0';
+  exportContainer.style.top = '0';
+  exportContainer.style.width = `${targetWidth}px`;
+  exportContainer.style.height = `${targetHeight}px`;
+  exportContainer.style.opacity = '0';
+  exportContainer.style.pointerEvents = 'none';
+  exportContainer.style.overflow = 'hidden';
+  exportContainer.style.zIndex = '-1';
+  exportContainer.setAttribute('aria-hidden', 'true');
+
+    document.body.appendChild(exportContainer);
+
+    const root = createRoot(exportContainer);
+    root.render(
+      <ExportCard
+        userData={userData}
+        funMessage={funMessage}
+        theme={activeTheme}
+        layout={CardLayout.Classic}
+      />
+    );
 
     try {
-      // Temporarily set explicit dimensions on the card element to ensure proper rendering
-      cardElement.style.width = `${targetWidth}px`;
-      cardElement.style.height = `${targetHeight}px`;
+      // Allow React to flush and layout to settle
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const dataUrl = await htmlToImage.toPng(cardElement, {
-        pixelRatio: 2, // Higher quality on download
+      // Ensure fonts (if available) are loaded before capture
+      const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
+      if (fontSet?.ready) {
+        await fontSet.ready.catch(() => undefined);
+      }
+
+      // Wait for images to load
+      const images: HTMLImageElement[] = Array.from(exportContainer.querySelectorAll('img'));
+      if (images.length > 0) {
+        await Promise.race([
+          Promise.all(
+            images.map(
+              (img) =>
+                new Promise<void>((resolve) => {
+                  if (img.complete) {
+                    resolve();
+                  } else {
+                    img.addEventListener('load', () => resolve(), { once: true });
+                    img.addEventListener('error', () => resolve(), { once: true });
+                  }
+                })
+            )
+          ),
+          new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+        ]);
+      }
+
+      const cardElement = exportContainer.firstElementChild as HTMLElement | null;
+      const captureTarget = cardElement ?? exportContainer;
+      const computedStyles = getComputedStyle(captureTarget);
+      const backgroundColor = computedStyles.backgroundColor;
+
+      const dataUrl = await htmlToImage.toPng(captureTarget, {
+        pixelRatio: 1, // Force exact 1080x1440 output
         cacheBust: true,
-        allowTaint: false,
+        width: targetWidth,
+        height: targetHeight,
+        style: {
+          opacity: '1',
+          visibility: 'visible',
+          transform: 'none',
+          filter: 'none',
+        },
+        backgroundColor:
+          backgroundColor && backgroundColor !== 'rgba(0, 0, 0, 0)'
+            ? backgroundColor
+            : undefined,
       });
 
       const link = document.createElement('a');
@@ -101,17 +159,15 @@ const UserPage: React.FC = () => {
       link.download = `gitwrap-2025-${safeUsername}-classic-${safeAspectRatio}.png`;
       link.href = dataUrl;
       link.click();
-    } catch(err) {
+    } catch (err) {
       console.error('Failed to download image:', err);
       const message = err instanceof Error ? err.message : String(err);
-      alert(`Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`);
+      alert(
+        `Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`
+      );
     } finally {
-      // Restore original styles
-      if (originalStyle) {
-        cardElement.setAttribute('style', originalStyle);
-      } else {
-        cardElement.removeAttribute('style');
-      }
+      root.unmount();
+      document.body.removeChild(exportContainer);
       setIsDownloading(null);
     }
   };
@@ -125,7 +181,7 @@ const UserPage: React.FC = () => {
             <div className="w-24 h-24 mx-auto mb-6 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20 animate-ping"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-40 blur-xl"></div>
-              <svg className="relative w-24 h-24 text-white opacity-90" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="24 h-24 text-white opacity-90" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
               </svg>
             </div>
@@ -168,11 +224,15 @@ const UserPage: React.FC = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2">
-            {/* Mobile: Remove aspect ratio constraint, Desktop: Keep 3:4 ratio */}
-            <div className="w-full max-w-xl mx-auto lg:max-w-none overflow-hidden">
-              <div className="sm:aspect-[3/4] w-full">
-                <GitWrapCard ref={cardRef} userData={userData} funMessage={funMessage} theme={activeTheme} layout={CardLayout.Classic} />
-              </div>
+            {/* Let the card grow naturally so no content is clipped */}
+            <div className="w-full max-w-3xl mx-auto lg:max-w-none">
+              <GitWrapCard
+                ref={cardRef}
+                userData={userData}
+                funMessage={funMessage}
+                theme={activeTheme}
+                layout={CardLayout.Classic}
+              />
             </div>
         </div>
         <div className="space-y-8">

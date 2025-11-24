@@ -20,3 +20,38 @@ html, body, #root {
 h1, h2, h3, h4, h5, h6, strong {
   font-weight: 600;
 }
+
+/* Export-mode breakpoint overrides so sm: utilities behave consistently */
+.export-mode .sm\:block {
+  display: block !important;
+}
+
+.export-mode .sm\:flex {
+  display: flex !important;
+}
+
+.export-mode .sm\:inline-flex {
+  display: inline-flex !important;
+}
+
+.export-mode .sm\:grid {
+  display: grid !important;
+}
+
+.export-mode .sm\:inline-block {
+  display: inline-block !important;
+}
+
+.export-mode .sm\:hidden {
+  display: none !important;
+}
+
+/* Utility to hide scrollbars without disabling scroll */
+body.no-scrollbar {
+  scrollbar-width: none;
+}
+
+body.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

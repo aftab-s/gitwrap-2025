@@ -10,6 +10,7 @@ interface LayoutProps {
   userData: UserStats;
   funMessage: string;
   theme: Theme;
+  isExport?: boolean;
 }
 
 // Helper to convert flat calendar to heatmap weeks structure
@@ -77,7 +78,7 @@ function buildHeatmapWeeks(calendar: Array<{ date: string; count: number }>) {
   return weeks;
 }
 
-const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme }, ref) => {
+const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme, isExport = false }, ref) => {
   const { classes } = theme;
   const isRetro = theme.name === 'Retro';
   const isSpace = theme.name === 'Space';
@@ -93,9 +94,6 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       userData.totalCommits + userData.totalPRs + userData.totalIssues + userData.totalPRReviews
     )
   );
-
-  // Overall year-over-year growth (percentage). Use 0 as fallback.
-  const overallGrowth = userData.yearOverYearGrowth?.overallGrowth ?? 0;
 
   const Heatmap: React.FC<{ weeks: { monthLabel: string; days: number[] }[] }> = ({ weeks }) => {
     const normalizedWeeks = weeks.length > 0
@@ -114,7 +112,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             style={{ gridTemplateColumns: `repeat(${totalWeeks}, minmax(0, 1fr))` }}
           >
             {normalizedWeeks.map((week, idx) => (
-              <div key={`month-${idx}`} className={`text-[9px] ${classes.textSecondary}`}>
+              <div key={`month-${idx}`} className={`text-[0.5625rem] ${classes.textSecondary}`}>
                 {week.monthLabel}
               </div>
             ))}
@@ -123,7 +121,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         {/* Heatmap with weekday labels */}
         <div className="flex gap-2">
           {/* Weekday labels */}
-          <div className="flex flex-col justify-between text-[9px] py-3 pr-1">
+          <div className="flex flex-col justify-between text-[0.5625rem] py-3 pr-1">
             {weekdayLabels.map((label, idx) => (
               <div key={`weekday-${idx}`} className={`${classes.textSecondary} h-3 flex items-center justify-end`}>
                 {label}
@@ -151,36 +149,29 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   };
 
   return (
-    <div ref={ref} className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
+    <div
+      ref={ref}
+  className={`relative w-full h-full flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-y-visible ${
+        isExport ? 'export-mode' : ''
+      }`}
+    >
       {/* Retro LCD scan lines overlay */}
       {isRetro && (
         <>
-          {/* Stronger horizontal scan lines for clearer LCD/CRT feel */}
-          <div
+          {/* Horizontal scan lines */}
+          <div 
             className="absolute inset-0 pointer-events-none z-50"
             style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0px, transparent 2px, transparent 4px)',
-              backgroundSize: '100% 6px',
-              mixBlendMode: 'multiply',
+              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.15) 3px)',
+              backgroundSize: '100% 4px',
             }}
           />
-
-          {/* Colored micro-scan tints (very subtle) to give a retro RGB feel */}
-          <div
-            className="absolute inset-0 pointer-events-none z-51"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, rgba(236,72,153,0.06) 0px, rgba(236,72,153,0.06) 1px, transparent 1px, transparent 5px)',
-              opacity: 0.14,
-              mixBlendMode: 'screen'
-            }}
-          />
-
-          {/* Subtle CRT curvature vignette (deeper for Retro) */}
-          <div
+          {/* Subtle CRT curvature vignette */}
+          <div 
             className="absolute inset-0 pointer-events-none z-40"
             style={{
-              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.45) 100%)',
-              boxShadow: 'inset 0 0 140px rgba(0, 0, 0, 0.6)'
+              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 70%, rgba(0, 0, 0, 0.3) 100%)',
+              boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.5)'
             }}
           />
         </>
@@ -249,7 +240,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             backgroundImage: `url(${classes.bgImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            opacity: 0.08,
+            opacity: 0.06,
             filter: 'brightness(0.9) saturate(0.9)'
           }}
         />
@@ -272,7 +263,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 crossOrigin="anonymous" 
                 className="w-16 h-16 rounded-2xl shadow-xl ring-2 ring-white/10" 
               />
-              <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[10px] font-bold rounded-full`}>
+              <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[0.625rem] font-bold rounded-full`}>
                 {userData.githubAnniversary}Y
               </div>
             </div>
@@ -300,7 +291,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                   crossOrigin="anonymous" 
                   className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl shadow-xl ring-2 sm:ring-4 ring-white/10" 
                 />
-                <div className={`absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 px-1.5 sm:px-2 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[10px] sm:text-xs font-bold rounded-full`}>
+                <div className={`absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 px-1.5 sm:px-2 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[0.625rem] sm:text-xs font-bold rounded-full`}>
                   {userData.githubAnniversary}Y
                 </div>
               </div>
@@ -311,7 +302,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             </div>
             <div className="text-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-white/5 border border-white/10">
               <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${classes.accent} leading-none`}>2025</div>
-              <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} tracking-widest uppercase mt-0.5 sm:mt-1`}>Year in Review</div>
+              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} tracking-widest uppercase mt-0.5 sm:mt-1`}>Year in Review</div>
             </div>
           </div>
         </header>
@@ -361,7 +352,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="text-2xl mb-1">⏰</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.bestHour}:00</div>
-                <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Best Hour</div>
+                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Best Hour</div>
               </div>
               
               <div className={`p-3 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-center ${
@@ -372,7 +363,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="text-2xl mb-1">👀</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.totalPRReviews}</div>
-                <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Reviews</div>
+                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Reviews</div>
               </div>
               
               <div className={`p-3 rounded-xl bg-gradient-to-br from-yellow-500/15 to-amber-500/10 text-center ${
@@ -383,7 +374,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="text-2xl mb-1">⭐</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.totalStarsGiven}</div>
-                <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Stars Given</div>
+                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Stars Given</div>
               </div>
               
               <div className={`p-3 rounded-xl bg-gradient-to-br from-purple-500/15 to-indigo-500/10 text-center ${
@@ -394,7 +385,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="text-2xl mb-1">🔥</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.longestStreakDays}</div>
-                <div className={`text-[10px] ${classes.textSecondary} uppercase mt-1`}>Day Streak</div>
+                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Day Streak</div>
               </div>
             </div>
           </div>
@@ -451,9 +442,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Best Hour</div>
+                    <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Best Hour</div>
                     <div className={`text-3xl sm:text-4xl font-black ${classes.highlight}`}>{userData.bestHour}:00</div>
-                    <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>peak coding time</div>
+                    <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>peak coding time</div>
                   </div>
                   <div className="text-3xl sm:text-4xl md:text-5xl">⏰</div>
                 </div>
@@ -467,9 +458,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Reviews</div>
+                      <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Reviews</div>
                       <div className={`text-2xl sm:text-4xl font-black ${classes.highlight}`}>{userData.totalPRReviews}</div>
-                      <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>code reviews</div>
+                      <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>code reviews</div>
                     </div>
                     <div className="text-3xl sm:text-4xl md:text-5xl">👀</div>
                   </div>
@@ -482,9 +473,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Stars</div>
+                      <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Stars</div>
                       <div className={`text-2xl sm:text-4xl font-black ${classes.highlight}`}>{userData.totalStarsGiven}</div>
-                      <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>given</div>
+                      <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>given</div>
                     </div>
                     <div className="text-3xl sm:text-4xl md:text-5xl">⭐</div>
                   </div>
@@ -532,7 +523,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
                       <span className={`text-xs sm:text-sm font-bold ${classes.textPrimary}`}>{lang.name}</span>
                     </div>
-                    <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
+                    <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[0.625rem] sm:text-xs font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
                       #{idx + 1}
                     </div>
                   </div>
@@ -567,11 +558,11 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2">
-                  <div className="text-xl">{overallGrowth > 0 ? '📈' : '📉'}</div>
+                  <div className="text-xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
                   <span className={`text-xs ${classes.textSecondary}`}>Year over Year</span>
                 </div>
-                <span className={`text-sm font-bold ${overallGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {overallGrowth > 0 ? '+' : '-'}{Math.abs(overallGrowth)}%
+                <span className={`text-sm font-bold ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
                 </span>
               </div>
             </div>
@@ -589,9 +580,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 <CommitIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">🔥</div>
               </div>
-              <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Streak</div>
+              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Streak</div>
               <div className={`text-2xl sm:text-3xl font-black ${classes.highlight}`}>{userData.longestStreakDays}</div>
-              <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>days</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>days</div>
             </div>
 
             <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500/15 via-blue-500/10 to-transparent ${
@@ -604,9 +595,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 <PRIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">📅</div>
               </div>
-              <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Peak Day</div>
+              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Peak Day</div>
               <div className={`text-xl sm:text-2xl font-black ${classes.highlight}`}>{userData.bestDayOfWeek.slice(0, 3)}</div>
-              <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>most active</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>most active</div>
             </div>
 
             <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-500/15 via-green-500/10 to-transparent ${
@@ -619,9 +610,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 <IssueIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                 <div className="text-xl sm:text-2xl md:text-3xl">📦</div>
               </div>
-              <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Repos</div>
+              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Repos</div>
               <div className={`text-2xl sm:text-3xl font-black ${classes.highlight}`}>{userData.totalRepositories}</div>
-              <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>projects</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>projects</div>
             </div>
 
             <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-pink-500/15 via-pink-500/10 to-transparent ${
@@ -632,13 +623,13 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
                 <ReviewIcon className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400" />
-                <div className="text-xl sm:text-2xl md:text-3xl">{overallGrowth > 0 ? '📈' : '📉'}</div>
+                <div className="text-xl sm:text-2xl md:text-3xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
               </div>
-              <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Growth</div>
-              <div className={`text-2xl sm:text-3xl font-black ${overallGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {overallGrowth > 0 ? '+' : '-'}{Math.abs(overallGrowth)}%
+              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Growth</div>
+              <div className={`text-2xl sm:text-3xl font-black ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
               </div>
-              <div className={`text-[10px] sm:text-xs ${classes.textSecondary} mt-1`}>vs 2024</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>vs 2024</div>
             </div>
           </div>
 
@@ -654,8 +645,8 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="relative z-10">
                 {/* Mobile: Centered layout */}
                 <div className="sm:hidden text-center">
-                  <div className="text-4xl mb-2 opacity-100">🏆</div>
-                  <div className={`text-[10px] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
+                  <div className="text-4xl mb-2">🏆</div>
+                  <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
                   <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{userData.topRepos[0].name}</div>
                   <div className="flex justify-center items-center gap-3 text-xs">
                     <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
@@ -667,7 +658,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 {/* Desktop: Original horizontal layout */}
                 <div className="hidden sm:flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className={`text-[10px] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>⭐ Top Repository</div>
+                    <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>⭐ Top Repository</div>
                     <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>{userData.topRepos[0].name}</div>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                       <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
@@ -675,7 +666,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
                     </div>
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">🏆</div>
+                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">🏆</div>
                 </div>
               </div>
             </div>
@@ -690,7 +681,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           }`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-4 gap-2">
               <h3 className={`text-xs sm:text-sm font-bold uppercase tracking-wider ${classes.accent}`}>2025 Activity</h3>
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[0.625rem] sm:text-xs">
                 <span className={classes.textSecondary}>Less</span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   {[0, 1, 2, 3, 4].map((level) => (
@@ -743,7 +734,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         </main>
         
         {/* Footer */}
-        <footer className={`mt-3 sm:mt-5 pt-2 sm:pt-4 text-center text-[10px] sm:text-xs ${classes.textSecondary} tracking-wider border-t border-white/10`}>
+  <footer className={`mt-3 sm:mt-5 pt-2 sm:pt-4 text-center text-[0.625rem] sm:text-xs ${classes.textSecondary} tracking-wider border-t border-white/10`}>
           Powered by <span className={classes.accent}>GitWrap</span> • 2025
         </footer>
       </div>
