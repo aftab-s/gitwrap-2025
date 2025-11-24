@@ -26,6 +26,11 @@ const Contributors: React.FC = () => {
   useEffect(() => {
     let mounted = true;
 
+    // Clear stale cache on mount to ensure fresh data
+    try {
+      sessionStorage.removeItem(CACHE_KEY);
+    } catch (e) {}
+
     async function loadFromPublicJson(): Promise<Contributor[] | null> {
       try {
         const res = await fetch('/contributors.json', { cache: 'no-store' });
@@ -74,28 +79,11 @@ const Contributors: React.FC = () => {
         // ignore
       }
 
-      // 1) public contributors.json (created at build/CI time)
-      const publicData = await loadFromPublicJson();
-      if (publicData && mounted) {
-        setContributors(publicData);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) {}
-        return;
-      }
-
-      // 2) Try GitHub API (may be rate limited if unauthenticated).
-      // Only attempt client-side GitHub API calls when explicitly allowed:
-      // - running in development (`DEV`), or
-      // - `VITE_GITHUB_APP_TOKEN` is present (explicit token), or
-      // - `VITE_ALLOW_CLIENT_GITHUB` is set to 'true' (opt-in).
+      // 1) Prioritize GitHub API to get live, complete contributor list
       const allowClientFetch = Boolean(_env.VITE_GITHUB_APP_TOKEN) || Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
       let ghData: Contributor[] | null = null;
       if (allowClientFetch) {
         ghData = await loadFromGitHubApi();
-      } else {
-        // In production without a public contributors.json and without client fetch permission,
-        // we will not attempt an unauthenticated call to the GitHub API to avoid rate limits.
-        // Instead, fall back to the static fallback list and let CI populate `public/contributors.json`.
-        ghData = null;
       }
       if (ghData && mounted) {
         setContributors(ghData);
@@ -103,7 +91,15 @@ const Contributors: React.FC = () => {
         return;
       }
 
-      // 3) Fallback
+      // 2) Fallback to public contributors.json (static file, may be outdated)
+      const publicData = await loadFromPublicJson();
+      if (publicData && mounted) {
+        setContributors(publicData);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) {}
+        return;
+      }
+
+      // 3) Final fallback
       if (mounted) setContributors(fallback);
     }
 
@@ -112,30 +108,63 @@ const Contributors: React.FC = () => {
   }, []);
 
   if (!contributors) {
-    return (      <div className="flex items-center justify-center text-gray-400">Loading contributors…</div>
+    return (
+      <div className="flex items-center justify-center text-gray-400">
+        <div className="animate-pulse">Loading contributors…</div>
+      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto text-center">
-      <h3 className="text-sm text-gray-300 font-semibold mb-3">Contributors</h3>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        {contributors.map((c) => (
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="text-center mb-6">
+        <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-1">
+          Contributors
+        </h3>
+        <p className="text-sm text-gray-500">Amazing minds behind GitWrap</p>
+      </div>
+      
+      <div className="flex items-center justify-center gap-4 flex-wrap">
+        {contributors.map((c, idx) => (
           <a
             key={c.login}
             href={c.html_url || `https://github.com/${c.login}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center text-xs text-gray-200 hover:opacity-90"
-            title={c.login}
+            className="group relative"
+            title={`${c.login} • ${c.contributions || 0} contributions`}
           >
-            <img
-              src={c.avatar_url || `https://avatars.githubusercontent.com/${c.login}`}
-              alt={c.login}
-              className="w-10 h-10 rounded-full ring-2 ring-white/10 shadow-sm"
-              crossOrigin="anonymous"
-            />
-            <span className="mt-1">{c.login}</span>
+            <div className="relative">
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+              
+              {/* Avatar with ring */}
+              <div className="relative">
+                <img
+                  src={c.avatar_url || `https://avatars.githubusercontent.com/${c.login}`}
+                  alt={c.login}
+                  className="w-16 h-16 rounded-full ring-2 ring-white/20 group-hover:ring-4 group-hover:ring-purple-400/50 transition-all duration-300 group-hover:scale-105"
+                  crossOrigin="anonymous"
+                />
+                
+                {/* Contribution badge for top contributor - disabled for now */}
+                {/* {idx === 0 && (
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-gray-900">
+                    <span className="text-xs">⭐</span>
+                  </div>
+                )} */}
+              </div>
+            </div>
+            
+            {/* Username tooltip on hover */}
+            <div className="absolute left-1/2 -translate-x-1/2 -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <div className="bg-gray-900/95 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg shadow-xl border border-white/10 whitespace-nowrap">
+                <div className="font-semibold">{c.login}</div>
+                {c.contributions && (
+                  <div className="text-gray-400 text-[10px]">{c.contributions} commits</div>
+                )}
+              </div>
+            </div>
           </a>
         ))}
       </div>
