@@ -75,6 +75,30 @@ const UserPage: React.FC = () => {
     const targetWidth = 1080;
     const targetHeight = 1440;
 
+    // Attempt to fetch avatar and embed as data URL to avoid CORS/taint issues on iOS/Safari
+    async function embedAvatarAsDataUrl(url?: string) {
+      if (!url) return undefined;
+      try {
+        const resp = await fetch(url, { mode: 'cors' });
+        if (!resp.ok) throw new Error('Avatar fetch failed');
+        const blob = await resp.blob();
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(blob);
+        });
+      } catch (err) {
+        console.warn('Failed to embed avatar as data URL, falling back to original URL', err);
+        return undefined;
+      }
+    }
+
+    const embeddedAvatar = await embedAvatarAsDataUrl(userData.avatarUrl).catch(() => undefined);
+
+    // Prepare a shallow copy of userData for export so we can replace the avatar URL safely
+    const exportUserData = embeddedAvatar ? { ...userData, avatarUrl: embeddedAvatar } : userData;
+
     const exportContainer = document.createElement('div');
   exportContainer.style.position = 'fixed';
   exportContainer.style.left = '0';
@@ -92,7 +116,7 @@ const UserPage: React.FC = () => {
     const root = createRoot(exportContainer);
     root.render(
       <ExportCard
-        userData={userData}
+        userData={exportUserData}
         funMessage={funMessage}
         theme={activeTheme}
         layout={CardLayout.Classic}
