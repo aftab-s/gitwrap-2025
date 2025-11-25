@@ -94,6 +94,8 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       userData.totalCommits + userData.totalPRs + userData.totalIssues + userData.totalPRReviews
     )
   );
+  const topRepo = userData.topRepos?.[0];
+  const hasTopRepo = Boolean(topRepo);
 
   const languageCardSizing = isExport
     ? {
@@ -670,43 +672,61 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Top Repository Spotlight */}
-          {userData.topRepos[0] && (
-            <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
-              isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
-              isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
-              isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
-              'border border-yellow-400/30'
-            }`}>
-              <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
-              <div className="relative z-10">
-                {/* Mobile: Centered layout */}
-                <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
-                  <div className="text-4xl mb-2">🏆</div>
-                  <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
-                  <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{userData.topRepos[0].name}</div>
-                  <div className="flex justify-center items-center gap-3 text-xs">
-                    <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
-                    <span className={classes.textSecondary}>•</span>
-                    <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
-                  </div>
+          <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
+            isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
+            isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+            isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
+            'border border-yellow-400/30'
+          }`}>
+            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
+            <div className="relative z-10">
+              {/* Mobile: Centered layout */}
+              <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
+                <div className="text-4xl mb-2">{hasTopRepo ? '🏆' : '🚀'}</div>
+                <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>
+                  {hasTopRepo ? 'Top Repository' : 'Future Top Repository'}
                 </div>
-                
-                {/* Desktop: Original horizontal layout */}
-                <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between gap-3`}>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>⭐ Top Repository</div>
-                    <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>{userData.topRepos[0].name}</div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
+                {hasTopRepo ? (
+                  <>
+                    <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{topRepo!.name}</div>
+                    <div className="flex justify-center items-center gap-3 text-xs">
+                      <span className={classes.textSecondary}>{topRepo!.contributions} commits</span>
                       <span className={classes.textSecondary}>•</span>
-                      <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
+                      <span className={classes.textSecondary}>{topRepo!.stargazers} stars</span>
                     </div>
+                  </>
+                ) : (
+                  <p className={`text-xs ${classes.textSecondary} leading-relaxed`}>
+                    Launch something bold, rack up a few commits, and we&apos;ll spotlight it here.
+                  </p>
+                )}
+              </div>
+              
+              {/* Desktop / Export layout */}
+              <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between gap-3`}>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>
+                    {hasTopRepo ? '⭐ Top Repository' : '⭐ Waiting for Your Top Repo' }
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">🏆</div>
+                  <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>
+                    {hasTopRepo ? topRepo!.name : 'Ship a repo worthy of the spotlight'}
+                  </div>
+                  {hasTopRepo ? (
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <span className={classes.textSecondary}>{topRepo!.contributions} commits</span>
+                      <span className={classes.textSecondary}>•</span>
+                      <span className={classes.textSecondary}>{topRepo!.stargazers} stars</span>
+                    </div>
+                  ) : (
+                    <p className={`text-xs sm:text-sm ${classes.textSecondary} max-w-lg`}>
+                      Kick off a fresh project or breathe life into an old one—once it gains momentum, it will take over this showcase automatically.
+                    </p>
+                  )}
                 </div>
+                <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">{hasTopRepo ? '🏆' : '🚀'}</div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Contribution Heatmap */}
           <div className={`p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white/5 ${
