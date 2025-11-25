@@ -666,7 +666,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
                     </div>
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">🏆</div>
+                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">🏆</div>
                 </div>
               </div>
             </div>
