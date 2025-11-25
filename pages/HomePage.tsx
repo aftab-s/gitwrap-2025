@@ -52,7 +52,7 @@ const HomePage: React.FC = () => {
               if (error) setError('');
             }}
             placeholder="Your GitHub username"
-            className="w-full pl-4 pr-22 md:pr-28 py-2.5 sm:py-2.5 md:py-3 text-[0.85rem] sm:text-[0.95rem] md:text-base bg-white/5 text-white border-2 border-transparent rounded-full focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all duration-300 placeholder-gray-400"
+            className="w-full pl-4 pr-32 py-4 text-lg bg-white/5 text-white border-2 border-transparent rounded-full focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all duration-300 placeholder-gray-400"
             aria-label="GitHub Username"
           />
           <button
