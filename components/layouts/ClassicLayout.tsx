@@ -752,11 +752,18 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               </div>
             </div>
             {/* Mobile: Show simplified heatmap or message */}
-            <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center py-4`}>
-              <div className={`text-xs ${classes.textSecondary} italic`}>View on desktop for full contribution calendar</div>
-            </div>
-            {/* Desktop: Full heatmap */}
-            <div className={`${isExport ? 'block' : 'hidden sm:block'}`}>
+            {!isExport && (
+              <div className="sm:hidden text-center py-4">
+                <div className={`text-xs ${classes.textSecondary} italic`}>
+                  View on desktop for full contribution calendar
+                </div>
+              </div>
+            )}
+            {/* Desktop / Export: Full heatmap */}
+            <div
+              className={`${isExport ? 'block sm:block' : 'hidden sm:block'}`}
+              style={isExport ? { display: 'block' } : undefined}
+            >
               <Heatmap weeks={heatmapWeeks} />
             </div>
           </div>
