@@ -51,7 +51,7 @@ const HomePage: React.FC = () => {
               setUsername(e.target.value);
               if (error) setError('');
             }}
-            placeholder="Enter your GitHub username"
+            placeholder="Your GitHub username"
             className="w-full pl-4 pr-32 py-4 text-lg bg-white/5 text-white border-2 border-transparent rounded-full focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all duration-300 placeholder-gray-400"
             aria-label="GitHub Username"
           />
