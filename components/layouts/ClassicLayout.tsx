@@ -95,6 +95,34 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
     )
   );
 
+  const languageCardSizing = isExport
+    ? {
+        wrapper: 'p-3 py-4 sm:px-5 sm:py-6 rounded-2xl sm:rounded-[24px] min-h-[10.25rem] sm:min-h-[13rem]',
+        contentGap: 'gap-2',
+        headerSpacing: 'mb-3 sm:mb-3.5',
+        labelGap: 'gap-3 sm:gap-4',
+        dotSize: 'w-3.5 h-3.5 sm:w-4 sm:h-4',
+        nameSize: 'text-xl sm:text-xl',
+        badgePadding: 'px-2 sm:px-3 py-0.5 sm:py-0.75',
+        badgeText: 'text-sm sm:text-base',
+        percentSize: 'text-[2.5rem] sm:text-[3.5rem] md:text-[4.25rem] mb-2 sm:mb-2.5',
+        percentContainerSpacing: 'space-y-3 sm:space-y-3.5',
+        progressHeight: 'h-1.5 sm:h-2'
+      }
+    : {
+        wrapper: 'p-2 py-3 sm:px-5 sm:py-5 rounded-xl sm:rounded-2xl min-h-[6.5rem] sm:min-h-[8rem]',
+        contentGap: '',
+        headerSpacing: 'mb-2 sm:mb-3',
+        labelGap: 'gap-1.5 sm:gap-2',
+        dotSize: 'w-2.5 h-2.5 sm:w-3 sm:h-3',
+        nameSize: 'text-sm sm:text-sm',
+        badgePadding: 'px-1.5 sm:px-2 py-0.5',
+        badgeText: 'text-xs sm:text-sm',
+        percentSize: 'text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3',
+        percentContainerSpacing: '',
+        progressHeight: 'h-1.5'
+      };
+
   const Heatmap: React.FC<{ weeks: { monthLabel: string; days: number[] }[] }> = ({ weeks }) => {
     const normalizedWeeks = weeks.length > 0
       ? weeks
@@ -402,30 +430,30 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-full blur-2xl"></div>
               <div className="relative z-10">
                 <div className={`text-xs sm:text-sm font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-3`}>Total Contributions</div>
-                <div className={`text-4xl sm:text-5xl md:text-6xl font-black ${classes.accent} mb-1 sm:mb-2`}>
+                <div className={`${isExport ? 'text-6xl sm:text-7xl md:text-8xl' : 'text-5xl sm:text-6xl md:text-7xl'} font-black ${classes.accent} mb-1 sm:mb-2`}>
                   {userData.totalContributions.toLocaleString()}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-4">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalCommits.toLocaleString()} commits</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalCommits.toLocaleString()} commits</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalPRs} PRs</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalPRs} PRs</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalIssues} issues</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalIssues} issues</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-pink-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalPRReviews} reviews</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalPRReviews} reviews</span>
                   </div>
                   {otherCount > 0 && (
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                      <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{otherCount} other</span>
+                      <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{otherCount} other</span>
                     </div>
                   )}
                 </div>
@@ -508,30 +536,38 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original Language Cards */}
-          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-2 sm:grid-cols-3 gap-2`}>
+          <div className={`${isExport ? 'grid gap-3 sm:gap-4' : 'hidden sm:grid gap-2'} grid-cols-2 sm:grid-cols-3`}>
             {userData.topLanguages.map((lang, idx) => (
-              <div key={lang.name} className={`relative group p-2 sm:p-5 rounded-xl sm:rounded-2xl bg-white/5 transition-all duration-300 ${
-                isRetro ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]' :
-                isSpace ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]' :
-                isSunset ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]' :
-                'border border-white/10 hover:border-white/20'
-              }`}>
+              <div
+                key={lang.name}
+                className={`relative group bg-white/5 transition-all duration-300 flex flex-col ${languageCardSizing.wrapper} ${
+                  isRetro
+                    ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]'
+                    : isSpace
+                    ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]'
+                    : isSunset
+                    ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]'
+                    : 'border border-white/10 hover:border-white/20'
+                }`}
+              >
                 <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle at 50% 0%, ${lang.color}15, transparent 70%)` }}></div>
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-1 sm:mb-3">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
-                      <span className={`text-xs sm:text-sm font-bold ${classes.textPrimary}`}>{lang.name}</span>
+                    <div className={`relative z-10 flex-1 flex flex-col justify-between ${languageCardSizing.contentGap}`}>
+                      <div className={`flex items-center justify-between ${languageCardSizing.headerSpacing}`}>
+                        <div className={`flex items-center ${languageCardSizing.labelGap}`}>
+                          <div className={`${languageCardSizing.dotSize} rounded-full`} style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
+                          <span className={`${languageCardSizing.nameSize} font-bold ${classes.textPrimary}`}>{lang.name}</span>
+                        </div>
+                        <div className={`${languageCardSizing.badgePadding} rounded-full ${languageCardSizing.badgeText} font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
+                          #{idx + 1}
+                        </div>
+                      </div>
+                      <div className={languageCardSizing.percentContainerSpacing}>
+                        <div className={`${languageCardSizing.percentSize} font-black ${classes.accent}`}>{lang.percent.toFixed(1)}%</div>
+                        <div className={`w-full ${languageCardSizing.progressHeight} bg-white/10 rounded-full overflow-hidden`}>
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[0.625rem] sm:text-xs font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
-                      #{idx + 1}
-                    </div>
-                  </div>
-                  <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${classes.accent} mb-1 sm:mb-2`}>{lang.percent.toFixed(1)}%</div>
-                  <div className="w-full h-1 sm:h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
