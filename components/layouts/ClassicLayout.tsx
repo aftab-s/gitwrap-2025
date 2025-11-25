@@ -248,14 +248,14 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       {/* Mobile-first responsive padding */}
       <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full w-full">
       {/* Decorative corner elements - hidden on mobile */}
-      <div className={`hidden sm:block absolute top-0 left-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-br-full`}></div>
-      <div className={`hidden sm:block absolute bottom-0 right-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-tl-full`}></div>
+  <div className={`${isExport ? 'block' : 'hidden sm:block'} absolute top-0 left-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-br-full`}></div>
+  <div className={`${isExport ? 'block' : 'hidden sm:block'} absolute bottom-0 right-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-tl-full`}></div>
       
       <div className="relative z-10 flex flex-col h-full">
         {/* Header - Completely redesigned for mobile */}
         <header className="pb-3 sm:pb-6 border-b border-white/10">
           {/* Mobile: Centered avatar with name below */}
-          <div className="flex sm:hidden flex-col items-center text-center gap-2 mb-3">
+          <div className={`${isExport ? 'hidden' : 'flex'} sm:hidden flex-col items-center text-center gap-2 mb-3`}>
             <div className="relative">
               <img 
                 src={userData.avatarUrl} 
@@ -274,7 +274,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
           
           {/* Mobile: Year badge below profile */}
-          <div className="flex sm:hidden justify-center">
+          <div className={`${isExport ? 'hidden' : 'flex'} sm:hidden justify-center`}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
               <div className={`text-3xl font-black ${classes.accent} leading-none`}>2025</div>
               <div className={`text-xs font-semibold ${classes.textSecondary} tracking-wider uppercase`}>GitWrap</div>
@@ -282,7 +282,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original horizontal layout */}
-          <div className="hidden sm:flex items-center justify-between">
+          <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between`}>
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative">
                 <img 
@@ -311,7 +311,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         <main className="flex-grow mt-3 sm:mt-6 flex flex-col gap-2 sm:gap-4">
           
             {/* Mobile: Single column big number showcase */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             {/* Hero Number - Total Contributions */}
             <div className={`relative p-4 rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden mb-2 ${
               isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.3)]' :
@@ -391,7 +391,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original layout */}
-          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4`}>
             {/* Left: Main Contribution Metric */}
             <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden ${
               isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_25px_rgba(34,211,238,0.4)]' :
@@ -485,7 +485,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Mobile: Top Language Pills */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>Top Languages</h3>
             <div className="flex flex-col gap-2">
               {userData.topLanguages.slice(0, 3).map((lang, idx) => (
@@ -508,7 +508,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original Language Cards */}
-          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-2 sm:grid-cols-3 gap-2`}>
             {userData.topLanguages.map((lang, idx) => (
               <div key={lang.name} className={`relative group p-2 sm:p-5 rounded-xl sm:rounded-2xl bg-white/5 transition-all duration-300 ${
                 isRetro ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]' :
@@ -537,7 +537,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Mobile: Compact Activity List */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>Activity Highlights</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
@@ -569,7 +569,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original Activity Grid */}
-          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3`}>
             <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500/15 via-purple-500/10 to-transparent ${
               isRetro ? 'border-2 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' :
               isSpace ? 'border border-cyan-400/25 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
@@ -644,7 +644,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
               <div className="relative z-10">
                 {/* Mobile: Centered layout */}
-                <div className="sm:hidden text-center">
+                <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
                   <div className="text-4xl mb-2">🏆</div>
                   <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
                   <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{userData.topRepos[0].name}</div>
@@ -656,7 +656,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 </div>
                 
                 {/* Desktop: Original horizontal layout */}
-                <div className="hidden sm:flex items-center justify-between gap-3">
+                <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between gap-3`}>
                   <div className="flex-1 min-w-0">
                     <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>⭐ Top Repository</div>
                     <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>{userData.topRepos[0].name}</div>
@@ -666,7 +666,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
                     </div>
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">🏆</div>
+                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">🏆</div>
                 </div>
               </div>
             </div>
@@ -696,11 +696,11 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               </div>
             </div>
             {/* Mobile: Show simplified heatmap or message */}
-            <div className="sm:hidden text-center py-4">
+            <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center py-4`}>
               <div className={`text-xs ${classes.textSecondary} italic`}>View on desktop for full contribution calendar</div>
             </div>
             {/* Desktop: Full heatmap */}
-            <div className="hidden sm:block">
+            <div className={`${isExport ? 'block' : 'hidden sm:block'}`}>
               <Heatmap weeks={heatmapWeeks} />
             </div>
           </div>
@@ -720,12 +720,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             </div>
             <div className="relative z-10">
               {/* Mobile: Centered with icon above */}
-              <div className="sm:hidden text-center">
+              <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
                 <SparklesIcon className={`w-8 h-8 mx-auto mb-2 ${classes.accent}`} />
                 <p className={`text-sm leading-relaxed font-medium ${classes.textPrimary}`}>{funMessage}</p>
               </div>
               {/* Desktop: Icon on left */}
-              <div className="hidden sm:flex gap-3 sm:gap-4">
+              <div className={`${isExport ? 'flex' : 'hidden sm:flex'} gap-3 sm:gap-4`}>
                 <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 ${classes.accent}`} />
                 <p className={`text-sm sm:text-base md:text-lg leading-relaxed font-medium ${classes.textPrimary}`}>{funMessage}</p>
               </div>
