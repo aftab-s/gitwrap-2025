@@ -124,7 +124,7 @@ const Contributors: React.FC = () => {
         <p className="text-sm text-gray-500">Amazing minds behind GitWrap</p>
       </div>
       
-      <div className="flex items-center justify-center gap-4 flex-wrap">
+  <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
         {contributors.map((c, idx) => (
           <a
             key={c.login}
@@ -143,7 +143,7 @@ const Contributors: React.FC = () => {
                 <img
                   src={c.avatar_url || `https://avatars.githubusercontent.com/${c.login}`}
                   alt={c.login}
-                  className="w-16 h-16 rounded-full ring-2 ring-white/20 group-hover:ring-4 group-hover:ring-purple-400/50 transition-all duration-300 group-hover:scale-105"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-2 ring-white/20 group-hover:ring-4 group-hover:ring-purple-400/50 transition-all duration-300 group-hover:scale-105"
                   crossOrigin="anonymous"
                 />
                 
