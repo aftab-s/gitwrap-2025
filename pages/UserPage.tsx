@@ -75,6 +75,12 @@ const UserPage: React.FC = () => {
     const targetWidth = 1080;
     const targetHeight = 1440;
 
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    const originalViewportContent = viewportMeta?.getAttribute('content') ?? null;
+    if (viewportMeta) {
+      viewportMeta.setAttribute('content', 'width=1080, initial-scale=1.0');
+    }
+
     // Attempt to fetch avatar and embed as data URL to avoid CORS/taint issues on iOS/Safari
     async function embedAvatarAsDataUrl(url?: string) {
       if (!url) return undefined;
@@ -178,6 +184,7 @@ const UserPage: React.FC = () => {
       });
 
       const link = document.createElement('a');
+      const safeAspectRatio = aspectRatio.replace(':', 'x');
       const safeUsername = username?.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       const safeTheme = activeTheme?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'theme';
       link.download = `gitwrap-2025-${safeUsername}-${safeTheme}.png`;
@@ -192,6 +199,13 @@ const UserPage: React.FC = () => {
     } finally {
       root.unmount();
       document.body.removeChild(exportContainer);
+      if (viewportMeta) {
+        if (originalViewportContent !== null) {
+          viewportMeta.setAttribute('content', originalViewportContent);
+        } else {
+          viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+        }
+      }
       setIsDownloading(null);
     }
   };

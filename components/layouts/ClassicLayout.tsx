@@ -94,6 +94,36 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       userData.totalCommits + userData.totalPRs + userData.totalIssues + userData.totalPRReviews
     )
   );
+  const topRepo = userData.topRepos?.[0];
+  const hasTopRepo = Boolean(topRepo);
+
+  const languageCardSizing = isExport
+    ? {
+        wrapper: 'p-3 py-4 sm:px-5 sm:py-6 rounded-2xl sm:rounded-[24px] min-h-[10.25rem] sm:min-h-[13rem]',
+        contentGap: 'gap-2',
+        headerSpacing: 'mb-3 sm:mb-3.5',
+        labelGap: 'gap-3 sm:gap-4',
+        dotSize: 'w-3.5 h-3.5 sm:w-4 sm:h-4',
+        nameSize: 'text-xl sm:text-xl',
+        badgePadding: 'px-2 sm:px-3 py-0.5 sm:py-0.75',
+        badgeText: 'text-sm sm:text-base',
+        percentSize: 'text-[2.5rem] sm:text-[3.5rem] md:text-[4.25rem] mb-2 sm:mb-2.5',
+        percentContainerSpacing: 'space-y-3 sm:space-y-3.5',
+        progressHeight: 'h-1.5 sm:h-2'
+      }
+    : {
+        wrapper: 'p-2 py-3 sm:px-5 sm:py-5 rounded-xl sm:rounded-2xl min-h-[6.5rem] sm:min-h-[8rem]',
+        contentGap: '',
+        headerSpacing: 'mb-2 sm:mb-3',
+        labelGap: 'gap-1.5 sm:gap-2',
+        dotSize: 'w-2.5 h-2.5 sm:w-3 sm:h-3',
+        nameSize: 'text-sm sm:text-sm',
+        badgePadding: 'px-1.5 sm:px-2 py-0.5',
+        badgeText: 'text-xs sm:text-sm',
+        percentSize: 'text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3',
+        percentContainerSpacing: '',
+        progressHeight: 'h-1.5'
+      };
 
   const Heatmap: React.FC<{ weeks: { monthLabel: string; days: number[] }[] }> = ({ weeks }) => {
     const normalizedWeeks = weeks.length > 0
@@ -248,14 +278,14 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
       {/* Mobile-first responsive padding */}
       <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full w-full">
       {/* Decorative corner elements - hidden on mobile */}
-      <div className={`hidden sm:block absolute top-0 left-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-br-full`}></div>
-      <div className={`hidden sm:block absolute bottom-0 right-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-tl-full`}></div>
+  <div className={`${isExport ? 'block' : 'hidden sm:block'} absolute top-0 left-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-br-full`}></div>
+  <div className={`${isExport ? 'block' : 'hidden sm:block'} absolute bottom-0 right-0 w-32 h-32 ${classes.accent} opacity-[0.05] rounded-tl-full`}></div>
       
       <div className="relative z-10 flex flex-col h-full">
         {/* Header - Completely redesigned for mobile */}
         <header className="pb-3 sm:pb-6 border-b border-white/10">
           {/* Mobile: Centered avatar with name below */}
-          <div className="flex sm:hidden flex-col items-center text-center gap-2 mb-3">
+          <div className={`${isExport ? 'hidden' : 'flex'} sm:hidden flex-col items-center text-center gap-2 mb-3`}>
             <div className="relative">
               <img 
                 src={userData.avatarUrl} 
@@ -274,7 +304,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
           
           {/* Mobile: Year badge below profile */}
-          <div className="flex sm:hidden justify-center">
+          <div className={`${isExport ? 'hidden' : 'flex'} sm:hidden justify-center`}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
               <div className={`text-3xl font-black ${classes.accent} leading-none`}>2025</div>
               <div className={`text-xs font-semibold ${classes.textSecondary} tracking-wider uppercase`}>GitWrap</div>
@@ -282,7 +312,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original horizontal layout */}
-          <div className="hidden sm:flex items-center justify-between">
+          <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between`}>
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative">
                 <img 
@@ -311,7 +341,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         <main className="flex-grow mt-3 sm:mt-6 flex flex-col gap-2 sm:gap-4">
           
             {/* Mobile: Single column big number showcase */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             {/* Hero Number - Total Contributions */}
             <div className={`relative p-4 rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden mb-2 ${
               isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.3)]' :
@@ -391,7 +421,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original layout */}
-          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4`}>
             {/* Left: Main Contribution Metric */}
             <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent overflow-hidden ${
               isRetro ? 'border-2 border-cyan-400/50 shadow-[0_0_25px_rgba(34,211,238,0.4)]' :
@@ -402,30 +432,30 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-full blur-2xl"></div>
               <div className="relative z-10">
                 <div className={`text-xs sm:text-sm font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-3`}>Total Contributions</div>
-                <div className={`text-4xl sm:text-5xl md:text-6xl font-black ${classes.accent} mb-1 sm:mb-2`}>
+                <div className={`${isExport ? 'text-6xl sm:text-7xl md:text-8xl' : 'text-5xl sm:text-6xl md:text-7xl'} font-black ${classes.accent} mb-1 sm:mb-2`}>
                   {userData.totalContributions.toLocaleString()}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-4">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalCommits.toLocaleString()} commits</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalCommits.toLocaleString()} commits</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalPRs} PRs</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalPRs} PRs</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalIssues} issues</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalIssues} issues</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-2 h-2 rounded-full bg-pink-400"></div>
-                    <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{userData.totalPRReviews} reviews</span>
+                    <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{userData.totalPRReviews} reviews</span>
                   </div>
                   {otherCount > 0 && (
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                      <span className={`text-xs sm:text-sm ${classes.textSecondary}`}>{otherCount} other</span>
+                      <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{otherCount} other</span>
                     </div>
                   )}
                 </div>
@@ -485,7 +515,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Mobile: Top Language Pills */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>Top Languages</h3>
             <div className="flex flex-col gap-2">
               {userData.topLanguages.slice(0, 3).map((lang, idx) => (
@@ -508,36 +538,44 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original Language Cards */}
-          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className={`${isExport ? 'grid gap-3 sm:gap-4' : 'hidden sm:grid gap-2'} grid-cols-2 sm:grid-cols-3`}>
             {userData.topLanguages.map((lang, idx) => (
-              <div key={lang.name} className={`relative group p-2 sm:p-5 rounded-xl sm:rounded-2xl bg-white/5 transition-all duration-300 ${
-                isRetro ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]' :
-                isSpace ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]' :
-                isSunset ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]' :
-                'border border-white/10 hover:border-white/20'
-              }`}>
+              <div
+                key={lang.name}
+                className={`relative group bg-white/5 transition-all duration-300 flex flex-col ${languageCardSizing.wrapper} ${
+                  isRetro
+                    ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]'
+                    : isSpace
+                    ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]'
+                    : isSunset
+                    ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]'
+                    : 'border border-white/10 hover:border-white/20'
+                }`}
+              >
                 <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle at 50% 0%, ${lang.color}15, transparent 70%)` }}></div>
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-1 sm:mb-3">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
-                      <span className={`text-xs sm:text-sm font-bold ${classes.textPrimary}`}>{lang.name}</span>
+                    <div className={`relative z-10 flex-1 flex flex-col justify-between ${languageCardSizing.contentGap}`}>
+                      <div className={`flex items-center justify-between ${languageCardSizing.headerSpacing}`}>
+                        <div className={`flex items-center ${languageCardSizing.labelGap}`}>
+                          <div className={`${languageCardSizing.dotSize} rounded-full`} style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
+                          <span className={`${languageCardSizing.nameSize} font-bold ${classes.textPrimary}`}>{lang.name}</span>
+                        </div>
+                        <div className={`${languageCardSizing.badgePadding} rounded-full ${languageCardSizing.badgeText} font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
+                          #{idx + 1}
+                        </div>
+                      </div>
+                      <div className={languageCardSizing.percentContainerSpacing}>
+                        <div className={`${languageCardSizing.percentSize} font-black ${classes.accent}`}>{lang.percent.toFixed(1)}%</div>
+                        <div className={`w-full ${languageCardSizing.progressHeight} bg-white/10 rounded-full overflow-hidden`}>
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[0.625rem] sm:text-xs font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
-                      #{idx + 1}
-                    </div>
-                  </div>
-                  <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${classes.accent} mb-1 sm:mb-2`}>{lang.percent.toFixed(1)}%</div>
-                  <div className="w-full h-1 sm:h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
 
           {/* Mobile: Compact Activity List */}
-          <div className="sm:hidden">
+          <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>Activity Highlights</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
@@ -569,7 +607,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Desktop: Original Activity Grid */}
-          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          <div className={`${isExport ? 'grid' : 'hidden sm:grid'} grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3`}>
             <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500/15 via-purple-500/10 to-transparent ${
               isRetro ? 'border-2 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' :
               isSpace ? 'border border-cyan-400/25 shadow-[0_0_12px_rgba(34,211,238,0.2)]' :
@@ -634,43 +672,61 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           </div>
 
           {/* Top Repository Spotlight */}
-          {userData.topRepos[0] && (
-            <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
-              isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
-              isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
-              isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
-              'border border-yellow-400/30'
-            }`}>
-              <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
-              <div className="relative z-10">
-                {/* Mobile: Centered layout */}
-                <div className="sm:hidden text-center">
-                  <div className="text-4xl mb-2">🏆</div>
-                  <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Top Repository</div>
-                  <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{userData.topRepos[0].name}</div>
-                  <div className="flex justify-center items-center gap-3 text-xs">
-                    <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
-                    <span className={classes.textSecondary}>•</span>
-                    <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
-                  </div>
+          <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
+            isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
+            isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+            isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
+            'border border-yellow-400/30'
+          }`}>
+            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-bl-full blur-3xl"></div>
+            <div className="relative z-10">
+              {/* Mobile: Centered layout */}
+              <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
+                <div className="text-4xl mb-2">{hasTopRepo ? '🏆' : '🚀'}</div>
+                <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>
+                  {hasTopRepo ? 'Top Repository' : 'Future Top Repository'}
                 </div>
-                
-                {/* Desktop: Original horizontal layout */}
-                <div className="hidden sm:flex items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>⭐ Top Repository</div>
-                    <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>{userData.topRepos[0].name}</div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <span className={classes.textSecondary}>{userData.topRepos[0].contributions} commits</span>
+                {hasTopRepo ? (
+                  <>
+                    <div className={`text-lg font-black ${classes.highlight} mb-2 truncate`}>{topRepo!.name}</div>
+                    <div className="flex justify-center items-center gap-3 text-xs">
+                      <span className={classes.textSecondary}>{topRepo!.contributions} commits</span>
                       <span className={classes.textSecondary}>•</span>
-                      <span className={classes.textSecondary}>{userData.topRepos[0].stargazers} stars</span>
+                      <span className={classes.textSecondary}>{topRepo!.stargazers} stars</span>
                     </div>
+                  </>
+                ) : (
+                  <p className={`text-xs ${classes.textSecondary} leading-relaxed`}>
+                    Launch something bold, rack up a few commits, and we&apos;ll spotlight it here.
+                  </p>
+                )}
+              </div>
+              
+              {/* Desktop / Export layout */}
+              <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between gap-3`}>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>
+                    {hasTopRepo ? '⭐ Top Repository' : '⭐ Waiting for Your Top Repo' }
                   </div>
-                  <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">🏆</div>
+                  <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>
+                    {hasTopRepo ? topRepo!.name : 'Ship a repo worthy of the spotlight'}
+                  </div>
+                  {hasTopRepo ? (
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <span className={classes.textSecondary}>{topRepo!.contributions} commits</span>
+                      <span className={classes.textSecondary}>•</span>
+                      <span className={classes.textSecondary}>{topRepo!.stargazers} stars</span>
+                    </div>
+                  ) : (
+                    <p className={`text-xs sm:text-sm ${classes.textSecondary} max-w-lg`}>
+                      Kick off a fresh project or breathe life into an old one—once it gains momentum, it will take over this showcase automatically.
+                    </p>
+                  )}
                 </div>
+                <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">{hasTopRepo ? '🏆' : '🚀'}</div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Contribution Heatmap */}
           <div className={`p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white/5 ${
@@ -696,11 +752,18 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               </div>
             </div>
             {/* Mobile: Show simplified heatmap or message */}
-            <div className="sm:hidden text-center py-4">
-              <div className={`text-xs ${classes.textSecondary} italic`}>View on desktop for full contribution calendar</div>
-            </div>
-            {/* Desktop: Full heatmap */}
-            <div className="hidden sm:block">
+            {!isExport && (
+              <div className="sm:hidden text-center py-4">
+                <div className={`text-xs ${classes.textSecondary} italic`}>
+                  View on desktop for full contribution calendar
+                </div>
+              </div>
+            )}
+            {/* Desktop / Export: Full heatmap */}
+            <div
+              className={`${isExport ? 'block sm:block' : 'hidden sm:block'}`}
+              style={isExport ? { display: 'block' } : undefined}
+            >
               <Heatmap weeks={heatmapWeeks} />
             </div>
           </div>
@@ -720,12 +783,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             </div>
             <div className="relative z-10">
               {/* Mobile: Centered with icon above */}
-              <div className="sm:hidden text-center">
+              <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
                 <SparklesIcon className={`w-8 h-8 mx-auto mb-2 ${classes.accent}`} />
                 <p className={`text-sm leading-relaxed font-medium ${classes.textPrimary}`}>{funMessage}</p>
               </div>
               {/* Desktop: Icon on left */}
-              <div className="hidden sm:flex gap-3 sm:gap-4">
+              <div className={`${isExport ? 'flex' : 'hidden sm:flex'} gap-3 sm:gap-4`}>
                 <SparklesIcon className={`w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 ${classes.accent}`} />
                 <p className={`text-sm sm:text-base md:text-lg leading-relaxed font-medium ${classes.textPrimary}`}>{funMessage}</p>
               </div>

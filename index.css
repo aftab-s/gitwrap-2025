@@ -46,6 +46,79 @@ h1, h2, h3, h4, h5, h6, strong {
   display: none !important;
 }
 
+.export-mode .sm\:grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.export-mode .sm\:grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.export-mode .sm\:grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+/* Force desktop typography scale while exporting so viewport width doesn't shrink fonts */
+.export-mode .sm\:text-xs,
+.export-mode .md\:text-xs {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+.export-mode .sm\:text-sm,
+.export-mode .md\:text-sm {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.export-mode .sm\:text-base,
+.export-mode .md\:text-base {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.export-mode .sm\:text-lg,
+.export-mode .md\:text-lg {
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
+}
+
+.export-mode .sm\:text-xl,
+.export-mode .md\:text-xl {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+}
+
+.export-mode .sm\:text-2xl,
+.export-mode .md\:text-2xl {
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+}
+
+.export-mode .sm\:text-3xl,
+.export-mode .md\:text-3xl {
+  font-size: 1.875rem !important;
+  line-height: 2.25rem !important;
+}
+
+.export-mode .sm\:text-4xl,
+.export-mode .md\:text-4xl {
+  font-size: 2.25rem !important;
+  line-height: 2.5rem !important;
+}
+
+.export-mode .sm\:text-5xl,
+.export-mode .md\:text-5xl {
+  font-size: 3rem !important;
+  line-height: 1 !important;
+}
+
+.export-mode .sm\:text-6xl,
+.export-mode .md\:text-6xl {
+  font-size: 3.75rem !important;
+  line-height: 1 !important;
+}
+
 /* Utility to hide scrollbars without disabling scroll */
 body.no-scrollbar {
   scrollbar-width: none;
