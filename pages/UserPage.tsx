@@ -17,6 +17,7 @@ import { DownloadIcon } from '../components/icons/DownloadIcon';
 declare const htmlToImage: any;
 
 const avatarDataUrlCache = new Map<string, string>();
+const TAILWIND_CDN_URL = 'https://cdn.tailwindcss.com';
 
 async function convertAvatarViaCanvas(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -89,6 +90,57 @@ async function embedAvatarAsDataUrl(url?: string) {
   }
 
   return undefined;
+}
+
+async function createExportEnvironment(width: number, height: number) {
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.setAttribute('tabindex', '-1');
+  Object.assign(iframe.style, {
+    position: 'fixed',
+    left: '0',
+    top: '0',
+    width: `${width}px`,
+    height: `${height}px`,
+    opacity: '0',
+    pointerEvents: 'none',
+    border: '0',
+    zIndex: '-1',
+  });
+
+  iframe.srcdoc = `<!DOCTYPE html><html><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=${width}, initial-scale=1.0" />
+    <link rel="stylesheet" href="/index.css" />
+    <script src="${TAILWIND_CDN_URL}"></script>
+  </head>
+  <body style="margin:0;padding:0;overflow:hidden;"></body>
+  </html>`;
+
+  document.body.appendChild(iframe);
+
+  await new Promise<void>((resolve, reject) => {
+    iframe.onload = () => resolve();
+    iframe.onerror = () => reject(new Error('Failed to load export iframe'));
+  });
+
+  const doc = iframe.contentDocument;
+  if (!doc || !iframe.contentWindow) {
+    iframe.remove();
+    throw new Error('Export iframe not ready');
+  }
+
+  const container = doc.createElement('div');
+  container.style.width = `${width}px`;
+  container.style.height = `${height}px`;
+  doc.body.appendChild(container);
+
+  return {
+    container,
+    document: doc,
+    window: iframe.contentWindow,
+    cleanup: () => iframe.remove(),
+  };
 }
 
 const UserPage: React.FC = () => {
@@ -176,12 +228,6 @@ const UserPage: React.FC = () => {
     const targetWidth = 1080;
     const targetHeight = 1440;
 
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    const originalViewportContent = viewportMeta?.getAttribute('content') ?? null;
-    if (viewportMeta) {
-      viewportMeta.setAttribute('content', 'width=1080, initial-scale=1.0');
-    }
-
     const embeddedAvatar = embeddedAvatarUrl
       ? embeddedAvatarUrl
       : await embedAvatarAsDataUrl(userData.avatarUrl).catch(() => undefined);
@@ -193,19 +239,8 @@ const UserPage: React.FC = () => {
     // Prepare a shallow copy of userData for export so we can replace the avatar URL safely
     const exportUserData = embeddedAvatar ? { ...userData, avatarUrl: embeddedAvatar } : userData;
 
-    const exportContainer = document.createElement('div');
-  exportContainer.style.position = 'fixed';
-  exportContainer.style.left = '0';
-  exportContainer.style.top = '0';
-  exportContainer.style.width = `${targetWidth}px`;
-  exportContainer.style.height = `${targetHeight}px`;
-  exportContainer.style.opacity = '0';
-  exportContainer.style.pointerEvents = 'none';
-  exportContainer.style.overflow = 'hidden';
-  exportContainer.style.zIndex = '-1';
-  exportContainer.setAttribute('aria-hidden', 'true');
-
-    document.body.appendChild(exportContainer);
+    const { container: exportContainer, document: exportDocument, window: exportWindow, cleanup } =
+      await createExportEnvironment(targetWidth, targetHeight);
 
     const root = createRoot(exportContainer);
     root.render(
@@ -223,7 +258,7 @@ const UserPage: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Ensure fonts (if available) are loaded before capture
-      const fontSet = (document as Document & { fonts?: FontFaceSet }).fonts;
+      const fontSet = (exportDocument as Document & { fonts?: FontFaceSet }).fonts;
       if (fontSet?.ready) {
         await fontSet.ready.catch(() => undefined);
       }
@@ -251,7 +286,7 @@ const UserPage: React.FC = () => {
 
       const cardElement = exportContainer.firstElementChild as HTMLElement | null;
       const captureTarget = cardElement ?? exportContainer;
-      const computedStyles = getComputedStyle(captureTarget);
+      const computedStyles = (exportWindow || window).getComputedStyle(captureTarget);
       const backgroundColor = computedStyles.backgroundColor;
 
       const dataUrl = await htmlToImage.toPng(captureTarget, {
@@ -286,14 +321,7 @@ const UserPage: React.FC = () => {
       );
     } finally {
       root.unmount();
-      document.body.removeChild(exportContainer);
-      if (viewportMeta) {
-        if (originalViewportContent !== null) {
-          viewportMeta.setAttribute('content', originalViewportContent);
-        } else {
-          viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-        }
-      }
+      cleanup();
       setIsDownloading(null);
     }
   };
