@@ -74,6 +74,12 @@ function buildHeatmapWeeks(calendar: Array<{ date: string; count: number }>) {
 
 const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme }, ref) => {
   const { classes } = theme;
+  const avatarSrc = userData.avatarUrl || '';
+  // Safari/iOS bugs keep base64/blob avatars from rendering when crossOrigin is present
+  const avatarCrossOrigin =
+    avatarSrc.startsWith('data:') || avatarSrc.startsWith('blob:') || avatarSrc.startsWith('filesystem:')
+      ? undefined
+      : 'anonymous';
   
   // Build heatmap weeks from flat calendar
   const heatmapWeeks = useMemo(() => buildHeatmapWeeks(userData.contributionCalendar), [userData.contributionCalendar]);
@@ -115,7 +121,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             <img 
               src={userData.avatarUrl} 
               alt={userData.login} 
-              crossOrigin="anonymous" 
+              crossOrigin={avatarCrossOrigin}
               className="w-14 h-14 rounded-xl ring-2 ring-white/20 shadow-lg" 
             />
             <div>
