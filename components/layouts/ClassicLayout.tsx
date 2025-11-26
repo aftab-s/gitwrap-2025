@@ -698,7 +698,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             <div className="relative z-10">
               {/* Mobile: Centered layout */}
               <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
-                <div className="text-4xl mb-2">{hasTopRepo ? '🏆' : '🚀'}</div>
+                <div className="text-4xl mb-2 opacity-100">{hasTopRepo ? '🏆' : '🚀'}</div>
                 <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>
                   {hasTopRepo ? 'Top Repository' : 'OPEN CALL FOR REPOS'}
                 </div>
@@ -739,7 +739,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     </p>
                   )}
                 </div>
-                <div className="text-3xl sm:text-5xl md:text-6xl opacity-50 flex-shrink-0">{hasTopRepo ? '🏆' : '🚀'}</div>
+                <div className="text-3xl sm:text-5xl md:text-6xl opacity-100 flex-shrink-0">{hasTopRepo ? '🏆' : '🚀'}</div>
               </div>
             </div>
           </div>
