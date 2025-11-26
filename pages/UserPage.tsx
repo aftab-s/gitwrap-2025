@@ -10,6 +10,7 @@ import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
+import Contributors from '../components/Contributors';
 import { DownloadIcon } from '../components/icons/DownloadIcon';
 
 // This is a browser global from the html-to-image CDN script
@@ -409,9 +410,25 @@ const UserPage: React.FC = () => {
              {isDownloading && <p className="text-sm text-gray-400 mt-2">Generating high-quality PNG, please wait...</p>}
           </div>
           {username && <SocialShare username={username} />}
-          {/* Mascot generation removed */}
+          <div>
+            <Contributors />
+          </div>
         </div>
       </div>
+      <footer className="mt-12 md:mt-16 text-center px-4 pb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+          <span className="text-gray-400 text-xs sm:text-sm">
+            Made with 💜 for developers
+          </span>
+          <span className="hidden sm:inline text-gray-600">•</span>
+          <span className="text-gray-500 text-[0.7rem] sm:text-xs">
+            Powered by React, Tailwind & Gemini AI
+          </span>
+        </div>
+        <div className="mt-1.5 text-gray-600 text-[0.7rem] sm:text-xs">
+          Celebrating your open source journey 🚀
+        </div>
+      </footer>
     </div>
   );
 };
