@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/u/:username", "destination": "/" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}

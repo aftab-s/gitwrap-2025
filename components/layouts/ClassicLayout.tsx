@@ -518,60 +518,76 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           <div className={`${isExport ? 'hidden' : ''} sm:hidden`}>
             <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>Top Languages</h3>
             <div className="flex flex-col gap-2">
-              {userData.topLanguages.slice(0, 3).map((lang, idx) => (
-                <div key={lang.name} className="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ backgroundColor: `${lang.color}20` }}>
-                    <span className="text-lg" style={{ filter: `drop-shadow(0 0 8px ${lang.color})` }}>#{idx + 1}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-sm font-bold ${classes.textPrimary} truncate`}>{lang.name}</span>
-                      <span className={`text-lg font-black ${classes.highlight} ml-2`}>{lang.percent.toFixed(1)}%</span>
+              {userData.topLanguages && userData.topLanguages.length > 0 ? (
+                userData.topLanguages.slice(0, 3).map((lang, idx) => (
+                  <div key={lang.name} className="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ backgroundColor: `${lang.color}20` }}>
+                      <span className="text-lg" style={{ filter: `drop-shadow(0 0 8px ${lang.color})` }}>#{idx + 1}</span>
                     </div>
-                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-sm font-bold ${classes.textPrimary} truncate`}>{lang.name}</span>
+                        <span className={`text-lg font-black ${classes.highlight} ml-2`}>{lang.percent.toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className="text-2xl mb-2">🧩</div>
+                  <div className={`text-sm ${classes.textSecondary}`}>Peaceful skies</div>
+                  <p className={`text-xs ${classes.textSecondary} mt-2 max-w-xs mx-auto`}>Nothing here… you haven’t angered any compiler recently.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
           {/* Desktop: Original Language Cards */}
           <div className={`${isExport ? 'grid gap-3 sm:gap-4' : 'hidden sm:grid gap-2'} grid-cols-2 sm:grid-cols-3`}>
-            {userData.topLanguages.map((lang, idx) => (
-              <div
-                key={lang.name}
-                className={`relative group bg-white/5 transition-all duration-300 flex flex-col ${languageCardSizing.wrapper} ${
-                  isRetro
-                    ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]'
-                    : isSpace
-                    ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]'
-                    : isSunset
-                    ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]'
-                    : 'border border-white/10 hover:border-white/20'
-                }`}
-              >
-                <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle at 50% 0%, ${lang.color}15, transparent 70%)` }}></div>
-                    <div className={`relative z-10 flex-1 flex flex-col justify-between ${languageCardSizing.contentGap}`}>
-                      <div className={`flex items-center justify-between ${languageCardSizing.headerSpacing}`}>
-                        <div className={`flex items-center ${languageCardSizing.labelGap}`}>
-                          <div className={`${languageCardSizing.dotSize} rounded-full`} style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
-                          <span className={`${languageCardSizing.nameSize} font-bold ${classes.textPrimary}`}>{lang.name}</span>
+            {userData.topLanguages && userData.topLanguages.length > 0 ? (
+              userData.topLanguages.map((lang, idx) => (
+                <div
+                  key={lang.name}
+                  className={`relative group bg-white/5 transition-all duration-300 flex flex-col ${languageCardSizing.wrapper} ${
+                    isRetro
+                      ? 'border-2 border-purple-400/50 hover:border-fuchsia-400/70 shadow-[0_0_15px_rgba(192,132,252,0.3)] hover:shadow-[0_0_25px_rgba(232,121,249,0.5)]'
+                      : isSpace
+                      ? 'border border-cyan-400/20 hover:border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]'
+                      : isSunset
+                      ? 'border border-orange-400/20 hover:border-orange-400/40 shadow-[0_0_12px_rgba(251,146,60,0.2)] hover:shadow-[0_0_20px_rgba(251,146,60,0.35)]'
+                      : 'border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle at 50% 0%, ${lang.color}15, transparent 70%)` }}></div>
+                      <div className={`relative z-10 flex-1 flex flex-col justify-between ${languageCardSizing.contentGap}`}>
+                        <div className={`flex items-center justify-between ${languageCardSizing.headerSpacing}`}>
+                          <div className={`flex items-center ${languageCardSizing.labelGap}`}>
+                            <div className={`${languageCardSizing.dotSize} rounded-full`} style={{ backgroundColor: lang.color || '#cccccc', boxShadow: `0 0 10px ${lang.color}60` }}></div>
+                            <span className={`${languageCardSizing.nameSize} font-bold ${classes.textPrimary}`}>{lang.name}</span>
+                          </div>
+                          <div className={`${languageCardSizing.badgePadding} rounded-full ${languageCardSizing.badgeText} font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
+                            #{idx + 1}
+                          </div>
                         </div>
-                        <div className={`${languageCardSizing.badgePadding} rounded-full ${languageCardSizing.badgeText} font-black ${classes.highlight}`} style={{ backgroundColor: `${lang.color}20` }}>
-                          #{idx + 1}
+                        <div className={languageCardSizing.percentContainerSpacing}>
+                          <div className={`${languageCardSizing.percentSize} font-black ${classes.accent}`}>{lang.percent.toFixed(1)}%</div>
+                          <div className={`w-full ${languageCardSizing.progressHeight} bg-white/10 rounded-full overflow-hidden`}>
+                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
+                          </div>
                         </div>
                       </div>
-                      <div className={languageCardSizing.percentContainerSpacing}>
-                        <div className={`${languageCardSizing.percentSize} font-black ${classes.accent}`}>{lang.percent.toFixed(1)}%</div>
-                        <div className={`w-full ${languageCardSizing.progressHeight} bg-white/10 rounded-full overflow-hidden`}>
-                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${lang.percent}%`, backgroundColor: lang.color || '#cccccc' }}></div>
-                        </div>
-                      </div>
-                    </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-2 sm:col-span-3 p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+                <div className="text-3xl mb-2">🧩</div>
+                <div className={`text-sm ${classes.textSecondary} font-semibold`}>Peaceful skies</div>
+                <p className={`text-xs ${classes.textSecondary} mt-2`}>Nothing here… you haven’t angered any compiler recently.</p>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Mobile: Compact Activity List */}
@@ -684,7 +700,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className={`${isExport ? 'hidden' : ''} sm:hidden text-center`}>
                 <div className="text-4xl mb-2">{hasTopRepo ? '🏆' : '🚀'}</div>
                 <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>
-                  {hasTopRepo ? 'Top Repository' : 'Future Top Repository'}
+                  {hasTopRepo ? 'Top Repository' : 'OPEN CALL FOR REPOS'}
                 </div>
                 {hasTopRepo ? (
                   <>
@@ -697,7 +713,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                   </>
                 ) : (
                   <p className={`text-xs ${classes.textSecondary} leading-relaxed`}>
-                    Launch something bold, rack up a few commits, and we&apos;ll spotlight it here.
+                    This future banger is napping. Commit to wake it.
                   </p>
                 )}
               </div>
@@ -706,10 +722,10 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <div className={`${isExport ? 'flex' : 'hidden sm:flex'} items-center justify-between gap-3`}>
                 <div className="flex-1 min-w-0">
                   <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1 sm:mb-2`}>
-                    {hasTopRepo ? '⭐ Top Repository' : '⭐ Waiting for Your Top Repo' }
+                    {hasTopRepo ? '⭐ Top Repository' : '⭐ OPEN CALL FOR REPOS' }
                   </div>
                   <div className={`text-lg sm:text-xl md:text-2xl font-black ${classes.highlight} mb-1 truncate`}>
-                    {hasTopRepo ? topRepo!.name : 'Ship a repo worthy of the spotlight'}
+                    {hasTopRepo ? topRepo!.name : 'this-could-be-the-one'}
                   </div>
                   {hasTopRepo ? (
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
@@ -719,7 +735,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     </div>
                   ) : (
                     <p className={`text-xs sm:text-sm ${classes.textSecondary} max-w-lg`}>
-                      Kick off a fresh project or breathe life into an old one—once it gains momentum, it will take over this showcase automatically.
+                      This future banger is napping. Commit to wake it.
                     </p>
                   )}
                 </div>
