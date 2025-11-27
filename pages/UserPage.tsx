@@ -441,6 +441,40 @@ const UserPage: React.FC = () => {
           <div>
             <Contributors />
           </div>
+          
+          {/* Contribution CTA */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <div className="relative bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-500">
+              <div className="text-center space-y-4">
+                {/* Animated icon */}
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-500">
+                  <svg className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold text-white">Join the Project</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    Help us make GitWrap even better. Contribute code, report bugs, or suggest new features.
+                  </p>
+                </div>
+                
+                <a
+                  href="https://github.com/aftab-s/gitwrap-2025"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/50 text-white rounded-lg text-sm font-medium transition-all duration-300 group/btn"
+                >
+                  <span>Contribute Now</span>
+                  <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <footer className="mt-12 md:mt-16 text-center px-4 pb-6">
