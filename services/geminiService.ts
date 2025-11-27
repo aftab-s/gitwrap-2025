@@ -35,8 +35,25 @@ export const generateFunMessage = async (stats: UserStats): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey });
 
   // Compact prompt to reduce input tokens and focus the model on producing a funny one-liner.
-  const prompt = `Generate a single, very short (under 18 words), single-sentence year-end performance review for a GitHub user. The review must be **mock-judgmental and very funny** (e.g., sarcastic or hyperbolic). It must be written in the **3rd person** and use at most two of the provided stats. Output only the funny review text.`
-    + ` User:${stats.login} Contributions:${stats.totalContributions} Commits:${stats.totalCommits} PRs:${stats.totalPRs} Reviews:${stats.totalPRReviews} Lang:${stats.topLanguages[0]?.name} Streak:${stats.longestStreakDays}`;
+  const prompt = `
+    Generate one funny single-sentence GitHub summary with no line breaks.
+    Tone: light, simple, playful. No metaphors, no over-the-top jokes.
+    Use the user's stats directly and clearly. Mention at most two stats.
+    Address the user as "User" instead of pronouns.
+    Do not use gender-neutral pronouns like "they".
+    Limit to 25 words.
+
+    Stats:
+    Username: ${stats.login}
+    Contributions: ${stats.totalContributions}
+    Commits: ${stats.totalCommits}
+    PRs: ${stats.totalPRs}
+    Reviews: ${stats.totalPRReviews}
+    Top language: ${stats.topLanguages[0]?.name}
+    Streak: ${stats.longestStreakDays} days
+    Best day: ${stats.bestDayOfWeek}
+    Best hour: ${stats.bestHour}:00
+  `;
 
   try {
     const response = await ai.models.generateContent({
