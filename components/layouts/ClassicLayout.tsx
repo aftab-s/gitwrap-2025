@@ -83,6 +83,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   const isRetro = theme.name === 'Retro';
   const isSpace = theme.name === 'Space';
   const isSunset = theme.name === 'Sunset';
+  const avatarSrc = userData.avatarUrl || '';
+  // iOS/Safari refuses to paint data/blob URLs if crossOrigin is set, so strip it for embedded exports
+  const avatarCrossOrigin =
+    avatarSrc.startsWith('data:') || avatarSrc.startsWith('blob:') || avatarSrc.startsWith('filesystem:')
+      ? undefined
+      : 'anonymous';
   
   // Build heatmap weeks from flat calendar
   const heatmapWeeks = useMemo(() => buildHeatmapWeeks(userData.contributionCalendar), [userData.contributionCalendar]);
@@ -290,7 +296,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               <img 
                 src={userData.avatarUrl} 
                 alt={userData.login} 
-                crossOrigin="anonymous" 
+                crossOrigin={avatarCrossOrigin}
                 className="w-16 h-16 rounded-2xl shadow-xl ring-2 ring-white/10" 
               />
               <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[0.625rem] font-bold rounded-full`}>
@@ -318,7 +324,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 <img 
                   src={userData.avatarUrl} 
                   alt={userData.login} 
-                  crossOrigin="anonymous" 
+                  crossOrigin={avatarCrossOrigin} 
                   className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl shadow-xl ring-2 sm:ring-4 ring-white/10" 
                 />
                 <div className={`absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 px-1.5 sm:px-2 py-0.5 ${classes.accent.replace('text-', 'bg-')} text-white text-[0.625rem] sm:text-xs font-bold rounded-full`}>

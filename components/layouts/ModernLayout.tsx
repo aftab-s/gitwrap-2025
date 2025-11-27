@@ -14,6 +14,12 @@ interface LayoutProps {
 
 const ModernLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMessage, theme }, ref) => {
   const { classes } = theme;
+  const avatarSrc = userData.avatarUrl || '';
+  // Safari on iOS drops data/blob images when crossOrigin is present, so only set it for remote URLs
+  const avatarCrossOrigin =
+    avatarSrc.startsWith('data:') || avatarSrc.startsWith('blob:') || avatarSrc.startsWith('filesystem:')
+      ? undefined
+      : 'anonymous';
 
   return (
     <div ref={ref} className={`relative w-full h-full p-10 flex flex-col font-sans ${classes.bg} ${classes.textPrimary} transition-all duration-500 overflow-hidden`}>
@@ -29,7 +35,7 @@ const ModernLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMes
               <img 
                 src={userData.avatarUrl} 
                 alt={userData.login} 
-                crossOrigin="anonymous" 
+                crossOrigin={avatarCrossOrigin} 
                 className="w-20 h-20 rounded-2xl shadow-2xl ring-4 ring-white/10" 
               />
               <div className={`absolute -bottom-1 -right-1 w-6 h-6 ${classes.accent.replace('text-', 'bg-')} rounded-full border-4 ${classes.bg.replace('bg-', 'border-')}`}></div>
