@@ -35,7 +35,7 @@ export const generateFunMessage = async (stats: UserStats): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey });
 
   // Compact prompt to reduce input tokens and focus the model on producing a funny one-liner.
-  const prompt = `A funny, single-sentence GitHub profile bio/one-liner. The sentence must be very short (under 20 words) and use at most two stats from the provided data. Do not use complex pronouns like 'they'—keep the language simple, direct, and humorous. Focus on a playful, cheeky tone. Output only the one-liner text.`
+  const prompt = `A very short (under 25 words), funny, single-sentence GitHub one-liner/bio written strictly in the **3rd person** (must mention the user's login). Use at most two of the provided stats. The tone should be cheeky and humorous. Output only the one-liner text.`
     + ` User:${stats.login} Contributions:${stats.totalContributions} Commits:${stats.totalCommits} PRs:${stats.totalPRs} Reviews:${stats.totalPRReviews} Lang:${stats.topLanguages[0]?.name} Streak:${stats.longestStreakDays}`;
 
   try {
