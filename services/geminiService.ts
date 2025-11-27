@@ -39,7 +39,7 @@ export const generateFunMessage = async (stats: UserStats): Promise<string> => {
     Generate one funny single-sentence GitHub summary with no line breaks.
     Tone: light, simple, playful. No metaphors, no over-the-top jokes.
     Use the user's stats directly and clearly. Mention at most two stats.
-    Address the user as "User" instead of pronouns.
+    Address the user with the username instead of pronouns.
     Do not use gender-neutral pronouns like "they".
     Limit to 25 words.
 
