@@ -111,16 +111,48 @@ async function createExportEnvironment(width: number, height: number) {
   iframe.srcdoc = `<!DOCTYPE html><html><head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=${width}, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/index.css" />
-    <script src="${TAILWIND_CDN_URL}"></script>
     <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('/fonts/SpaceGrotesk-Light.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/SpaceGrotesk-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/SpaceGrotesk-Medium.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('/fonts/SpaceGrotesk-SemiBold.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/SpaceGrotesk-Bold.ttf') format('truetype');
+      }
       * { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif !important; }
+      body { margin: 0; padding: 0; overflow: hidden; }
     </style>
+    <script src="${TAILWIND_CDN_URL}"></script>
   </head>
-  <body style="margin:0;padding:0;overflow:hidden;"></body>
+  <body></body>
   </html>`;
 
   document.body.appendChild(iframe);
