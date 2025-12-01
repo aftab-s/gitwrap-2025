@@ -617,13 +617,13 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               </div>
               
               <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
-                <div className="flex items-center gap-2">
-                  <div className="text-xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
-                  <span className={`text-xs ${classes.textSecondary}`}>Year over Year</span>
-                </div>
-                <span className={`text-sm font-bold ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="text-xl">{(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '📈' : '📉'}</div>
+                <span className={`text-xs ${classes.textSecondary}`}>Year over Year</span>
+              </div>
+              <span className={`text-sm font-bold ${(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
+              </span>
               </div>
             </div>
           </div>
@@ -682,13 +682,13 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               'border border-pink-400/30'
             }`}>
               <div className="flex items-center justify-between mb-1 sm:mb-3">
-                <ReviewIcon className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400" />
-                <div className="text-xl sm:text-2xl md:text-3xl">{userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '📈' : '📉'}</div>
-              </div>
-              <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Growth</div>
-              <div className={`text-2xl sm:text-3xl font-black ${userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {userData.yearOverYearGrowth?.overallGrowth ?? 0 >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
-              </div>
+              <ReviewIcon className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400" />
+              <div className="text-xl sm:text-2xl md:text-3xl">{(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '📈' : '📉'}</div>
+            </div>
+            <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Growth</div>
+            <div className={`text-2xl sm:text-3xl font-black ${(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
+            </div>
               <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>vs 2024</div>
             </div>
           </div>
