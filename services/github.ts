@@ -1,13 +1,13 @@
 import { GraphQLClient } from 'graphql-request';
 import type { UserStats } from '../types';
 
-// 2025 date range constants - use current date as end to show accurate YTD stats
-export const YEAR_2025_START = '2025-01-01T00:00:00Z';
-export const YEAR_2025_END = new Date().toISOString(); // Current date/time
+// 2025 date range constants - December 1, 2024 to December 1, 2025
+export const YEAR_2025_START = '2024-12-01T00:00:00Z';
+export const YEAR_2025_END = '2025-12-01T23:59:59Z';
 
-// 2024 date range constants for comparison - use full year
-export const YEAR_2024_START = '2024-01-01T00:00:00Z';
-export const YEAR_2024_END = '2024-12-31T23:59:59Z';
+// 2024 date range constants for comparison - December 1, 2023 to December 1, 2024
+export const YEAR_2024_START = '2023-12-01T00:00:00Z';
+export const YEAR_2024_END = '2024-12-01T23:59:59Z';
 
 const GITHUB_GRAPHQL_API = 'https://api.github.com/graphql';
 
