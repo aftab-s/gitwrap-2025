@@ -130,7 +130,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             </div>
           </div>
           <div className="text-right">
-            <div className={`text-3xl font-black ${classes.accent} leading-none`}>2025</div>
+            <div className={`text-3xl font-black ${classes.accent} leading-none`}>{userData.year}</div>
             <div className={`text-[0.625rem] font-semibold ${classes.textSecondary} tracking-widest uppercase`}>GitWrap</div>
           </div>
         </header>
@@ -163,7 +163,7 @@ const CompactLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
 
           {/* Activity Heatmap */}
           <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>2025 Activity</h3>
+            <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${classes.accent}`}>{userData.year} Activity</h3>
             <MiniHeatmap weeks={heatmapWeeks} />
             <div className="flex items-center justify-end gap-1.5 mt-2 text-[0.625rem]">
               <span className={classes.textSecondary}>Less</span>

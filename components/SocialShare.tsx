@@ -3,13 +3,14 @@ import { XIcon } from './icons/XIcon';
 import { LinkedInIcon } from './icons/LinkedInIcon';
 
 interface SocialShareProps {
+  year: number;
   username: string;
 }
 
-const SocialShare: React.FC<SocialShareProps> = ({ username }) => {
+const SocialShare: React.FC<SocialShareProps> = ({ username, year }) => {
   const shareUrl = window.location.href;
-  const text = `Check out my GitHub 2025 year in review on GitWrap! #GitWrap2025 #GitHubWrapped`;
-  const title = `${username}'s GitWrap 2025`;
+  const text = `Check out my GitHub ${year} year in review on GitWrap! #GitWrap${year} #GitHubWrapped`;
+  const title = `${username}'s GitWrap ${year}`;
 
   const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
   const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(text)}`;

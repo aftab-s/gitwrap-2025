@@ -102,6 +102,9 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
   );
   const topRepo = userData.topRepos?.[0];
   const hasTopRepo = Boolean(topRepo);
+  const privateCount = userData.privateContributions ?? 0;
+  const ai = userData.aiStats;
+  const topAITool = ai?.tools[0]?.name;
 
   const languageCardSizing = isExport
     ? {
@@ -312,7 +315,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
           {/* Mobile: Year badge below profile */}
           <div className={`${isExport ? 'hidden' : 'flex'} sm:hidden justify-center`}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
-              <div className={`text-3xl font-black ${classes.accent} leading-none`}>2025</div>
+              <div className={`text-3xl font-black ${classes.accent} leading-none`}>{userData.year}</div>
               <div className={`text-xs font-semibold ${classes.textSecondary} tracking-wider uppercase`}>GitWrap</div>
             </div>
           </div>
@@ -337,7 +340,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               </div>
             </div>
             <div className="text-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-white/5 border border-white/10">
-              <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${classes.accent} leading-none`}>2025</div>
+              <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${classes.accent} leading-none`}>{userData.year}</div>
               <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} tracking-widest uppercase mt-0.5 sm:mt-1`}>Year in Review</div>
             </div>
           </div>
@@ -372,6 +375,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     <>
                       <span className={classes.textSecondary}>•</span>
                       <span className={classes.textSecondary}>✨ {otherCount}</span>
+                    </>
+                  )}
+                  {privateCount > 0 && (
+                    <>
+                      <span className={classes.textSecondary}>•</span>
+                      <span className={classes.textSecondary}>🔒 {privateCount.toLocaleString()}</span>
                     </>
                   )}
                 </div>
@@ -410,7 +419,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
               }`}>
                 <div className="text-2xl mb-1">⭐</div>
                 <div className={`text-2xl font-black ${classes.highlight}`}>{userData.totalStarsGiven}</div>
-                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Stars Given</div>
+                <div className={`text-[0.625rem] ${classes.textSecondary} uppercase mt-1`}>Stars Earned</div>
               </div>
               
               <div className={`p-3 rounded-xl bg-gradient-to-br from-purple-500/15 to-indigo-500/10 text-center ${
@@ -464,6 +473,12 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                       <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{otherCount} other</span>
                     </div>
                   )}
+                  {privateCount > 0 && (
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="text-xs">🔒</span>
+                      <span className={`text-sm sm:text-base ${classes.textSecondary}`}>{privateCount.toLocaleString()} private</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -511,7 +526,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                     <div>
                       <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider mb-1`}>Stars</div>
                       <div className={`text-2xl sm:text-4xl font-black ${classes.highlight}`}>{userData.totalStarsGiven}</div>
-                      <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>given</div>
+                      <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>earned</div>
                     </div>
                     <div className="text-3xl sm:text-4xl md:text-5xl">⭐</div>
                   </div>
@@ -625,6 +640,18 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
                 {(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
               </span>
               </div>
+
+              {ai && (
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="text-xl">🤖</div>
+                    <span className={`text-xs ${classes.textSecondary}`}>
+                      AI Co-authored{topAITool ? ` · mostly ${topAITool}` : ''}
+                    </span>
+                  </div>
+                  <span className={`text-sm font-bold ${classes.highlight}`}>{ai.commitShare}%</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -689,12 +716,13 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             <div className={`text-2xl sm:text-3xl font-black ${(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {(userData.yearOverYearGrowth?.overallGrowth ?? 0) >= 0 ? '+' : ''}{userData.yearOverYearGrowth?.overallGrowth ?? 0}%
             </div>
-              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>vs 2024</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1`}>vs {userData.year - 1}</div>
             </div>
           </div>
 
-          {/* Top Repository Spotlight */}
-          <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden ${
+          {/* Top Repository Spotlight (+ AI co-authored tile beside it, when enabled) */}
+          <div className={ai ? `grid gap-2 sm:gap-4 ${isExport ? 'grid-cols-[2fr_1fr]' : 'grid-cols-1 sm:grid-cols-[2fr_1fr]'}` : ''}>
+          <div className={`relative p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 overflow-hidden min-w-0 ${
             isRetro ? 'border-2 border-yellow-400/50 shadow-[0_0_25px_rgba(250,204,21,0.4)]' :
             isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
             isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
@@ -750,6 +778,25 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             </div>
           </div>
 
+          {ai && (
+            <div className={`${isExport ? 'flex' : 'hidden sm:flex'} relative flex-col justify-center p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500/15 via-fuchsia-500/10 to-transparent overflow-hidden ${
+              isRetro ? 'border-2 border-fuchsia-400/50 shadow-[0_0_25px_rgba(232,121,249,0.4)]' :
+              isSpace ? 'border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.25)]' :
+              isSunset ? 'border border-orange-400/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]' :
+              'border border-violet-400/30'
+            }`}>
+              <div className="flex items-center justify-between mb-1">
+                <div className={`text-[0.625rem] sm:text-xs font-semibold ${classes.textSecondary} uppercase tracking-wider`}>AI Co-authored</div>
+                <div className="text-2xl sm:text-3xl">🤖</div>
+              </div>
+              <div className={`text-3xl sm:text-4xl font-black ${classes.highlight}`}>{ai.commitShare}%</div>
+              <div className={`text-[0.625rem] sm:text-xs ${classes.textSecondary} mt-1 truncate`}>
+                of commits{topAITool ? ` · mostly ${topAITool}` : ''}
+              </div>
+            </div>
+          )}
+          </div>
+
           {/* Contribution Heatmap */}
           <div className={`p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white/5 ${
             isRetro ? 'border-2 border-fuchsia-400/50 shadow-[0_0_25px_rgba(232,121,249,0.4)]' :
@@ -758,7 +805,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
             'border border-white/10'
           }`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-4 gap-2">
-              <h3 className={`text-xs sm:text-sm font-bold uppercase tracking-wider ${classes.accent}`}>2025 Activity</h3>
+              <h3 className={`text-xs sm:text-sm font-bold uppercase tracking-wider ${classes.accent}`}>{userData.year} Activity</h3>
               <div className="flex items-center gap-1.5 sm:gap-2 text-[0.625rem] sm:text-xs">
                 <span className={classes.textSecondary}>Less</span>
                 <div className="flex items-center gap-0.5 sm:gap-1">
@@ -820,7 +867,7 @@ const ClassicLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMe
         
         {/* Footer */}
   <footer className={`mt-3 sm:mt-5 pt-2 sm:pt-4 text-center text-[0.625rem] sm:text-xs ${classes.textSecondary} tracking-wider border-t border-white/10`}>
-          Powered by <span className={classes.accent}>GitWrap</span> • 2025
+          Powered by <span className={classes.accent}>GitWrap</span> • {userData.year}
         </footer>
       </div>
       </div>
