@@ -1,7 +1,10 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { SparklesIcon } from '../components/icons/SparklesIcon';
+import GitHubSignIn from '../components/GitHubSignIn';
+import { useAuth } from '../services/auth';
+import { APP_REPO_URL, AVAILABLE_YEARS, DEFAULT_YEAR } from '../config';
 
 const GitHubStarIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 16 16">
@@ -13,22 +16,26 @@ const HomePage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const year = Number(useParams().year ?? DEFAULT_YEAR); // validated by <YearGate> in App
+  const auth = useAuth();
+  // Set by /api/auth/callback when sign-in didn't complete (e.g. ?auth_error=denied)
+  const authError = new URLSearchParams(window.location.search).get('auth_error');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username.trim()) {
-      navigate(`/u/${username.trim()}`);
+      navigate(`/${year}/u/${username.trim()}`);
     } else {
       setError('Please enter a GitHub username.');
     }
   };
 
   return (
-  <div className="flex flex-col items-center justify-center min-h-screen h-screen overflow-hidden px-4 relative">
+  <div className="flex flex-col items-center justify-center min-h-screen py-20 px-4 relative">
       {/* Star button - top right corner */}
       <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
         <a
-          href="https://github.com/aftab-s/gitwrap-2025"
+          href={APP_REPO_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white rounded-full text-xs sm:text-sm font-medium transition-all duration-300 backdrop-blur-sm"
@@ -55,7 +62,7 @@ const HomePage: React.FC = () => {
               backgroundClip: 'text',
             }}
           >
-            2025
+            {year}
           </span>
         </h1>
   <p className="mt-2 sm:mt-3 text-[0.8rem] sm:text-[0.95rem] md:text-base text-gray-300 max-w-xl mx-auto px-2">
@@ -85,6 +92,51 @@ const HomePage: React.FC = () => {
         </div>
         {error && <p className="mt-2 text-center text-red-400">{error}</p>}
       </form>
+
+      {auth.ready && (
+        <div className="mt-5 sm:mt-6 w-full max-w-md px-4 sm:px-0 relative z-10 flex flex-col items-center gap-3">
+          {authError && authError !== 'denied' && (
+            <p className="text-xs text-red-400 text-center">GitHub sign-in didn't complete. Please try again.</p>
+          )}
+          {auth.login ? (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(`/${year}/u/${auth.login}`)}
+                className="px-5 py-2.5 rounded-full bg-purple-600 hover:bg-purple-700 font-semibold text-sm transition-colors"
+              >
+                🔒 Open my full wrap (incl. private)
+              </button>
+              <GitHubSignIn />
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 w-full text-xs text-gray-500">
+                <div className="flex-1 h-px bg-white/10" />
+                sign in to include your private contributions
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <GitHubSignIn />
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Edition switcher */}
+      <nav className="mt-5 flex items-center justify-center gap-2 relative z-10" aria-label="Edition">
+        {AVAILABLE_YEARS.map((y) => (
+          <Link
+            key={y}
+            to={`/${y}`}
+            aria-current={y === year ? 'page' : undefined}
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+              y === year ? 'bg-white/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {y}
+          </Link>
+        ))}
+      </nav>
 
       <footer className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-0 right-0 text-center z-10 px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">

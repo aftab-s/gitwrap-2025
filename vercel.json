@@ -1,6 +1,8 @@
 {
+  "functions": {
+    "api/stats.ts": { "maxDuration": 60 }
+  },
   "rewrites": [
-    { "source": "/u/:username", "destination": "/" },
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/((?!api/).*)", "destination": "/" }
   ]
 }

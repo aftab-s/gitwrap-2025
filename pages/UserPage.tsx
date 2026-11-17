@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useParams, Link } from 'react-router-dom';
 import type { UserStats, Theme } from '../types';
 import { AspectRatio, CardLayout } from '../types';
-import { fetchGitHubStats } from '../services/github';
-import { generateFunMessage } from '../services/geminiService';
+import { fetchWrap, WrapError } from '../services/api';
+import { useAuth, isOwnProfile, markSignedOut } from '../services/auth';
+import GitHubSignIn from '../components/GitHubSignIn';
+import AIStatsPanel from '../components/AIStatsPanel';
+import { APP_REPO_URL, DEFAULT_YEAR } from '../config';
 import { THEMES } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
@@ -182,7 +185,8 @@ async function createExportEnvironment(width: number, height: number) {
 }
 
 const UserPage: React.FC = () => {
-  const { username } = useParams<{ username: string }>();
+  const { username, year: yearParam } = useParams<{ username: string; year: string }>();
+  const year = Number(yearParam ?? DEFAULT_YEAR); // validated by <YearGate> in App
   const [userData, setUserData] = useState<UserStats | null>(null);
   const [funMessage, setFunMessage] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -190,7 +194,13 @@ const UserPage: React.FC = () => {
   const [activeTheme, setActiveTheme] = useState<Theme>(THEMES[0]);
   const [isDownloading, setIsDownloading] = useState<AspectRatio | null>(null);
   const [embeddedAvatarUrl, setEmbeddedAvatarUrl] = useState<string | null>(null);
-  
+  // Card display options
+  const [showAIStat, setShowAIStat] = useState(true);
+  const [showPrivateRepoNames, setShowPrivateRepoNames] = useState(false);
+
+  const auth = useAuth();
+  // The private view is only requested for the signed-in user's own profile (the server re-checks this).
+  const includePrivate = isOwnProfile(auth, username);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -199,41 +209,53 @@ const UserPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchGitHubStats(username);
-      setUserData(data);
-      
-      // Handle Gemini message generation separately to not block UI on failure
-      try {
-        const message = await generateFunMessage(data);
-        setFunMessage(message);
-      } catch (geminiError) {
-        console.warn("Failed to generate fun message:", geminiError);
-        setFunMessage("Your 2025 GitHub activity was truly impressive. Keep up the great work!");
-      }
-
+      const { stats, funMessage: message } = await fetchWrap(username, year, includePrivate);
+      setUserData(stats);
+      setFunMessage(message);
     } catch (err) {
-      if (err instanceof Error) {
-        console.error("Fetch data error:", err.message);
-        if (err.message.toLowerCase().includes('user not found')) {
-            setError(`Could not find a GitHub user with the name "${username}". Please check the spelling.`);
-        } else if (err.message.includes('rate limit exceeded')) {
-            setError('The GitHub API rate limit was exceeded. This can happen due to high traffic. Please try again in a little while.');
-        } else if (err.message.includes('GITHUB_APP_TOKEN')) {
-            setError('This application is not configured correctly. An API token is missing.');
-        } else {
-            setError('An error occurred while fetching GitHub data. The API might be temporarily down or the username may be incorrect.');
-        }
+      const code = err instanceof WrapError ? err.code : 'upstream';
+      console.error('Fetch data error:', err);
+      if ((code === 'session_expired' || code === 'unauthorized') && includePrivate) {
+        // Session gone: mark signed out, which re-runs this fetch in public mode.
+        markSignedOut();
+        return;
+      }
+      if (code === 'not_found') {
+        setError(`Could not find a GitHub user with the name "${username}". Please check the spelling.`);
+      } else if (code === 'rate_limited') {
+        setError(
+          auth.authEnabled && !includePrivate
+            ? 'The shared GitHub API quota is exhausted right now. Sign in with GitHub to use your own quota, or try again later.'
+            : 'The GitHub API rate limit was exceeded. Please try again in a little while.'
+        );
+      } else if (code === 'misconfigured') {
+        setError('This application is not configured correctly: the server is missing its GitHub API token.');
       } else {
-        setError('An unknown error occurred.');
+        setError('An error occurred while fetching GitHub data. GitHub might be temporarily unavailable; please try again.');
       }
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [username, year, includePrivate, auth.authEnabled]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    // Wait until we know who is signed in, so we don't fetch the public view and then refetch.
+    if (auth.ready) fetchData();
+  }, [auth.ready, fetchData]);
+
+  // What actually goes on the card, after applying the display options.
+  const cardData = useMemo<UserStats | null>(() => {
+    if (!userData) return null;
+    return {
+      ...userData,
+      aiStats: showAIStat ? userData.aiStats : undefined,
+      topRepos: showPrivateRepoNames
+        ? userData.topRepos
+        : userData.topRepos.map((r) => (r.isPrivate ? { ...r, name: 'Private repository', url: '' } : r)),
+    };
+  }, [userData, showAIStat, showPrivateRepoNames]);
+
+  const hasPrivateTopRepo = Boolean(userData?.topRepos.some((r) => r.isPrivate));
 
   useEffect(() => {
     if (!userData?.avatarUrl) {
@@ -260,7 +282,8 @@ const UserPage: React.FC = () => {
   }, [userData?.avatarUrl]);
 
   const handleDownload = async (aspectRatio: AspectRatio) => {
-    if (!userData) return;
+    if (!cardData) return;
+    const userData = cardData;
     setIsDownloading(aspectRatio);
 
     const targetWidth = 1080;
@@ -348,7 +371,7 @@ const UserPage: React.FC = () => {
       const safeAspectRatio = aspectRatio.replace(':', 'x');
       const safeUsername = username?.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       const safeTheme = activeTheme?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'theme';
-      link.download = `gitwrap-2025-${safeUsername}-${safeTheme}.png`;
+      link.download = `gitwrap-${year}-${safeUsername}-${safeTheme}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -392,7 +415,7 @@ const UserPage: React.FC = () => {
           </div>
           
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Wrapping up {username}'s 2025</h2>
+            <h2 className="text-2xl font-bold text-white">Wrapping up {username}'s {year}</h2>
             <p className="text-gray-400 text-sm">Analyzing contributions, calculating stats, and generating insights...</p>
           </div>
 
@@ -412,27 +435,49 @@ const UserPage: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <h2 className="text-3xl font-bold text-red-400">Oops! Something went wrong.</h2>
         <p className="mt-2 text-gray-300 max-w-lg">{error}</p>
-        <Link to="/" className="mt-6 px-6 py-2 bg-purple-600 rounded-full hover:bg-purple-700 transition-colors">
+        <Link to={`/${year}`} className="mt-6 px-6 py-2 bg-purple-600 rounded-full hover:bg-purple-700 transition-colors">
           Try another username
         </Link>
       </div>
     );
   }
 
-  if (!userData) return null;
+  if (!userData || !cardData) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="flex justify-between items-center mb-8">
-        <Link to="/" className="text-lg font-bold hover:text-purple-400 transition-colors">&larr; GitWrap 2025</Link>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <Link to={`/${year}`} className="text-lg font-bold hover:text-purple-400 transition-colors">&larr; GitWrap {year}</Link>
+        {auth.login && <GitHubSignIn />}
       </div>
+
+      {/* Data-source banner */}
+      {userData.includesPrivate ? (
+        <div className="mb-6 px-4 py-3 rounded-xl border border-green-400/30 bg-green-500/10 text-sm text-green-200">
+          🔒 Including your private contributions
+          {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} in private repos)` : ''}.
+          Only you see this version; a shared link shows the public view.
+        </div>
+      ) : (
+        <div className="mb-6 px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm text-gray-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <span>
+            Showing <strong className="text-white">public data only</strong>. Private contributions are included only
+            when you sign in with GitHub and open your own wrap.
+            {auth.login && !includePrivate
+              ? ` You're signed in as @${auth.login}; this is someone else's page.`
+              : ''}
+          </span>
+          {!auth.login && <GitHubSignIn label="Sign in to include private" />}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2">
             {/* Let the card grow naturally so no content is clipped */}
             <div className="w-full max-w-3xl mx-auto lg:max-w-none">
               <GitWrapCard
                 ref={cardRef}
-                userData={userData}
+                userData={cardData}
                 funMessage={funMessage}
                 theme={activeTheme}
                 layout={CardLayout.Classic}
@@ -447,8 +492,31 @@ const UserPage: React.FC = () => {
                 <label className="text-sm font-semibold text-gray-400">Theme</label>
                 <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
               </div>
+              {userData.aiStats && (
+                <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showAIStat}
+                    onChange={(e) => setShowAIStat(e.target.checked)}
+                    className="w-4 h-4 accent-purple-500"
+                  />
+                  Show AI co-authored stat on card
+                </label>
+              )}
+              {hasPrivateTopRepo && (
+                <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showPrivateRepoNames}
+                    onChange={(e) => setShowPrivateRepoNames(e.target.checked)}
+                    className="w-4 h-4 accent-purple-500"
+                  />
+                  Show private repository names
+                </label>
+              )}
             </div>
           </div>
+          {userData.aiStats && <AIStatsPanel stats={userData.aiStats} />}
           <div>
             <h2 className="text-2xl font-bold mb-4">Download</h2>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -475,7 +543,7 @@ const UserPage: React.FC = () => {
             </div>
              {isDownloading && <p className="text-sm text-gray-400 mt-2">Generating high-quality PNG, please wait...</p>}
           </div>
-          {username && <SocialShare username={username} />}
+          {username && <SocialShare username={username} year={year} />}
           <div>
             <Contributors />
           </div>
@@ -500,7 +568,7 @@ const UserPage: React.FC = () => {
                 </div>
                 
                 <a
-                  href="https://github.com/aftab-s/gitwrap-2025"
+                  href={APP_REPO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/50 text-white rounded-lg text-sm font-medium transition-all duration-300 group/btn"

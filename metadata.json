@@ -1,5 +1,4 @@
-
 {
-  "name": "GitWrap 2025",
-  "description": "A web application to generate a personalized and visually appealing 'year in review' summary for any public GitHub user, focusing on their contributions during the year 2025. It generates a stylish, shareable card."
+  "name": "GitWrap 2026",
+  "description": "A web application to generate a personalized, shareable 'year in review' card for any GitHub user's 2026 contributions, with optional GitHub sign-in to include private contributions and an AI co-authored commit stat."
 }

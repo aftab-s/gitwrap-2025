@@ -54,7 +54,7 @@ const LoaderTestPage: React.FC = () => {
                   <LoadingSpinner />
                   
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-white">Wrapping up username's 2025</h2>
+                    <h2 className="text-2xl font-bold text-white">Wrapping up username's 2026</h2>
                     <p className="text-gray-400 text-sm">Analyzing contributions, calculating stats, and generating insights...</p>
                   </div>
 

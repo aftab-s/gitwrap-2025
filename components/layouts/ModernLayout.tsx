@@ -46,7 +46,7 @@ const ModernLayout = forwardRef<HTMLDivElement, LayoutProps>(({ userData, funMes
             </div>
           </div>
           <div className="text-right">
-            <div className={`text-6xl font-black ${classes.accent} leading-none`}>2025</div>
+            <div className={`text-6xl font-black ${classes.accent} leading-none`}>{userData.year}</div>
             <div className={`text-sm font-semibold ${classes.textSecondary} tracking-widest uppercase mt-1`}>GitWrap</div>
           </div>
         </header>

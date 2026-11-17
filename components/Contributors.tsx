@@ -14,7 +14,7 @@ const fallback: Contributor[] = [
 // Repository to query. Prefer Vite env var `VITE_GITHUB_REPOSITORY` (owner/repo),
 // fallback to the current repo used in this codebase.
 const _env = (import.meta as any).env || {};
-const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2025';
+const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2026';
 const GITHUB_API = `https://api.github.com/repos/${REPOSITORY}/contributors?per_page=100`;
 
 const CACHE_KEY = 'contributors-cache-v1';
@@ -45,9 +45,7 @@ const Contributors: React.FC = () => {
 
     async function loadFromGitHubApi(): Promise<Contributor[] | null> {
       try {
-        const token = _env.VITE_GITHUB_APP_TOKEN;
         const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
-        if (token) headers.Authorization = `token ${token}`;
         const res = await fetch(GITHUB_API, { headers, cache: 'no-store' });
         if (!res.ok) return null;
         const data = await res.json();
@@ -80,7 +78,7 @@ const Contributors: React.FC = () => {
       }
 
       // 1) Prioritize GitHub API to get live, complete contributor list
-      const allowClientFetch = Boolean(_env.VITE_GITHUB_APP_TOKEN) || Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
+      const allowClientFetch = Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
       let ghData: Contributor[] | null = null;
       if (allowClientFetch) {
         ghData = await loadFromGitHubApi();
