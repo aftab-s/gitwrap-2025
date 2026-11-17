@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "loader-endpoint": "node scripts/loader-endpoint.cjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@google/genai": "^1.29.1",
@@ -15,7 +14,6 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
-    "styled-components": "^5.3.11",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -73,25 +73,24 @@ export type UserStats = z.infer<typeof userStatsSchema>;
 // Keep GitHubUserData as alias for backwards compatibility during migration
 export type GitHubUserData = UserStats;
 
+/** A card colourway. See constants.ts for what each role means. */
 export interface Theme {
+  id: string;
   name: string;
-  classes: {
-    bg: string;
-    textPrimary: string;
-    textSecondary: string;
-    accent: string;
-    highlight: string;
-    heatmapColors: string[];
-    bgImage?: string;
+  c: {
+    ground: string;
+    line: string;
+    ink: string;
+    panel: string;
+    a1: string;
+    a2: string;
+    led?: string;
+    onGround: string;
+    onGroundDim: string;
+    onPanelDim: string;
   };
 }
 
 export enum AspectRatio {
   Social = '3:4',
-}
-
-export enum CardLayout {
-  Classic = 'Classic',
-  Modern = 'Modern',
-  Compact = 'Compact',
 }

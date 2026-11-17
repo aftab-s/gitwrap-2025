@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import UserPage from './pages/UserPage';
-import LoaderTestPage from './pages/LoaderTestPage';
 import { Analytics } from "@vercel/analytics/react";
 import { DEFAULT_YEAR, getEdition } from './config';
 
@@ -29,7 +28,6 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to={`/${DEFAULT_YEAR}`} replace />} />
-      <Route path="/loader-test" element={<LoaderTestPage />} />
       <Route path="/u/:username" element={<LegacyUserRedirect />} />
       <Route path="/:year" element={<YearGate />}>
         <Route index element={<HomePage />} />
@@ -43,34 +41,7 @@ export function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-900 text-white font-sans relative overflow-hidden">
-        {/* Abstract grid background pattern - larger grid with perspective */}
-        <div 
-          className="fixed inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px',
-            transform: 'perspective(1000px) rotateX(60deg)',
-            transformOrigin: 'center top',
-            height: '200%'
-          }}
-        />
-        {/* Secondary smaller grid for depth */}
-        <div 
-          className="fixed inset-0 pointer-events-none opacity-50"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }}
-        />
-        <AppRoutes />
-      </div>
+      <AppRoutes />
       <Analytics />
     </BrowserRouter>
   );
