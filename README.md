@@ -13,7 +13,7 @@
 - **Personalized Stats:** Commits, PRs, Issues, and Reviews aggregated into one card.
 - **🔒 Private contributions (new):** Sign in with GitHub to include work from private repositories. Private repo names are hidden on the card unless you opt in.
 - **🤖 AI co-authored stat (new, optional):** What share of your commits carry an AI co-author signature (Claude Code, Copilot, Cursor, Codex, Gemini/Jules, Aider, Devin, Windsurf, Amazon Q, Junie), with a per-tool breakdown.
-- **Multiple Themes** and a **shareable 1080×1440 PNG export**.
+- **Six colourways** and a **shareable 1080×1440 PNG export**. What you see on screen is the exact image you download.
 - **AI (Text Only):** Gemini writes the one-liner on the card (falls back to a template).
 
 ## 📅 Editions: one URL per year
@@ -26,6 +26,10 @@
 | `/`, unknown years, old `/u/<name>` links | Redirect to the current edition (`/2026`) |
 
 Editions live in [`config.ts`](config.ts). To add 2027, add one entry to `EDITIONS` (and bump `DEFAULT_YEAR` when it should become the landing page). Signing in returns you to the edition you started from.
+
+## 🕹️ Design
+
+The 2026 UI is drawn as the printed control panel of an arcade machine: one flat colour field per colourway, black keylines, square keys that press down, and no rounded corners or blur anywhere. The rules live in [`DESIGN.md`](DESIGN.md); colourways are defined in [`constants.ts`](constants.ts), and the card itself is [`components/ArcadeCard.tsx`](components/ArcadeCard.tsx).
 
 ## 🔐 Architecture & security
 
@@ -92,7 +96,8 @@ The same commit scan supplies real commit timestamps for **Best Hour**. It repla
 ## 🧩 Project Structure
 
 - `config.ts` — editions (years + date ranges), repo URL (shared by client and server)
-- `pages/`, `components/` — React UI: home, user page, card layouts, sign-in button, AI stats panel
+- `pages/`, `components/` — React UI: landing page, wrap page, the card (`ArcadeCard`), sign-in key, AI stats panel
+- `index.css`, `constants.ts` — the design system: type, keys, windows, and the six colourways
 - `services/api.ts`, `services/auth.ts` — browser-side calls to our own `/api`
 - `api/stats.ts`, `api/auth/*.ts` — serverless endpoints
 - `api/_lib/github.ts` — GraphQL fetch + stat derivation (server-only)

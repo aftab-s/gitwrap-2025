@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useParams, Link } from 'react-router-dom';
 import type { UserStats, Theme } from '../types';
-import { AspectRatio, CardLayout } from '../types';
+import { AspectRatio } from '../types';
 import { fetchWrap, WrapError } from '../services/api';
 import { useAuth, isOwnProfile, markSignedOut } from '../services/auth';
+import Marquee from '../components/Marquee';
+import Footer from '../components/Footer';
 import GitHubSignIn from '../components/GitHubSignIn';
 import AIStatsPanel from '../components/AIStatsPanel';
 import { APP_REPO_URL, DEFAULT_YEAR } from '../config';
-import { THEMES } from '../constants';
+import { THEMES, DEFAULT_THEME, themeVars } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import Contributors from '../components/Contributors';
-import { DownloadIcon } from '../components/icons/DownloadIcon';
+import { Download, Lock } from '../components/icons/Arcade';
 
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
 
 const avatarDataUrlCache = new Map<string, string>();
-const TAILWIND_CDN_URL = 'https://cdn.tailwindcss.com';
 
 async function convertAvatarViaCanvas(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -115,45 +116,11 @@ async function createExportEnvironment(width: number, height: number) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=${width}, initial-scale=1.0" />
     <style>
-      @font-face {
-        font-family: 'Space Grotesk';
-        font-style: normal;
-        font-weight: 300;
-        font-display: swap;
-        src: url('/fonts/SpaceGrotesk-Light.ttf') format('truetype');
-      }
-      @font-face {
-        font-family: 'Space Grotesk';
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-        src: url('/fonts/SpaceGrotesk-Regular.ttf') format('truetype');
-      }
-      @font-face {
-        font-family: 'Space Grotesk';
-        font-style: normal;
-        font-weight: 500;
-        font-display: swap;
-        src: url('/fonts/SpaceGrotesk-Medium.ttf') format('truetype');
-      }
-      @font-face {
-        font-family: 'Space Grotesk';
-        font-style: normal;
-        font-weight: 600;
-        font-display: swap;
-        src: url('/fonts/SpaceGrotesk-SemiBold.ttf') format('truetype');
-      }
-      @font-face {
-        font-family: 'Space Grotesk';
-        font-style: normal;
-        font-weight: 700;
-        font-display: swap;
-        src: url('/fonts/SpaceGrotesk-Bold.ttf') format('truetype');
-      }
-      * { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif !important; }
+      @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; src: url('/fonts/Archivo-latin.woff2') format('woff2'); }
+      @font-face { font-family: 'Martian Mono'; font-style: normal; font-weight: 100 800; font-stretch: 75% 112.5%; src: url('/fonts/MartianMono-latin.woff2') format('woff2'); }
+      @font-face { font-family: 'Doto'; font-style: normal; font-weight: 100 900; src: url('/fonts/Doto-latin.woff2') format('woff2'); }
       body { margin: 0; padding: 0; overflow: hidden; }
     </style>
-    <script src="${TAILWIND_CDN_URL}"></script>
   </head>
   <body></body>
   </html>`;
@@ -191,24 +158,26 @@ const UserPage: React.FC = () => {
   const [funMessage, setFunMessage] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTheme, setActiveTheme] = useState<Theme>(THEMES[0]);
+  const [activeTheme, setActiveTheme] = useState<Theme>(DEFAULT_THEME);
   const [isDownloading, setIsDownloading] = useState<AspectRatio | null>(null);
   const [embeddedAvatarUrl, setEmbeddedAvatarUrl] = useState<string | null>(null);
   // Card display options
   const [showAIStat, setShowAIStat] = useState(true);
   const [showPrivateRepoNames, setShowPrivateRepoNames] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [rateLimited, setRateLimited] = useState(false);
 
   const auth = useAuth();
   // The private view is only requested for the signed-in user's own profile (the server re-checks this).
   const includePrivate = isOwnProfile(auth, username);
 
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     if (!username) return;
     try {
       setLoading(true);
       setError(null);
+      setRateLimited(false);
       const { stats, funMessage: message } = await fetchWrap(username, year, includePrivate);
       setUserData(stats);
       setFunMessage(message);
@@ -223,6 +192,7 @@ const UserPage: React.FC = () => {
       if (code === 'not_found') {
         setError(`Could not find a GitHub user with the name "${username}". Please check the spelling.`);
       } else if (code === 'rate_limited') {
+        setRateLimited(true);
         setError(
           auth.authEnabled && !includePrivate
             ? 'The shared GitHub API quota is exhausted right now. Sign in with GitHub to use your own quota, or try again later.'
@@ -285,6 +255,7 @@ const UserPage: React.FC = () => {
     if (!cardData) return;
     const userData = cardData;
     setIsDownloading(aspectRatio);
+    setDownloadError(null);
 
     const targetWidth = 1080;
     const targetHeight = 1440;
@@ -309,7 +280,6 @@ const UserPage: React.FC = () => {
         userData={exportUserData}
         funMessage={funMessage}
         theme={activeTheme}
-        layout={CardLayout.Classic}
       />
     );
 
@@ -318,7 +288,8 @@ const UserPage: React.FC = () => {
       await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      // Ensure fonts (if available) are loaded before capture
+      // Ask for each face the card uses, then wait: fonts.ready alone can resolve before they are requested
+      await Promise.all(["900 40px Archivo", "600 20px 'Martian Mono'", "900 40px Doto"].map((f) => (exportDocument as any).fonts?.load(f).catch(() => undefined)));
       const fontSet = (exportDocument as Document & { fonts?: FontFaceSet }).fonts;
       if (fontSet?.ready) {
         await fontSet.ready.catch(() => undefined);
@@ -368,7 +339,6 @@ const UserPage: React.FC = () => {
       });
 
       const link = document.createElement('a');
-      const safeAspectRatio = aspectRatio.replace(':', 'x');
       const safeUsername = username?.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       const safeTheme = activeTheme?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'theme';
       link.download = `gitwrap-${year}-${safeUsername}-${safeTheme}.png`;
@@ -376,10 +346,7 @@ const UserPage: React.FC = () => {
       link.click();
     } catch (err) {
       console.error('Failed to download image:', err);
-      const message = err instanceof Error ? err.message : String(err);
-      alert(
-        `Sorry, there was an error creating the image. This can be caused by external resources (like avatars) failing to load. Please try again.\n\nError: ${message}`
-      );
+      setDownloadError('The image could not be created. Check your connection and press Download again.');
     } finally {
       root.unmount();
       cleanup();
@@ -387,57 +354,49 @@ const UserPage: React.FC = () => {
     }
   };
 
+  const vars = themeVars(activeTheme) as React.CSSProperties;
+  const yearHref = (y: number) => `/${y}/u/${username}`;
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen relative">
-        <div className="text-center space-y-8">
-          {/* Animated GitHub logo/icon */}
-          <div className="relative inline-block">
-            <div className="w-24 h-24 mx-auto mb-6 relative">
-              <div
-                className="absolute inset-0 rounded-full opacity-20 animate-ping"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(90deg, #06b6d4 0%, #34d399 20%, #fb923c 40%, #ec4899 60%, #38bdf8 80%, #64748b 100%)',
-                }}
-              ></div>
-              <div
-                className="absolute inset-0 rounded-full opacity-40 blur-xl"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(90deg, #06b6d4 0%, #34d399 20%, #fb923c 40%, #ec4899 60%, #38bdf8 80%, #64748b 100%)',
-                }}
-              ></div>
-              <svg className="24 h-24 text-white opacity-90" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
-              </svg>
-            </div>
+      <div className="gw" style={vars}>
+        <Marquee year={year} yearHref={yearHref} />
+        <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 64, paddingBottom: 96 }}>
+          <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', overflowWrap: 'anywhere' }}>
+            Counting {username}&rsquo;s {year}
+          </h1>
+          <div className="lamps" role="status" aria-label="Loading" style={{ marginTop: 32 }}>
+            {Array.from({ length: 8 }, (_, i) => (
+              <span key={i} />
+            ))}
           </div>
-          
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Wrapping up {username}'s {year}</h2>
-            <p className="text-gray-400 text-sm">Analyzing contributions, calculating stats, and generating insights...</p>
-          </div>
-
-          {/* Progress dots */}
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </div>
-        </div>
+          <p className="silk" style={{ marginTop: 24 }}>
+            Reading contributions · scanning commits for AI co-authors · takes a few seconds
+          </p>
+        </main>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
-        <h2 className="text-3xl font-bold text-red-400">Oops! Something went wrong.</h2>
-        <p className="mt-2 text-gray-300 max-w-lg">{error}</p>
-        <Link to={`/${year}`} className="mt-6 px-6 py-2 bg-purple-600 rounded-full hover:bg-purple-700 transition-colors">
-          Try another username
-        </Link>
+      <div className="gw" style={vars}>
+        <Marquee year={year} yearHref={yearHref} />
+        <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 64, paddingBottom: 96 }}>
+          <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)' }}>No card this time</h1>
+          <p className="strip strip-warn" role="alert" style={{ marginTop: 32, maxWidth: 560 }}>
+            {error}
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 32 }}>
+            <button type="button" className="key" onClick={() => fetchData()}>
+              Try again
+            </button>
+            <Link to={`/${year}`} className="key key-plain">
+              Another username
+            </Link>
+            {rateLimited && <GitHubSignIn label="Sign in instead" />}
+          </div>
+        </main>
       </div>
     );
   }
@@ -445,158 +404,99 @@ const UserPage: React.FC = () => {
   if (!userData || !cardData) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-        <Link to={`/${year}`} className="text-lg font-bold hover:text-purple-400 transition-colors">&larr; GitWrap {year}</Link>
-        {auth.login && <GitHubSignIn />}
-      </div>
+    <div className="gw" style={vars}>
+      <Marquee year={year} yearHref={yearHref} />
 
-      {/* Data-source banner */}
-      {userData.includesPrivate ? (
-        <div className="mb-6 px-4 py-3 rounded-xl border border-green-400/30 bg-green-500/10 text-sm text-green-200">
-          🔒 Including your private contributions
-          {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} in private repos)` : ''}.
-          Only you see this version; a shared link shows the public view.
-        </div>
-      ) : (
-        <div className="mb-6 px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm text-gray-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <span>
-            Showing <strong className="text-white">public data only</strong>. Private contributions are included only
-            when you sign in with GitHub and open your own wrap.
-            {auth.login && !includePrivate
-              ? ` You're signed in as @${auth.login}; this is someone else's page.`
-              : ''}
-          </span>
-          {!auth.login && <GitHubSignIn label="Sign in to include private" />}
-        </div>
-      )}
+      <main className="gw-wrap" style={{ paddingTop: 40, paddingBottom: 72, flex: '1 0 auto' }}>
+        <div className="wrap-grid">
+          <GitWrapCard className="wrap-card" userData={cardData} funMessage={funMessage} theme={activeTheme} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-        <div className="lg:col-span-2">
-            {/* Let the card grow naturally so no content is clipped */}
-            <div className="w-full max-w-3xl mx-auto lg:max-w-none">
-              <GitWrapCard
-                ref={cardRef}
-                userData={cardData}
-                funMessage={funMessage}
-                theme={activeTheme}
-                layout={CardLayout.Classic}
-              />
-            </div>
-        </div>
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Customize Your Card</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-400">Theme</label>
-                <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
-              </div>
-              {userData.aiStats && (
-                <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showAIStat}
-                    onChange={(e) => setShowAIStat(e.target.checked)}
-                    className="w-4 h-4 accent-purple-500"
-                  />
-                  Show AI co-authored stat on card
-                </label>
-              )}
-              {hasPrivateTopRepo && (
-                <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showPrivateRepoNames}
-                    onChange={(e) => setShowPrivateRepoNames(e.target.checked)}
-                    className="w-4 h-4 accent-purple-500"
-                  />
-                  Show private repository names
-                </label>
-              )}
-            </div>
-          </div>
-          {userData.aiStats && <AIStatsPanel stats={userData.aiStats} />}
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Download</h2>
-            <div className="flex flex-col sm:flex-row gap-4">
-               {Object.values(AspectRatio).map(ar => (
-                <button
-                  key={ar}
-                  onClick={() => handleDownload(ar)}
-                  disabled={!!isDownloading}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 rounded-lg font-semibold hover:bg-purple-700 transition-all disabled:bg-purple-800 disabled:cursor-not-allowed"
-                >
-                  {isDownloading === ar ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Generating...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <DownloadIcon className="w-5 h-5" />
-                      <span>Social Post (3:4)</span>
-                    </>
-                  )}
-                </button>
-              ))}
-            </div>
-             {isDownloading && <p className="text-sm text-gray-400 mt-2">Generating high-quality PNG, please wait...</p>}
-          </div>
-          {username && <SocialShare username={username} year={year} />}
-          <div>
-            <Contributors />
-          </div>
-          
-          {/* Contribution CTA */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-500">
-              <div className="text-center space-y-4">
-                {/* Animated icon */}
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-500">
-                  <svg className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-white">Join the Project</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">
-                    Help us make GitWrap even better. Contribute code, report bugs, or suggest new features.
+          <div className="stack">
+            <section>
+              <h1 className="display" style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', overflowWrap: 'anywhere' }}>
+                {userData.login}&rsquo;s {year}
+              </h1>
+              {userData.includesPrivate ? (
+                <p className="strip" style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <Lock size={18} style={{ marginTop: 2 }} />
+                  <span>
+                    Your private repositories are counted
+                    {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} commits)` : ''}. Only you see this
+                    version; a shared link shows the public one.
+                  </span>
+                </p>
+              ) : (
+                <div style={{ marginTop: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+                  <p className="dim" style={{ margin: 0, maxWidth: '44ch', fontSize: '0.9375rem' }}>
+                    Public activity only.{' '}
+                    {auth.login
+                      ? `You are signed in as @${auth.login}; private repositories count only on your own card.`
+                      : 'Is this you? Sign in to count your private repositories too.'}
                   </p>
+                  <GitHubSignIn label="Sign in" className="key-sm" />
                 </div>
-                
-                <a
-                  href={APP_REPO_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/50 text-white rounded-lg text-sm font-medium transition-all duration-300 group/btn"
-                >
-                  <span>Contribute Now</span>
-                  <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+              )}
+            </section>
+
+            <section>
+              <button
+                type="button"
+                className="key key-lg key-block"
+                onClick={() => handleDownload(AspectRatio.Social)}
+                disabled={!!isDownloading}
+                aria-busy={!!isDownloading}
+              >
+                <Download size={22} />
+                {isDownloading ? 'Printing the card' : 'Download card'}
+              </button>
+              <p className="silk" style={{ margin: '20px 0 16px' }}>
+                PNG · 1080 × 1440 · sized for feeds
+              </p>
+              {downloadError && (
+                <p className="strip strip-warn" role="alert" style={{ marginBottom: 16 }}>
+                  {downloadError}
+                </p>
+              )}
+              {username && <SocialShare username={username} year={year} />}
+            </section>
+
+            <section>
+              <h2 className="heading">Colourway</h2>
+              <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
+              {(userData.aiStats || hasPrivateTopRepo) && (
+                <div style={{ display: 'grid', gap: 20, marginTop: 28 }}>
+                  {userData.aiStats && (
+                    <label className="switch">
+                      <input type="checkbox" checked={showAIStat} onChange={(e) => setShowAIStat(e.target.checked)} />
+                      Show the AI co-authored stat on the card
+                    </label>
+                  )}
+                  {hasPrivateTopRepo && (
+                    <label className="switch">
+                      <input type="checkbox" checked={showPrivateRepoNames} onChange={(e) => setShowPrivateRepoNames(e.target.checked)} />
+                      Show private repository names
+                    </label>
+                  )}
+                </div>
+              )}
+            </section>
+
+            {userData.aiStats && <AIStatsPanel stats={userData.aiStats} />}
+
+            <section>
+              <h2 className="heading">Built by</h2>
+              <Contributors />
+              <p style={{ margin: '20px 0 0' }}>
+                <a className="link" href={APP_REPO_URL} target="_blank" rel="noopener noreferrer">
+                  Contribute on GitHub
                 </a>
-              </div>
-            </div>
+              </p>
+            </section>
           </div>
         </div>
-      </div>
-      <footer className="mt-12 md:mt-16 text-center px-4 pb-6">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
-          <span className="text-gray-400 text-xs sm:text-sm">
-            Made with 💜 for developers
-          </span>
-          <span className="hidden sm:inline text-gray-600">•</span>
-          <span className="text-gray-500 text-[0.7rem] sm:text-xs">
-            Powered by React, Tailwind & Gemini AI
-          </span>
-        </div>
-        <div className="mt-1.5 text-gray-600 text-[0.7rem] sm:text-xs">
-          Celebrating your open source journey 🚀
-        </div>
-      </footer>
+      </main>
+
+      <Footer />
     </div>
   );
 };

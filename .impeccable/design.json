@@ -1,0 +1,1312 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T11:43:10.212Z",
+  "title": "Design System: GitWrap",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "primary",
+        "displayName": "Player One Ground",
+        "colourway": "Player One",
+        "colourwayRole": "ground",
+        "canonical": "oklch(47.2% 0.257 268)",
+        "tonalRamp": [
+          "#020035",
+          "#0B0679",
+          "#1924B9",
+          "#2C49F2",
+          "#557DFE",
+          "#8BABFD",
+          "#BED0FD",
+          "#E8EEFE"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Player One Keyline",
+        "colourway": "Player One",
+        "colourwayRole": "line",
+        "canonical": "oklch(16.2% 0.021 275)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#24262E",
+          "#42444F",
+          "#626572",
+          "#858896",
+          "#AAADBB",
+          "#CDD0DD",
+          "#ECEEF8"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Player One Ink",
+        "colourway": "Player One",
+        "colourwayRole": "ink",
+        "canonical": "oklch(16.2% 0.021 275)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#24262E",
+          "#42444F",
+          "#626572",
+          "#858896",
+          "#AAADBB",
+          "#CDD0DD",
+          "#ECEEF8"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Player One Panel",
+        "colourway": "Player One",
+        "colourwayRole": "panel",
+        "canonical": "oklch(96.6% 0.011 95)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272622",
+          "#46453F",
+          "#68665F",
+          "#8B8982",
+          "#B0AEA7",
+          "#D2D1CB",
+          "#F0EEE9"
+        ]
+      },
+      "a1": {
+        "role": "secondary",
+        "displayName": "Player One Ink One",
+        "colourway": "Player One",
+        "colourwayRole": "a1",
+        "canonical": "oklch(87.7% 0.174 93)",
+        "tonalRamp": [
+          "#110A00",
+          "#302501",
+          "#544301",
+          "#7B6406",
+          "#A4860D",
+          "#CFAA11",
+          "#F1CE5A",
+          "#FFEEB9"
+        ]
+      },
+      "a2": {
+        "role": "tertiary",
+        "displayName": "Player One Ink Two",
+        "colourway": "Player One",
+        "colourwayRole": "a2",
+        "canonical": "oklch(69.7% 0.198 13)",
+        "tonalRamp": [
+          "#200004",
+          "#4E0017",
+          "#84002C",
+          "#BA1646",
+          "#E64567",
+          "#FF8192",
+          "#FDBEC3",
+          "#FFE8EA"
+        ]
+      },
+      "on-ground": {
+        "role": "neutral",
+        "displayName": "Player One On Ground",
+        "colourway": "Player One",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(100.0% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Player One On Ground Dim",
+        "colourway": "Player One",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(86.8% 0.066 278)",
+        "tonalRamp": [
+          "#090A16",
+          "#21243C",
+          "#3E4263",
+          "#5D638B",
+          "#8086B1",
+          "#A5ABD5",
+          "#C9CEF4",
+          "#EBEDFD"
+        ]
+      },
+      "on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Player One On Panel Dim",
+        "colourway": "Player One",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(47.1% 0.036 273)",
+        "tonalRamp": [
+          "#090B11",
+          "#222633",
+          "#3F4456",
+          "#5F657B",
+          "#8288A0",
+          "#A6ADC4",
+          "#CAD0E5",
+          "#E9EEFF"
+        ]
+      },
+      "token-ground": {
+        "role": "primary",
+        "displayName": "Token Ground",
+        "colourway": "Token",
+        "colourwayRole": "ground",
+        "canonical": "oklch(86.0% 0.172 89)",
+        "tonalRamp": [
+          "#110A00",
+          "#322400",
+          "#564204",
+          "#7E6200",
+          "#A98404",
+          "#D5A703",
+          "#F6CC5C",
+          "#FEEDC4"
+        ]
+      },
+      "token-line": {
+        "role": "neutral",
+        "displayName": "Token Keyline",
+        "colourway": "Token",
+        "colourwayRole": "line",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "token-ink": {
+        "role": "neutral",
+        "displayName": "Token Ink",
+        "colourway": "Token",
+        "colourwayRole": "ink",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "token-panel": {
+        "role": "neutral",
+        "displayName": "Token Panel",
+        "colourway": "Token",
+        "colourwayRole": "panel",
+        "canonical": "oklch(100.0% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "token-a1": {
+        "role": "secondary",
+        "displayName": "Token Ink One",
+        "colourway": "Token",
+        "colourwayRole": "a1",
+        "canonical": "oklch(68.4% 0.207 34)",
+        "tonalRamp": [
+          "#200000",
+          "#4C0900",
+          "#7F1A01",
+          "#B72A03",
+          "#EB4722",
+          "#FD886D",
+          "#FDC0B2",
+          "#FDE9E5"
+        ]
+      },
+      "token-a2": {
+        "role": "tertiary",
+        "displayName": "Token Ink Two",
+        "colourway": "Token",
+        "colourwayRole": "a2",
+        "canonical": "oklch(85.2% 0.094 228)",
+        "tonalRamp": [
+          "#000D16",
+          "#022B3A",
+          "#064C64",
+          "#19708F",
+          "#4294B6",
+          "#6FB9DA",
+          "#9DDBF8",
+          "#DDF3FD"
+        ]
+      },
+      "token-led": {
+        "role": "secondary",
+        "displayName": "Token LED",
+        "colourway": "Token",
+        "colourwayRole": "led",
+        "canonical": "oklch(86.0% 0.172 89)",
+        "tonalRamp": [
+          "#110A00",
+          "#322400",
+          "#564204",
+          "#7E6200",
+          "#A98404",
+          "#D5A703",
+          "#F6CC5C",
+          "#FEEDC4"
+        ]
+      },
+      "token-on-ground": {
+        "role": "neutral",
+        "displayName": "Token On Ground",
+        "colourway": "Token",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "token-on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Token On Ground Dim",
+        "colourway": "Token",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(40.6% 0.083 91)",
+        "tonalRamp": [
+          "#100A00",
+          "#312500",
+          "#53430D",
+          "#776429",
+          "#9C874C",
+          "#C0AD74",
+          "#E1D0A0",
+          "#FBEEC7"
+        ]
+      },
+      "token-on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Token On Panel Dim",
+        "colourway": "Token",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(47.1% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "mint-ground": {
+        "role": "primary",
+        "displayName": "Mint Cab Ground",
+        "colourway": "Mint Cab",
+        "colourwayRole": "ground",
+        "canonical": "oklch(78.9% 0.186 156)",
+        "tonalRamp": [
+          "#001005",
+          "#002F18",
+          "#03532F",
+          "#087A47",
+          "#10A361",
+          "#25CD7E",
+          "#75EEA8",
+          "#C5FFD9"
+        ]
+      },
+      "mint-line": {
+        "role": "neutral",
+        "displayName": "Mint Cab Keyline",
+        "colourway": "Mint Cab",
+        "colourwayRole": "line",
+        "canonical": "oklch(22.0% 0.036 170)",
+        "tonalRamp": [
+          "#060D0A",
+          "#1A2A25",
+          "#344B42",
+          "#526D63",
+          "#749186",
+          "#9AB5AB",
+          "#C0D7CE",
+          "#E0F4EC"
+        ]
+      },
+      "mint-ink": {
+        "role": "neutral",
+        "displayName": "Mint Cab Ink",
+        "colourway": "Mint Cab",
+        "colourwayRole": "ink",
+        "canonical": "oklch(22.0% 0.036 170)",
+        "tonalRamp": [
+          "#060D0A",
+          "#1A2A25",
+          "#344B42",
+          "#526D63",
+          "#749186",
+          "#9AB5AB",
+          "#C0D7CE",
+          "#E0F4EC"
+        ]
+      },
+      "mint-panel": {
+        "role": "neutral",
+        "displayName": "Mint Cab Panel",
+        "colourway": "Mint Cab",
+        "colourwayRole": "panel",
+        "canonical": "oklch(99.0% 0.014 162)",
+        "tonalRamp": [
+          "#090C0A",
+          "#222825",
+          "#3F4743",
+          "#5F6964",
+          "#828C87",
+          "#A7B1AB",
+          "#CBD3CF",
+          "#EAF0ED"
+        ]
+      },
+      "mint-a1": {
+        "role": "secondary",
+        "displayName": "Mint Cab Ink One",
+        "colourway": "Mint Cab",
+        "colourwayRole": "a1",
+        "canonical": "oklch(71.8% 0.201 355)",
+        "tonalRamp": [
+          "#1E000D",
+          "#4B0029",
+          "#7F024A",
+          "#B3186C",
+          "#DF4590",
+          "#FF7AB4",
+          "#FEBAD4",
+          "#FFE7EF"
+        ]
+      },
+      "mint-a2": {
+        "role": "tertiary",
+        "displayName": "Mint Cab Ink Two",
+        "colourway": "Mint Cab",
+        "colourwayRole": "a2",
+        "canonical": "oklch(90.9% 0.165 98)",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2E2601",
+          "#514503",
+          "#776602",
+          "#9E8908",
+          "#C9AD08",
+          "#E8D265",
+          "#FFF0A8"
+        ]
+      },
+      "mint-on-ground": {
+        "role": "neutral",
+        "displayName": "Mint Cab On Ground",
+        "colourway": "Mint Cab",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(22.0% 0.036 170)",
+        "tonalRamp": [
+          "#060D0A",
+          "#1A2A25",
+          "#344B42",
+          "#526D63",
+          "#749186",
+          "#9AB5AB",
+          "#C0D7CE",
+          "#E0F4EC"
+        ]
+      },
+      "mint-on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Mint Cab On Ground Dim",
+        "colourway": "Mint Cab",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(39.0% 0.082 161)",
+        "tonalRamp": [
+          "#000F07",
+          "#052E1D",
+          "#1A5138",
+          "#377457",
+          "#5A9979",
+          "#82BD9E",
+          "#ACDFC3",
+          "#D1FAE3"
+        ]
+      },
+      "mint-on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Mint Cab On Panel Dim",
+        "colourway": "Mint Cab",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(47.5% 0.053 164)",
+        "tonalRamp": [
+          "#040E09",
+          "#142C22",
+          "#2C4D3E",
+          "#4A705E",
+          "#6B9480",
+          "#92B8A5",
+          "#B9DAC9",
+          "#DBF6E8"
+        ]
+      },
+      "grape-ground": {
+        "role": "primary",
+        "displayName": "Grape Ground",
+        "colourway": "Grape",
+        "colourwayRole": "ground",
+        "canonical": "oklch(49.1% 0.250 283)",
+        "tonalRamp": [
+          "#0B0030",
+          "#25006F",
+          "#4212B1",
+          "#5F39E9",
+          "#7E6FFE",
+          "#A4A2FD",
+          "#CACCFD",
+          "#ECEDFD"
+        ]
+      },
+      "grape-line": {
+        "role": "neutral",
+        "displayName": "Grape Keyline",
+        "colourway": "Grape",
+        "colourwayRole": "line",
+        "canonical": "oklch(17.9% 0.062 290)",
+        "tonalRamp": [
+          "#0B0915",
+          "#262339",
+          "#454060",
+          "#656087",
+          "#8883AD",
+          "#ADA8D1",
+          "#D0CCF0",
+          "#EEECFE"
+        ]
+      },
+      "grape-ink": {
+        "role": "neutral",
+        "displayName": "Grape Ink",
+        "colourway": "Grape",
+        "colourwayRole": "ink",
+        "canonical": "oklch(17.9% 0.062 290)",
+        "tonalRamp": [
+          "#0B0915",
+          "#262339",
+          "#454060",
+          "#656087",
+          "#8883AD",
+          "#ADA8D1",
+          "#D0CCF0",
+          "#EEECFE"
+        ]
+      },
+      "grape-panel": {
+        "role": "neutral",
+        "displayName": "Grape Panel",
+        "colourway": "Grape",
+        "colourwayRole": "panel",
+        "canonical": "oklch(96.3% 0.020 298)",
+        "tonalRamp": [
+          "#0B0A0E",
+          "#27252C",
+          "#46434D",
+          "#676470",
+          "#8A8794",
+          "#AFACB9",
+          "#D2CFDA",
+          "#EFEDF6"
+        ]
+      },
+      "grape-a1": {
+        "role": "secondary",
+        "displayName": "Grape Ink One",
+        "colourway": "Grape",
+        "colourwayRole": "a1",
+        "canonical": "oklch(90.7% 0.205 123)",
+        "tonalRamp": [
+          "#080E00",
+          "#212B00",
+          "#3C4C03",
+          "#597103",
+          "#799708",
+          "#99BF04",
+          "#BEE25E",
+          "#DEFD99"
+        ]
+      },
+      "grape-a2": {
+        "role": "tertiary",
+        "displayName": "Grape Ink Two",
+        "colourway": "Grape",
+        "colourwayRole": "a2",
+        "canonical": "oklch(73.5% 0.188 354)",
+        "tonalRamp": [
+          "#1E000D",
+          "#4B012A",
+          "#7E034B",
+          "#AE256E",
+          "#D94D92",
+          "#FE7BB6",
+          "#FFBAD5",
+          "#FEE8F0"
+        ]
+      },
+      "grape-on-ground": {
+        "role": "neutral",
+        "displayName": "Grape On Ground",
+        "colourway": "Grape",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(100.0% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "grape-on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Grape On Ground Dim",
+        "colourway": "Grape",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(87.2% 0.071 296)",
+        "tonalRamp": [
+          "#0C0916",
+          "#28213B",
+          "#483E62",
+          "#695E8A",
+          "#8C81B0",
+          "#B1A6D4",
+          "#D3CAF3",
+          "#EFECFE"
+        ]
+      },
+      "grape-on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Grape On Panel Dim",
+        "colourway": "Grape",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(46.6% 0.060 295)",
+        "tonalRamp": [
+          "#0C0914",
+          "#282238",
+          "#473F5E",
+          "#686084",
+          "#8B82AA",
+          "#B0A7CE",
+          "#D3CBEE",
+          "#EFEBFF"
+        ]
+      },
+      "bone-ground": {
+        "role": "primary",
+        "displayName": "Bone Ground",
+        "colourway": "Bone",
+        "colourwayRole": "ground",
+        "canonical": "oklch(92.1% 0.015 94)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#282621",
+          "#47453D",
+          "#69665D",
+          "#8C897F",
+          "#B1AEA4",
+          "#D3D1C8",
+          "#F0EEE7"
+        ]
+      },
+      "bone-line": {
+        "role": "neutral",
+        "displayName": "Bone Keyline",
+        "colourway": "Bone",
+        "colourwayRole": "line",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "bone-ink": {
+        "role": "neutral",
+        "displayName": "Bone Ink",
+        "colourway": "Bone",
+        "colourwayRole": "ink",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "bone-panel": {
+        "role": "neutral",
+        "displayName": "Bone Panel",
+        "colourway": "Bone",
+        "colourwayRole": "panel",
+        "canonical": "oklch(100.0% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "bone-a1": {
+        "role": "secondary",
+        "displayName": "Bone Ink One",
+        "colourway": "Bone",
+        "colourwayRole": "a1",
+        "canonical": "oklch(63.6% 0.212 31)",
+        "tonalRamp": [
+          "#200000",
+          "#500100",
+          "#850700",
+          "#BD1704",
+          "#EE422D",
+          "#FE8673",
+          "#FDC0B5",
+          "#FDE9E6"
+        ]
+      },
+      "bone-a2": {
+        "role": "tertiary",
+        "displayName": "Bone Ink Two",
+        "colourway": "Bone",
+        "colourwayRole": "a2",
+        "canonical": "oklch(87.7% 0.174 93)",
+        "tonalRamp": [
+          "#110A00",
+          "#302501",
+          "#544301",
+          "#7B6406",
+          "#A4860D",
+          "#CFAA11",
+          "#F1CE5A",
+          "#FFEEB9"
+        ]
+      },
+      "bone-on-ground": {
+        "role": "neutral",
+        "displayName": "Bone On Ground",
+        "colourway": "Bone",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(17.8% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "bone-on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Bone On Ground Dim",
+        "colourway": "Bone",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(46.4% 0.016 93)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#282620",
+          "#47453D",
+          "#69665C",
+          "#8C897E",
+          "#B1AEA3",
+          "#D4D1C8",
+          "#F1EEE7"
+        ]
+      },
+      "bone-on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Bone On Panel Dim",
+        "colourway": "Bone",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(48.2% 0.000 0)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#AEAEAE",
+          "#D1D1D1",
+          "#EEEEEE"
+        ]
+      },
+      "night-ground": {
+        "role": "primary",
+        "displayName": "Night Shift Ground",
+        "colourway": "Night Shift",
+        "colourwayRole": "ground",
+        "canonical": "oklch(20.1% 0.012 271)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#25262B",
+          "#43454B",
+          "#63666D",
+          "#868991",
+          "#ABAEB6",
+          "#CED1D8",
+          "#ECEEF4"
+        ]
+      },
+      "night-line": {
+        "role": "neutral",
+        "displayName": "Night Shift Keyline",
+        "colourway": "Night Shift",
+        "colourwayRole": "line",
+        "canonical": "oklch(95.7% 0.012 96)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272622",
+          "#46453F",
+          "#68665F",
+          "#8B8981",
+          "#B0AEA6",
+          "#D3D1CA",
+          "#F0EEE9"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Shift Ink",
+        "colourway": "Night Shift",
+        "colourwayRole": "ink",
+        "canonical": "oklch(15.0% 0.009 274)",
+        "tonalRamp": [
+          "#0B0B0D",
+          "#252629",
+          "#444549",
+          "#64666B",
+          "#87898F",
+          "#ACAEB3",
+          "#CFD1D6",
+          "#EDEEF2"
+        ]
+      },
+      "night-panel": {
+        "role": "neutral",
+        "displayName": "Night Shift Panel",
+        "colourway": "Night Shift",
+        "colourwayRole": "panel",
+        "canonical": "oklch(95.7% 0.012 96)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272622",
+          "#46453F",
+          "#68665F",
+          "#8B8981",
+          "#B0AEA6",
+          "#D3D1CA",
+          "#F0EEE9"
+        ]
+      },
+      "night-a1": {
+        "role": "secondary",
+        "displayName": "Night Shift Ink One",
+        "colourway": "Night Shift",
+        "colourwayRole": "a1",
+        "canonical": "oklch(78.9% 0.186 156)",
+        "tonalRamp": [
+          "#001005",
+          "#002F18",
+          "#03532F",
+          "#087A47",
+          "#10A361",
+          "#25CD7E",
+          "#75EEA8",
+          "#C5FFD9"
+        ]
+      },
+      "night-a2": {
+        "role": "tertiary",
+        "displayName": "Night Shift Ink Two",
+        "colourway": "Night Shift",
+        "colourwayRole": "a2",
+        "canonical": "oklch(87.7% 0.174 93)",
+        "tonalRamp": [
+          "#110A00",
+          "#302501",
+          "#544301",
+          "#7B6406",
+          "#A4860D",
+          "#CFAA11",
+          "#F1CE5A",
+          "#FFEEB9"
+        ]
+      },
+      "night-on-ground": {
+        "role": "neutral",
+        "displayName": "Night Shift On Ground",
+        "colourway": "Night Shift",
+        "colourwayRole": "on-ground",
+        "canonical": "oklch(95.7% 0.012 96)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272622",
+          "#46453F",
+          "#68665F",
+          "#8B8981",
+          "#B0AEA6",
+          "#D3D1CA",
+          "#F0EEE9"
+        ]
+      },
+      "night-on-ground-dim": {
+        "role": "neutral",
+        "displayName": "Night Shift On Ground Dim",
+        "colourway": "Night Shift",
+        "colourwayRole": "on-ground-dim",
+        "canonical": "oklch(75.1% 0.019 269)",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#24262D",
+          "#41454E",
+          "#616671",
+          "#848995",
+          "#A9AEBA",
+          "#CDD1DC",
+          "#EBEEF7"
+        ]
+      },
+      "night-on-panel-dim": {
+        "role": "neutral",
+        "displayName": "Night Shift On Panel Dim",
+        "colourway": "Night Shift",
+        "colourwayRole": "on-panel-dim",
+        "canonical": "oklch(46.8% 0.020 268)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#23262D",
+          "#41454F",
+          "#616672",
+          "#848996",
+          "#A9AEBA",
+          "#CCD1DC",
+          "#EBEEF7"
+        ]
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Dark Glass",
+        "colourway": "fixed",
+        "canonical": "oklch(16.2% 0.021 275)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#24262E",
+          "#42444F",
+          "#626572",
+          "#858896",
+          "#AAADBB",
+          "#CDD0DD",
+          "#ECEEF8"
+        ]
+      },
+      "glass-text": {
+        "role": "neutral",
+        "displayName": "Glass Text",
+        "colourway": "fixed",
+        "canonical": "oklch(96.6% 0.011 95)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#272622",
+          "#46453F",
+          "#68665F",
+          "#8B8982",
+          "#B0AEA7",
+          "#D2D1CB",
+          "#F0EEE9"
+        ]
+      },
+      "glass-dim": {
+        "role": "neutral",
+        "displayName": "Glass Dim",
+        "colourway": "fixed",
+        "canonical": "oklch(70.7% 0.030 272)",
+        "tonalRamp": [
+          "#090B10",
+          "#232631",
+          "#404453",
+          "#606577",
+          "#83889C",
+          "#A8ADC0",
+          "#CBD0E1",
+          "#EAEEFC"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page headlines in heavy condensed capitals; size is set per use with clamp()."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings on the wrap page (.heading)."
+      },
+      "score-value": {
+        "displayName": "Score value",
+        "purpose": "The reading at the right of a score row; tabular numerals."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "The one paragraph under the landing headline, max-width 34rem."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default running text at normal width."
+      },
+      "label": {
+        "displayName": "Silk label",
+        "purpose": "Silkscreened legends, measurements and instructions (.silk); also the type of .link."
+      },
+      "key": {
+        "displayName": "Key legend",
+        "purpose": "Text on keys; 0.875rem on small keys, 1.375rem on large."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "GitWrap in the marquee; the only wide setting of Archivo."
+      },
+      "slot-input": {
+        "displayName": "Slot input",
+        "purpose": "Typed text and the @ prefix in the coin-slot field."
+      },
+      "card-year": {
+        "displayName": "Card year",
+        "purpose": "The dot-matrix year on the card. Doto is used nowhere else."
+      }
+    },
+    "shadows": [
+      {
+        "name": "travel-edge",
+        "value": "0 6px 0 0 var(--line)",
+        "purpose": "The hard edge under every key and colourway swatch; shrinks to 4px on hover and 0 when pressed."
+      },
+      {
+        "name": "travel-edge-sm",
+        "value": "0 4px 0 0 var(--line)",
+        "purpose": "The edge under small keys and switches."
+      },
+      {
+        "name": "slot-recess",
+        "value": "inset 0 6px 0 0 rgb(0 0 0 / 0.55)",
+        "purpose": "Recessed top edge inside the coin-slot input."
+      },
+      {
+        "name": "dispenser-lip",
+        "value": "0 6px 0 0 rgb(0 0 0 / 0.35)",
+        "purpose": "Lip under the dispenser mouth, over the card feeding out."
+      }
+    ],
+    "motion": [
+      {
+        "name": "key-travel",
+        "value": "transform 70ms steps(2), box-shadow 70ms steps(2)",
+        "purpose": "Keys, swatches and switches moving onto their edge."
+      },
+      {
+        "name": "ground-swap",
+        "value": "background-color 120ms steps(3)",
+        "purpose": "The page ground changing when a colourway is picked."
+      },
+      {
+        "name": "feed",
+        "value": "feed 900ms steps(9) both",
+        "purpose": "The sample card feeding out of the dispenser once on load (clip-path reveal plus translateY from -12%)."
+      },
+      {
+        "name": "lamp",
+        "value": "lamp 1.6s steps(1) infinite, 0.2s stagger across 8 lamps",
+        "purpose": "Loading lamps stepping from panel to a1."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none",
+        "purpose": "Under prefers-reduced-motion every animation and transition above is removed."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "hero-stack",
+        "value": "1040px",
+        "purpose": "Landing hero becomes one column; card capped at 480px."
+      },
+      {
+        "name": "wrap-stack",
+        "value": "980px",
+        "purpose": "Wrap page becomes one column; card centred, no longer sticky."
+      },
+      {
+        "name": "hide-sm",
+        "value": "640px",
+        "purpose": "Signed-in login hidden in the marquee."
+      },
+      {
+        "name": "controls-stack",
+        "value": "520px",
+        "purpose": "Landing controls stack in one column."
+      },
+      {
+        "name": "marquee-compact",
+        "value": "480px",
+        "purpose": "Hazard stripe removed; wordmark 1.125rem."
+      },
+      {
+        "name": "coarse-pointer",
+        "value": "(pointer: coarse)",
+        "purpose": "Small keys grow to a 44px minimum target."
+      }
+    ],
+    "colourways": [
+      {
+        "id": "p1",
+        "name": "Player One",
+        "prefix": "",
+        "default": true
+      },
+      {
+        "id": "token",
+        "name": "Token",
+        "prefix": "token-"
+      },
+      {
+        "id": "mint",
+        "name": "Mint Cab",
+        "prefix": "mint-"
+      },
+      {
+        "id": "grape",
+        "name": "Grape",
+        "prefix": "grape-"
+      },
+      {
+        "id": "bone",
+        "name": "Bone",
+        "prefix": "bone-"
+      },
+      {
+        "id": "night",
+        "name": "Night Shift",
+        "prefix": "night-"
+      }
+    ],
+    "card": {
+      "width": 1080,
+      "height": 1440,
+      "padding": 44,
+      "gap": 22,
+      "keyline": 4,
+      "ledOpacitySteps": [
+        0.09,
+        0.5,
+        0.7,
+        0.85,
+        1
+      ],
+      "source": "components/ArcadeCard.tsx",
+      "note": "Inline-styled and fixed-size; scaled on screen by components/GitWrapCard.tsx."
+    }
+  },
+  "components": [
+    {
+      "name": "Key (primary)",
+      "kind": "button",
+      "refersTo": "key-lg",
+      "description": "The one main action on a screen: an a1 keycap that travels onto its edge when pressed.",
+      "html": "<div class=\"ds-ground\"><button type=\"button\" class=\"ds-key ds-key-lg\">Start <svg width=\"20\" height=\"20\" viewBox=\"0 0 16 16\" aria-hidden=\"true\" shape-rendering=\"crispEdges\"><path d=\"M1 7h9V3l5 5-5 5V9H1V7z\" fill=\"currentColor\"/></svg></button></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; } .ds-key { --face: var(--a1); --travel: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 48px; padding: 0.75rem 1.25rem; background: var(--face); color: var(--ink); border: 3px solid var(--line); border-radius: 0; box-shadow: 0 var(--travel) 0 0 var(--line); font-family: var(--display); font-weight: 800; font-stretch: 78%; font-size: 1.0625rem; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; white-space: nowrap; cursor: pointer; user-select: none; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-key:hover { transform: translateY(2px); box-shadow: 0 calc(var(--travel) - 2px) 0 0 var(--line); } .ds-key:active, .ds-key[aria-pressed='true'], .ds-key[aria-current='page'] { transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key:focus-visible { outline: 3px solid var(--on-ground); outline-offset: 4px; } .ds-key:disabled { cursor: not-allowed; background-image: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(0 0 0 / 0.18) 6px 12px); transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key-lg { min-height: 60px; padding: 1rem 1.75rem; font-size: 1.375rem; }"
+    },
+    {
+      "name": "Key (plain)",
+      "kind": "button",
+      "refersTo": "key-plain",
+      "description": "Secondary actions on a panel-coloured face; shown with its disabled (hatched, pressed-down) state.",
+      "html": "<div class=\"ds-ground\"><button type=\"button\" class=\"ds-key ds-key-plain\">Sign in</button> <button type=\"button\" class=\"ds-key ds-key-plain\" disabled>Sign in</button></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; display: flex; gap: 16px; } .ds-key { --face: var(--a1); --travel: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 48px; padding: 0.75rem 1.25rem; background: var(--face); color: var(--ink); border: 3px solid var(--line); border-radius: 0; box-shadow: 0 var(--travel) 0 0 var(--line); font-family: var(--display); font-weight: 800; font-stretch: 78%; font-size: 1.0625rem; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; white-space: nowrap; cursor: pointer; user-select: none; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-key:hover { transform: translateY(2px); box-shadow: 0 calc(var(--travel) - 2px) 0 0 var(--line); } .ds-key:active, .ds-key[aria-pressed='true'], .ds-key[aria-current='page'] { transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key:focus-visible { outline: 3px solid var(--on-ground); outline-offset: 4px; } .ds-key:disabled { cursor: not-allowed; background-image: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(0 0 0 / 0.18) 6px 12px); transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key-plain { --face: var(--panel); }"
+    },
+    {
+      "name": "Year keys",
+      "kind": "nav",
+      "refersTo": "key-sm",
+      "description": "Small plain keys for edition years in the marquee; the current year sits pressed down in a1.",
+      "html": "<nav class=\"ds-ground\" aria-label=\"Edition\"><a href=\"#\" class=\"ds-key ds-key-sm ds-key-plain\">2025</a><a href=\"#\" class=\"ds-key ds-key-sm ds-key-plain\" aria-current=\"page\">2026</a></nav>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; display: flex; gap: 8px; } .ds-key { --face: var(--a1); --travel: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 48px; padding: 0.75rem 1.25rem; background: var(--face); color: var(--ink); border: 3px solid var(--line); border-radius: 0; box-shadow: 0 var(--travel) 0 0 var(--line); font-family: var(--display); font-weight: 800; font-stretch: 78%; font-size: 1.0625rem; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; white-space: nowrap; cursor: pointer; user-select: none; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-key:hover { transform: translateY(2px); box-shadow: 0 calc(var(--travel) - 2px) 0 0 var(--line); } .ds-key:active, .ds-key[aria-pressed='true'], .ds-key[aria-current='page'] { transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key:focus-visible { outline: 3px solid var(--on-ground); outline-offset: 4px; } .ds-key:disabled { cursor: not-allowed; background-image: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(0 0 0 / 0.18) 6px 12px); transform: translateY(var(--travel)); box-shadow: 0 0 0 0 var(--line); } .ds-key-plain { --face: var(--panel); } .ds-key-sm { min-height: 36px; padding: 0.4rem 0.75rem; font-size: 0.875rem; --travel: 4px; } .ds-key[aria-current='page'] { --face: var(--a1); }"
+    },
+    {
+      "name": "Marquee",
+      "kind": "nav",
+      "refersTo": "key-sm",
+      "description": "The strip across the top of every page: wordmark, hazard stripe, year keys, closed by one keyline.",
+      "html": "<header class=\"ds-marquee\"><a href=\"#\" class=\"ds-wordmark\">GitWrap</a><div class=\"ds-stripe\" aria-hidden=\"true\"></div><a href=\"#\" class=\"ds-yearkey\">2025</a><a href=\"#\" class=\"ds-yearkey\" aria-current=\"page\">2026</a></header>",
+      "css": ".ds-marquee { display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: var(--ground); border-bottom: 3px solid var(--line); } .ds-wordmark { font-family: var(--display); font-weight: 900; font-stretch: 112%; font-size: 1.375rem; letter-spacing: 0.02em; text-transform: uppercase; text-decoration: none; color: var(--on-ground); white-space: nowrap; } .ds-wordmark:focus-visible, .ds-yearkey:focus-visible { outline: 3px solid var(--on-ground); outline-offset: 4px; } .ds-stripe { flex: 1 1 auto; min-width: 24px; height: 14px; border: 3px solid var(--line); background-image: repeating-linear-gradient(-45deg, var(--line) 0 10px, var(--a1) 10px 20px); } .ds-yearkey { display: inline-flex; align-items: center; min-height: 36px; padding: 0.4rem 0.75rem; background: var(--panel); color: var(--ink); border: 3px solid var(--line); box-shadow: 0 4px 0 0 var(--line); font-family: var(--display); font-weight: 800; font-stretch: 78%; font-size: 0.875rem; line-height: 1; letter-spacing: 0.04em; text-decoration: none; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-yearkey:hover { transform: translateY(2px); box-shadow: 0 2px 0 0 var(--line); } .ds-yearkey:active, .ds-yearkey[aria-current='page'] { transform: translateY(4px); box-shadow: 0 0 0 0 var(--line); } .ds-yearkey[aria-current='page'] { background: var(--a1); }"
+    },
+    {
+      "name": "Coin slot",
+      "kind": "input",
+      "refersTo": "slot",
+      "description": "The username field: dark glass with a recessed top edge, a1 prefix and caret, and a silkscreened instruction below.",
+      "html": "<div class=\"ds-ground\"><label class=\"ds-slot\"><span class=\"ds-slot-at\" aria-hidden=\"true\">@</span><input type=\"text\" placeholder=\"github-username\" aria-label=\"GitHub username\" /></label><span class=\"ds-silk\">1 · Enter any GitHub username</span></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; display: flex; flex-direction: column; gap: 12px; max-width: 560px; } .ds-slot { display: flex; align-items: stretch; min-height: 60px; background: #0b0d17; border: 3px solid var(--line); box-shadow: inset 0 6px 0 0 rgb(0 0 0 / 0.55); } .ds-slot:focus-within { outline: 3px solid var(--on-ground); outline-offset: 4px; } .ds-slot-at { display: flex; align-items: center; padding: 0 0.25rem 0 1rem; font-family: var(--mono); font-weight: 700; font-size: 1.125rem; color: var(--a1); } .ds-slot input { flex: 1 1 auto; min-width: 0; background: transparent; border: 0; outline: 0; padding: 0.5rem 1rem 0.5rem 0.25rem; font-family: var(--mono); font-size: 1.125rem; font-weight: 600; color: #f6f4ec; caret-color: var(--a1); } .ds-slot input::placeholder { color: #9aa0b4; opacity: 1; } .ds-silk { font-family: var(--mono); font-size: 0.75rem; font-weight: 600; font-stretch: 87.5%; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.4; color: var(--on-ground-dim); }"
+    },
+    {
+      "name": "Score window",
+      "kind": "card",
+      "refersTo": "window",
+      "description": "A light window holding score rows: mono label left, condensed tabular value right, dotted leader between rows.",
+      "html": "<div class=\"ds-ground\"><div class=\"ds-window\"><div class=\"ds-score-row\"><span class=\"ds-silk\">Commits (235 of 619)</span><span class=\"ds-score-value\">38%</span></div><div class=\"ds-score-row\"><span class=\"ds-silk\">Added lines</span><span class=\"ds-score-value\">45%</span></div><div class=\"ds-score-row\"><span class=\"ds-silk\">Claude</span><span class=\"ds-score-value\">235</span></div></div></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; } .ds-window { background: var(--panel); color: var(--ink); border: 3px solid var(--line); padding: 8px 16px; } .ds-score-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 3px dotted currentColor; } .ds-score-row:last-child { border-bottom: 0; } .ds-silk { font-family: var(--mono); font-size: 0.75rem; font-weight: 600; font-stretch: 87.5%; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.4; color: var(--on-panel-dim); } .ds-score-value { font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }"
+    },
+    {
+      "name": "Strips",
+      "kind": "custom",
+      "refersTo": "strip-warn",
+      "description": "A window for one sentence. Plain for notices; a2 face for errors (role=\"alert\").",
+      "html": "<div class=\"ds-ground\"><p class=\"ds-strip\">Your private repositories are counted. Only you see this version; a shared link shows the public one.</p><p class=\"ds-strip ds-strip-warn\" role=\"alert\">GitHub sign-in did not finish. Press the sign-in key to try again.</p></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; display: grid; gap: 16px; max-width: 560px; } .ds-strip { margin: 0; border: 3px solid var(--line); background: var(--panel); color: var(--ink); padding: 12px 16px; font-family: var(--display); font-size: 0.9375rem; line-height: 1.4; } .ds-strip-warn { background: var(--a2); }"
+    },
+    {
+      "name": "Switch",
+      "kind": "input",
+      "refersTo": "switch",
+      "description": "A checkbox drawn as a small key: checked, it turns a1, drops onto its edge and shows a square mark.",
+      "html": "<div class=\"ds-ground\"><label class=\"ds-switch\"><input type=\"checkbox\" checked />Show the AI co-authored stat on the card</label><label class=\"ds-switch\"><input type=\"checkbox\" />Show private repository names</label></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; display: grid; gap: 20px; color: var(--on-ground); } .ds-switch { display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: var(--display); font-size: 0.9375rem; font-weight: 600; } .ds-switch input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 28px; height: 28px; margin: 0; background: var(--panel); border: 3px solid var(--line); border-radius: 0; box-shadow: 0 4px 0 0 var(--line); cursor: pointer; display: grid; place-items: center; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-switch input:checked { background: var(--a1); transform: translateY(4px); box-shadow: 0 0 0 0 var(--line); } .ds-switch input:checked::after { content: ''; width: 12px; height: 12px; background: var(--ink); } .ds-switch input:focus-visible { outline: 3px solid var(--on-ground); outline-offset: 4px; }"
+    },
+    {
+      "name": "Colourway keys",
+      "kind": "chip",
+      "refersTo": "swatch",
+      "description": "A radiogroup of six square keys; each shows its own ground with its two inks along the bottom. Selected sits pressed with a solid outline; focus is dashed.",
+      "html": "<div class=\"ds-ground\"><div class=\"ds-swatches\" role=\"radiogroup\" aria-label=\"Colourway\"><button type=\"button\" role=\"radio\" aria-checked=\"true\" aria-label=\"Player One\" title=\"Player One\" class=\"ds-swatch\" style=\"background:#2438E8;--line:#0B0D17\"><span style=\"background:#FFD21F\"></span><span style=\"background:#FF5C7A\"></span></button><button type=\"button\" role=\"radio\" aria-checked=\"false\" aria-label=\"Token\" title=\"Token\" class=\"ds-swatch\" style=\"background:#FFC917;--line:#111111\"><span style=\"background:#FF5A36\"></span><span style=\"background:#8ADBFF\"></span></button><button type=\"button\" role=\"radio\" aria-checked=\"false\" aria-label=\"Mint Cab\" title=\"Mint Cab\" class=\"ds-swatch\" style=\"background:#1EDC86;--line:#062018\"><span style=\"background:#FF63AB\"></span><span style=\"background:#FFE14A\"></span></button><button type=\"button\" role=\"radio\" aria-checked=\"false\" aria-label=\"Grape\" title=\"Grape\" class=\"ds-swatch\" style=\"background:#5B2EE5;--line:#120A2A\"><span style=\"background:#C8F53B\"></span><span style=\"background:#FF6FB2\"></span></button><button type=\"button\" role=\"radio\" aria-checked=\"false\" aria-label=\"Bone\" title=\"Bone\" class=\"ds-swatch\" style=\"background:#E8E5DA;--line:#111111\"><span style=\"background:#F0442F\"></span><span style=\"background:#FFD21F\"></span></button><button type=\"button\" role=\"radio\" aria-checked=\"false\" aria-label=\"Night Shift\" title=\"Night Shift\" class=\"ds-swatch\" style=\"background:#14161C;--line:#0B0D17\"><span style=\"background:#1EDC86\"></span><span style=\"background:#FFD21F\"></span></button></div><p class=\"ds-silk\">Player One</p></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; max-width: 584px; } .ds-swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; } .ds-swatch { aspect-ratio: 1 / 1; min-height: 44px; padding: 0; border: 3px solid var(--line); border-radius: 0; box-shadow: 0 6px 0 0 var(--line); cursor: pointer; display: grid; grid-template-columns: 1fr 1fr; align-items: end; overflow: hidden; transition: transform 70ms steps(2), box-shadow 70ms steps(2); } .ds-swatch span { height: 38%; border-top: 3px solid var(--line); } .ds-swatch span + span { border-left: 3px solid var(--line); } .ds-swatch:hover { transform: translateY(2px); box-shadow: 0 4px 0 0 var(--line); } .ds-swatch[aria-checked='true'] { transform: translateY(6px); box-shadow: 0 0 0 0 var(--line); outline: 3px solid var(--on-ground); outline-offset: 2px; } .ds-swatch:focus-visible { outline: 3px dashed var(--on-ground); outline-offset: 6px; } .ds-silk { font-family: var(--mono); font-size: 0.75rem; font-weight: 600; font-stretch: 87.5%; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.4; color: var(--on-ground-dim); margin: 16px 0 0; }"
+    },
+    {
+      "name": "Loading lamps",
+      "kind": "custom",
+      "refersTo": "window",
+      "description": "Eight keylined squares that step from panel to a1 one after another while a card is being counted.",
+      "html": "<div class=\"ds-ground\"><div class=\"ds-lamps\" role=\"status\" aria-label=\"Loading\"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>",
+      "css": ".ds-ground { background: var(--ground); padding: 24px; } .ds-lamps { display: flex; gap: 8px; } .ds-lamps span { width: 28px; height: 28px; border: 3px solid var(--line); background: var(--panel); animation: ds-lamp 1.6s steps(1) infinite; } .ds-lamps span:nth-child(2) { animation-delay: 0.2s; } .ds-lamps span:nth-child(3) { animation-delay: 0.4s; } .ds-lamps span:nth-child(4) { animation-delay: 0.6s; } .ds-lamps span:nth-child(5) { animation-delay: 0.8s; } .ds-lamps span:nth-child(6) { animation-delay: 1s; } .ds-lamps span:nth-child(7) { animation-delay: 1.2s; } .ds-lamps span:nth-child(8) { animation-delay: 1.4s; } @keyframes ds-lamp { 0%, 100% { background: var(--panel); } 12%, 60% { background: var(--a1); } } @media (prefers-reduced-motion: reduce) { .ds-lamps span { animation: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Printed Control Panel",
+    "overview": "GitWrap is drawn as the printed control panel of an arcade machine, and your year is what it scores. Each page is one flat silkscreened ground in a single colour, ruled with black keylines. Actions are square keycaps that sit on a visible travel edge and press down onto it. Numbers live in light \"score windows\"; the contribution heatmap and the year live behind dark glass, lit like LEDs. Words are heavy condensed capitals, measurements are a wide mono, and the dot-matrix face appears once, for the year.\n\nThe system is loud in colour and strict in everything else. A colourway is a three-ink print: a ground, and two accent inks, with a keyline and a light panel face. Nothing is rounded, nothing is blurred, nothing glows, and nothing eases. That strictness is what keeps the arcade reference from reading as a toy: the hierarchy is carried by size, weight and width of type, so a stat reads in one glance when the card is shrunk into a social feed.\n\nThere is no Tailwind and no component library. The site is plain CSS in `index.css`, driven by custom properties that a page wrapper swaps per colourway. The card (`components/ArcadeCard.tsx`) is a fixed 1080×1440 layout with inline styles only, so the on-screen preview and the exported PNG are the same pixels.",
+    "keyCharacteristics": [
+      "One flat ground per colourway, black keylines, two accent inks",
+      "Square corners everywhere, enforced globally (`border-radius: 0 !important`)",
+      "Keys travel: a hard 6px edge under every pressable thing, which the key drops onto",
+      "Light windows hold readings; dark glass holds lit displays",
+      "Three typefaces with fixed jobs: Archivo, Martian Mono, Doto",
+      "Stepped motion only (`steps()`), removed entirely under reduced motion"
+    ],
+    "rules": [
+      {
+        "name": "The Three-Ink Rule",
+        "body": "A colourway is a ground plus two inks (`a1`, `a2`), with `line` and `panel` as the print's black and paper. Nothing else gets a colour. A new colourway is a new entry in `THEMES`, never a one-off colour in a component.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink-Carrying Rule",
+        "body": "`a1` and `a2` are always light enough to carry `ink` text, because keys, chips and the AI block print on them. Text on an accent is `ink`, never `onGround`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Hazard Stripe Rule",
+        "body": "The 45° stripe of `line` and `a1` appears in exactly two places: the marquee strip and the rule under the card's header. It is not a general divider or decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Jobs Rule",
+        "body": "Archivo says words and scores. Martian Mono labels and measures. Doto shows the year on the card and nothing else.",
+        "section": "typography"
+      },
+      {
+        "name": "The Width Rule",
+        "body": "Hierarchy comes from Archivo's width axis as much as its size: 66–68% for the biggest figures, 75–80% for headings and values, normal width for reading text, 112% for the wordmark only.",
+        "section": "typography"
+      },
+      {
+        "name": "The Travel Edge Rule",
+        "body": "A hard offset edge means \"this moves when pressed\". It belongs to keys, swatches and switches only. Windows, strips, the card and images never get one.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every colour from the active colourway's roles via `var(--ground)`, `var(--a1)` and so on (or `theme.c` on the card). The only fixed colours are the dark glass set: #0B0D17, #F6F4EC, #9AA0B4.",
+      "Do set `themeVars(theme)` on the `.gw` wrapper of any new page so the whole page, marquee and footer included, prints in one colourway.",
+      "Do make every primary action a `.key`, with `a1` for the one main action on a screen and `.key-plain` for the rest.",
+      "Do put `ink` text on `panel`, `a1` and `a2`; put `on-ground` or `on-ground-dim` text on the ground.",
+      "Do use `steps()` for every transition and animation, and add anything new to the `prefers-reduced-motion` block at the end of `index.css`.",
+      "Do keep targets at 44px or more: keys are 48px, small keys grow to 44px on coarse pointers, swatches are at least 44px.",
+      "Do keep the `on-ground` focus ring (3px, 4px offset) visible on anything focusable, and keep selection and focus visually distinct, as the swatches do.",
+      "Do style anything on the card inline, at 1080×1440 pixel values, using only Archivo, Martian Mono and Doto.",
+      "Do use `tabular-nums` for any figure that changes, and truncate user-supplied strings on the card to one line."
+    ],
+    "donts": [
+      "Don't round a corner. `border-radius: 0 !important` is global; do not override it.",
+      "Don't use glass effects: no `backdrop-filter`, no blur, no translucent panels, no soft or blurred shadows, no glows.",
+      "Don't use eased or spring motion, fades or glides. Motion is stepped, short, and never loops except the loading lamps.",
+      "Don't add a colour outside the colourway. A fourth ink, a grey border or a semantic red/green breaks the three-ink print; warnings use `a2`.",
+      "Don't use the hazard stripe anywhere but the marquee and the card's header rule.",
+      "Don't put a travel edge on something that cannot be pressed.",
+      "Don't use Doto for anything but the year on the card, or Martian Mono for running text.",
+      "Don't add CSS classes, CSS variables or responsive rules to `ArcadeCard`; the export depends on it being self-contained and fixed-size.",
+      "Don't shrink card labels below 18px or add decoration that competes with the figures; the card must stay readable at feed size and must not read as childish."
+    ]
+  }
+}

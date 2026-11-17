@@ -1,15 +1,13 @@
-This folder contains the Space Grotesk font files used by the app.
+# Fonts
 
-Current files in this repo:
-- SpaceGrotesk-Regular.ttf
-- SpaceGrotesk-Light.ttf
-- SpaceGrotesk-Medium.ttf
-- SpaceGrotesk-SemiBold.ttf
-- SpaceGrotesk-Bold.ttf
+Self-hosted so the card export can embed them (the PNG is rasterised in the browser).
+All three are variable fonts under the SIL Open Font License, Latin subset.
 
-If you need to replace them, use the same filenames above. The app will preload these TTF files and the CSS in `src/styles/globals.css` declares @font-face rules for weights 300/400/500/600/700.
+| File | Family | Used for |
+|---|---|---|
+| `Archivo-latin.woff2` | Archivo (width 62–125, weight 100–900) | Headlines, names, numbers, body text |
+| `MartianMono-latin.woff2` | Martian Mono (width 75–112.5, weight 100–800) | Labels and measurements |
+| `Doto-latin.woff2` | Doto (weight 100–900) | The dot-matrix year on the card only |
 
-Why self-host:
-- Self-hosting ensures deterministic layout and avoids cross-origin font availability differences on first load — important for pixel-consistent exports.
-
-After changing or adding font files, restart the dev server to ensure Next.js serves the static assets from `/fonts/`.
+If you change a file name here, update the `@font-face` rules in `index.css` and in the export
+iframe in `pages/UserPage.tsx`.

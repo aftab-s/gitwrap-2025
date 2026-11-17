@@ -1,41 +1,19 @@
 import React from 'react';
-import GitWrapCard from './GitWrapCard';
+import ArcadeCard from './ArcadeCard';
 import type { UserStats, Theme } from '../types';
-import { CardLayout } from '../types';
 
 interface ExportCardProps {
   userData: UserStats;
   funMessage: string;
   theme: Theme;
-  layout: CardLayout;
 }
 
 /**
- * Export-only wrapper that renders a GitWrap card at a fixed 1080x1440 size.
- * The component is meant to be mounted in a hidden container before converting to PNG.
+ * Export-only mount: the card at its natural 1080×1440, rendered in a hidden iframe and
+ * rasterised to PNG.
  */
-const ExportCard: React.FC<ExportCardProps> = ({ userData, funMessage, theme, layout }) => {
-  return (
-    <div
-      style={{
-        width: '1080px',
-        height: '1440px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}
-      className={`${theme.classes.bg} ${theme.classes.textPrimary}`}
-    >
-      <GitWrapCard
-        userData={userData}
-        funMessage={funMessage}
-        theme={theme}
-        layout={layout}
-        isExport
-      />
-    </div>
-  );
-};
+const ExportCard: React.FC<ExportCardProps> = ({ userData, funMessage, theme }) => (
+  <ArcadeCard userData={userData} funMessage={funMessage} theme={theme} />
+);
 
 export default ExportCard;

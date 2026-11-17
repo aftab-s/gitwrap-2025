@@ -1,31 +1,45 @@
-import React, { forwardRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import type { UserStats, Theme } from '../types';
-import { CardLayout } from '../types';
-
-import ClassicLayout from './layouts/ClassicLayout';
-import ModernLayout from './layouts/ModernLayout';
-import CompactLayout from './layouts/CompactLayout';
+import ArcadeCard, { CARD_W, CARD_H } from './ArcadeCard';
 
 interface GitWrapCardProps {
   userData: UserStats;
   funMessage: string;
   theme: Theme;
-  layout: CardLayout;
-  isExport?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-const GitWrapCard = forwardRef<HTMLDivElement, GitWrapCardProps>(({ userData, funMessage, theme, layout, isExport = false }, ref) => {
-  const props = { userData, funMessage, theme, isExport };
+/**
+ * On-screen preview of the card. The card itself is always laid out at its export size
+ * (1080×1440); this wrapper scales it down to the available width, so what you see is exactly
+ * the image you download.
+ */
+const GitWrapCard: React.FC<GitWrapCardProps> = ({ userData, funMessage, theme, className, style }) => {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
 
-  switch (layout) {
-    case CardLayout.Modern:
-      return <ModernLayout ref={ref} {...props} />;
-    case CardLayout.Compact:
-      return <CompactLayout ref={ref} {...props} />;
-    case CardLayout.Classic:
-    default:
-      return <ClassicLayout ref={ref} {...props} />;
-  }
-});
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const update = () => setScale(frame.clientWidth / CARD_W);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={frameRef}
+      className={`card-frame ${className ?? ''}`}
+      style={{ aspectRatio: `${CARD_W} / ${CARD_H}`, ...style }}
+    >
+      <div style={{ width: CARD_W, height: CARD_H, transform: `scale(${scale})`, transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+        <ArcadeCard userData={userData} funMessage={funMessage} theme={theme} />
+      </div>
+    </div>
+  );
+};
 
 export default GitWrapCard;
