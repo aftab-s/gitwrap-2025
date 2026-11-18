@@ -18,7 +18,8 @@ import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import Contributors from '../components/Contributors';
-import { Download, Lock } from '../components/icons/Arcade';
+import FuturisticLoader from '../components/FuturisticLoader';
+import { Download, Lock, PlayerArrow } from '../components/icons/Arcade';
 
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
@@ -182,8 +183,23 @@ const UserPage: React.FC = () => {
     setPhase('card');
     window.scrollTo(0, 0);
   }, [seenKey]);
-  // Card display options
-  const [showPrivateRepoNames, setShowPrivateRepoNames] = useState(false);
+  // Card display options - defaults to true so authenticated users see their real repository names immediately
+  const [showPrivateRepoNames, setShowPrivateRepoNames] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('gw-show-private-repos');
+      return stored !== null ? stored === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+  const handleTogglePrivateRepos = (checked: boolean) => {
+    setShowPrivateRepoNames(checked);
+    try {
+      localStorage.setItem('gw-show-private-repos', String(checked));
+    } catch {
+      /* ignore */
+    }
+  };
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [rateLimited, setRateLimited] = useState(false);
 
@@ -379,18 +395,19 @@ const UserPage: React.FC = () => {
     return (
       <div className="gw" style={vars}>
         <Marquee year={year} />
-        <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 64, paddingBottom: 96 }}>
-          <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', overflowWrap: 'anywhere' }}>
-            Counting {username}&rsquo;s {year}
-          </h1>
-          <div className="lamps" role="status" aria-label="Loading" style={{ marginTop: 32 }}>
-            {Array.from({ length: 8 }, (_, i) => (
-              <span key={i} />
-            ))}
-          </div>
-          <p className="silk" style={{ marginTop: 24 }}>
-            Reading contributions · replaying your commits · takes a few seconds
-          </p>
+        <main
+          className="gw-wrap"
+          style={{
+            flex: '1 0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingTop: 32,
+            paddingBottom: 64,
+          }}
+        >
+          <FuturisticLoader username={username || 'Player'} year={year} />
         </main>
       </div>
     );
@@ -433,7 +450,6 @@ const UserPage: React.FC = () => {
   }
 
   const cls = userData.totalContributions > 0 ? playerClass(userData) : undefined;
-  const moves = userData.commitInsights?.moves ?? [];
 
   return (
     <div className="gw" style={vars}>
@@ -449,38 +465,142 @@ const UserPage: React.FC = () => {
                 {userData.login}&rsquo;s {year}
               </h1>
               {userData.includesPrivate ? (
-                <p className="strip" style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <Lock size={18} style={{ marginTop: 2 }} />
-                  <span>
-                    Your private repositories are counted
-                    {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} commits)` : ''}. Only you see this
-                    version; a shared link shows the public one.
-                  </span>
-                </p>
+                <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <p className="strip" style={{ margin: 0, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <Lock size={18} style={{ marginTop: 2 }} />
+                    <span>
+                      Your private repositories are counted
+                      {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} commits)` : ''}. Only you see this
+                      version; a shared link shows the public one.
+                    </span>
+                  </p>
+                  {hasPrivateTopRepo && (
+                    <label className="switch" style={{ alignSelf: 'flex-start' }}>
+                      <input
+                        type="checkbox"
+                        checked={showPrivateRepoNames}
+                        onChange={(e) => handleTogglePrivateRepos(e.target.checked)}
+                      />
+                      Show private repository names
+                    </label>
+                  )}
+                </div>
               ) : (
                 <div style={{ marginTop: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
                   <p className="dim" style={{ margin: 0, maxWidth: '44ch', fontSize: '0.9375rem' }}>
                     Public activity only.{' '}
                     {auth.login
                       ? `You are signed in as @${auth.login}; private repositories count only on your own card.`
-                      : 'Is this you? Sign in to count your private repositories too.'}
+                      : 'Is this you? Sign in to count your private contributions too.'}
                   </p>
                   <GitHubSignIn label="Sign in" className="key-sm" />
                 </div>
               )}
             </section>
 
+            {cls && (
+              <section>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <h2 className="heading" style={{ margin: 0 }}>Player class</h2>
+                  <span className="silk" style={{ letterSpacing: '0.06em', opacity: 0.85 }}>
+                    {cls.badge}
+                  </span>
+                </div>
+
+                <div className="window class-window">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <PlayerAvatar name={cls.name} />
+                    <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+                      <p className="display class-name" style={{ margin: 0 }}>{cls.name}</p>
+                      <p style={{ fontWeight: 600, marginTop: 4, lineHeight: 1.35 }}>{cls.line}</p>
+                    </div>
+                  </div>
+
+                  {/* Archetype Proof Spotlight */}
+                  <div
+                    style={{
+                      marginTop: 20,
+                      padding: '12px 14px',
+                      background: 'rgba(0, 0, 0, 0.08)',
+                      borderLeft: '4px solid currentColor',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 4,
+                    }}
+                  >
+                    <div className="silk" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+                      Class Proof · {cls.proof.formula}
+                    </div>
+                    <div style={{ fontSize: '0.9375rem', fontWeight: 600, opacity: 0.9 }}>
+                      {cls.proof.headline}
+                    </div>
+                  </div>
+
+                  {/* Tailored Archetype Metrics */}
+                  <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {cls.proof.metrics.map((m) => (
+                      <div
+                        key={m.label}
+                        className="score-row"
+                        style={{
+                          padding: '10px 0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'baseline',
+                          gap: 16,
+                        }}
+                      >
+                        <div style={{ minWidth: 0 }}>
+                          <div className="silk" style={{ fontWeight: 700 }}>{m.label}</div>
+                          {m.hint && (
+                            <div className="silk" style={{ opacity: 0.7, fontSize: '0.75rem', marginTop: 2 }}>
+                              {m.hint}
+                            </div>
+                          )}
+                        </div>
+                        <span className="score-value" style={{ fontSize: '1.25rem', whiteSpace: 'nowrap' }}>
+                          {m.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="silk" style={{ marginTop: 12 }}>
+                  Earned from your own numbers: hours, streaks, reviews and languages. Same year, same class.
+                </p>
+              </section>
+            )}
+
             <section>
-              <button
-                type="button"
-                className="key key-lg key-block"
-                onClick={() => handleDownload(AspectRatio.Social)}
-                disabled={!!isDownloading}
-                aria-busy={!!isDownloading}
-              >
-                <Download size={22} />
-                {isDownloading ? 'Printing the card' : 'Download card'}
-              </button>
+              <h2 className="heading">Colourway</h2>
+              <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
+            </section>
+
+            <section>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="key key-lg"
+                  style={{ flex: '1 1 200px' }}
+                  onClick={() => handleDownload(AspectRatio.Social)}
+                  disabled={!!isDownloading}
+                  aria-busy={!!isDownloading}
+                >
+                  <Download size={22} />
+                  {isDownloading ? 'Printing the card' : 'Download card'}
+                </button>
+                <button
+                  type="button"
+                  className="key key-lg key-plain"
+                  style={{ flex: '0 0 auto' }}
+                  onClick={() => setPhase('recap')}
+                  title="Replay the recap"
+                >
+                  <PlayerArrow size={20} />
+                  Replay
+                </button>
+              </div>
               <p className="silk" style={{ margin: '20px 0 16px' }}>
                 PNG · 1080 × 1440 · sized for feeds
               </p>
@@ -490,47 +610,7 @@ const UserPage: React.FC = () => {
                 </p>
               )}
               {username && <SocialShare username={username} year={year} />}
-              <p style={{ margin: '20px 0 0' }}>
-                <button type="button" className="link" onClick={() => setPhase('recap')}>
-                  Replay the recap
-                </button>
-              </p>
             </section>
-
-            <section>
-              <h2 className="heading">Colourway</h2>
-              <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
-              {hasPrivateTopRepo && (
-                <label className="switch" style={{ marginTop: 28 }}>
-                  <input type="checkbox" checked={showPrivateRepoNames} onChange={(e) => setShowPrivateRepoNames(e.target.checked)} />
-                  Show private repository names
-                </label>
-              )}
-            </section>
-
-            {cls && (
-              <section>
-                <h2 className="heading">Player class</h2>
-                <div className="window class-window">
-                  <PlayerAvatar name={cls.name} />
-                  <p className="display class-name">{cls.name}</p>
-                  <p style={{ fontWeight: 600 }}>{cls.line}</p>
-                  {moves.length > 0 && (
-                    <div style={{ marginTop: 16 }}>
-                      {moves.map((m) => (
-                        <div key={m.name} className="score-row">
-                          <span className="silk">Commits opening with &ldquo;{m.name}&rdquo;</span>
-                          <span className="score-value">{m.commits.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <p className="silk" style={{ marginTop: 12 }}>
-                  Earned from your own numbers: hours, streaks, reviews and languages. Same year, same class.
-                </p>
-              </section>
-            )}
 
             <section>
               <h2 className="heading">Built by</h2>
