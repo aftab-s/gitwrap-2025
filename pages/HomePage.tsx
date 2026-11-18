@@ -95,7 +95,7 @@ const HomePage: React.FC = () => {
                 ) : (
                   <GitHubSignIn />
                 )}
-                <span className="silk">{auth.login ? `Signed in as @${auth.login}` : 'Optional · adds private repos'}</span>
+                <span className="silk">{auth.login ? `Signed in as @${auth.login}` : 'Optional · adds private contributions'}</span>
               </div>
             )}
           </form>
