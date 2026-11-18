@@ -330,7 +330,7 @@ export async function fetchGitHubStats(username: string, options: FetchStatsOpti
       authenticated ? { maxRepos: 30, maxPagesPerRepo: 5 } : { maxRepos: 8, maxPagesPerRepo: 1 }
     ).catch((err) => {
       console.warn('Commit analysis failed, falling back to heuristics:', err);
-      return { commitHours: [] as number[], aiStats: undefined };
+      return { commitHours: [] as number[], commitInsights: undefined };
     });
 
     // Private contributions are calculated ONLY for an authenticated owner (their own OAuth token).
@@ -374,7 +374,7 @@ export async function fetchGitHubStats(username: string, options: FetchStatsOpti
       yearOverYearGrowth: calculateYearOverYearGrowth(current, previous),
       includesPrivate: authenticated,
       privateContributions,
-      aiStats: analysis.aiStats,
+      commitInsights: analysis.commitInsights,
     };
   }
 }

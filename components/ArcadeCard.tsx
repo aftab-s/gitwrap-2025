@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo } from 'react';
 import type { UserStats, Theme } from '../types';
-import { Lock, Robot, PlayerArrow } from './icons/Arcade';
+import { Lock, PlayerArrow } from './icons/Arcade';
+import { playerClass } from '../insights';
 
 /**
  * The wrap card, drawn as an arcade machine's printed control panel.
@@ -18,7 +19,7 @@ const DOT = "'Doto', 'Martian Mono', monospace";
 
 const KEYLINE = 4;
 // Lamp brightness per activity level: unlit stays faint, every lit level clears the dark glass.
-const LED_STEPS = [0.09, 0.5, 0.7, 0.85, 1];
+export const LED_STEPS = [0.09, 0.5, 0.7, 0.85, 1];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 interface Props {
@@ -60,7 +61,7 @@ function level(count: number): number {
 }
 
 /** Calendar days → week columns (Sunday on top), like GitHub's graph. */
-function toWeeks(calendar: Array<{ date: string; count: number }>): number[][] {
+export function toWeeks(calendar: Array<{ date: string; count: number }>): number[][] {
   const sorted = [...calendar].sort((a, b) => a.date.localeCompare(b.date));
   const weeks: number[][] = [];
   let week: number[] = [];
@@ -97,7 +98,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
   const growth = d.yearOverYearGrowth?.overallGrowth;
   const peakDay = DAYS.includes(d.bestDayOfWeek) ? d.bestDayOfWeek.slice(0, 3) : '—';
   const privateCount = d.privateContributions ?? 0;
-  const ai = d.aiStats;
+  const cls = useMemo(() => (d.totalContributions > 0 ? playerClass(d) : undefined), [d]);
   const topRepo = d.topRepos?.[0];
   const langs = d.topLanguages.slice(0, 3);
   const langInks = [c.a1, c.a2, c.panel];
@@ -285,7 +286,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
         )}
       </section>
 
-      {/* ---------- Top repository + AI co-authored ---------- */}
+      {/* ---------- Top repository + player class ---------- */}
       <section style={{ display: 'flex', gap: 22, alignItems: 'stretch' }}>
         <div style={{ ...window_, flex: '1 1 0', minWidth: 0, padding: '18px 24px 20px' }}>
           <div style={label(c.onPanelDim, 18)}>Top repository</div>
@@ -313,7 +314,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
           </div>
         </div>
 
-        {ai && (
+        {cls && (
           <div
             style={{
               width: 318,
@@ -326,16 +327,12 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
+              gap: 8,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={label(c.ink, 18)}>AI co-authored</span>
-              <Robot size={30} color={c.ink} />
-            </div>
-            <div style={{ ...condensed(96, c.ink), fontVariantNumeric: 'tabular-nums' }}>{ai.commitShare}%</div>
-            <div style={{ ...label(c.ink, 18), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              of commits{ai.tools[0] ? ` · ${ai.tools[0].name}` : ''}
-            </div>
+            <div style={label(c.ink, 18)}>Player class</div>
+            <div style={{ ...condensed(50, c.ink), lineHeight: 0.92, textTransform: 'uppercase' }}>{cls.name}</div>
+            <div style={{ ...label(c.ink, 18), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.short}</div>
           </div>
         )}
       </section>

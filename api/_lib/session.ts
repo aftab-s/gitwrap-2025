@@ -106,17 +106,6 @@ export function newState(request: Request): { state: string; cookie: string } {
   return { state, cookie: cookie(request, STATE_COOKIE, state, 600) };
 }
 
-// Which edition (year) the user was on when they clicked "Sign in", so they land back on it.
-export const RETURN_YEAR_COOKIE = 'gw_return_year';
-
-export function returnYearCookie(request: Request, year: number): string {
-  return cookie(request, RETURN_YEAR_COOKIE, String(year), 600);
-}
-
-export function readReturnYear(request: Request): string | undefined {
-  return readCookie(request, RETURN_YEAR_COOKIE);
-}
-
 export function stateMatches(request: Request, state: string | null): boolean {
   const expected = readCookie(request, STATE_COOKIE);
   if (!expected || !state) return false;

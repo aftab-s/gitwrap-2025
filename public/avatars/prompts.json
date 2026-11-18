@@ -1,0 +1,57 @@
+{
+  "generator": "Built-in imagegen",
+  "avatars": [
+    {
+      "name": "New Challenger",
+      "prompt": "Use case: stylized-concept. Create a single New Challenger player-class avatar for GitWrap: lime baby dinosaur emerging from a cracked egg, pink sneakers. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Night Owl",
+      "prompt": "Use case: stylized-concept. Create a single Night Owl player-class avatar for GitWrap: purple owl with sleepy eyes, crescent moon tuft, oversized headphones. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Early Riser",
+      "prompt": "Use case: stylized-concept. Create a single Early Riser player-class avatar for GitWrap: sun-yellow rooster pet with orange sunburst crest and mint sneakers. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Bug Hunter",
+      "prompt": "Use case: stylized-concept. Create a single Bug Hunter player-class avatar for GitWrap: mint frog detective with purple goggles and magnifying glass. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Weekend Warrior",
+      "prompt": "Use case: stylized-concept. Create a single Weekend Warrior player-class avatar for GitWrap: coral axolotl in electric-blue sunglasses with a tiny skateboard. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Streak Keeper",
+      "prompt": "Use case: stylized-concept. Create a single Streak Keeper player-class avatar for GitWrap: orange flame salamander with a chain of three glowing squares. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Marathoner",
+      "prompt": "Use case: stylized-concept. Create a single Marathoner player-class avatar for GitWrap: blue tortoise with sweatband and chunky running shoes. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Code Reviewer",
+      "prompt": "Use case: stylized-concept. Create a single Code Reviewer player-class avatar for GitWrap: cream cyclops with large glasses and checkmark clipboard. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "PR Shipper",
+      "prompt": "Use case: stylized-concept. Create a single PR Shipper player-class avatar for GitWrap: purple penguin courier with a little parcel and pilot goggles. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Polyglot",
+      "prompt": "Use case: stylized-concept. Create a single Polyglot player-class avatar for GitWrap: multicolor chameleon with three colored speech bubbles without letters. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Specialist",
+      "prompt": "Use case: stylized-concept. Create a single Specialist player-class avatar for GitWrap: electric-blue wizard cat with a star-tipped wand and pointy hat. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "Sprinter",
+      "prompt": "Use case: stylized-concept. Create a single Sprinter player-class avatar for GitWrap: yellow rabbit with lightning ears and hot-pink running shoes. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    },
+    {
+      "name": "All-Rounder",
+      "prompt": "Use case: stylized-concept. Create a single All-Rounder player-class avatar for GitWrap: mint round alien juggling three geometric colored shapes. Funky 16-bit Tamagotchi-inspired virtual pet, original character, squat expressive body, mischievous confident face. Crisp chunky square pixel clusters, bold near-black stepped outline, flat limited arcade colors, subtle two-tone pixel shading. Consistent collectible game sprite aesthetic. Centered full body on a square transparent canvas, generous margins, occupies 75% of frame. No words, labels, numbers, UI, device shell, scenery, shadows, gradients, smooth vector edges, watermarks."
+    }
+  ]
+}

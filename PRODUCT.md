@@ -17,19 +17,20 @@ GitWrap turns a GitHub username into a shareable year-in-review card. Success me
 ## Positioning
 
 - Private contributions are included only when the profile's owner signs in with GitHub; a shared link always shows the public view.
-- An "AI co-authored" stat: the share of commits carrying an AI co-author signature, stated as a lower bound.
+- A tap-through recap (stories) plays before the card.
+- A "player class" earned from the user's own numbers, and a "signature move" (the verb that opens most of their commits).
 - One URL per year: `/2025`, `/2026`.
 
 ## Operating Context
 
-- Flow: landing page (username field, optional sign-in) → loading → wrap page (card, customise, download, share).
+- Flow: landing page (username field, optional sign-in) → loading → recap stories → wrap page (card, customise, download, share).
 - The card is exported as a 1080×1440 PNG and viewed mostly inside social feeds at small sizes.
 - Open source; hosted on Vercel.
 
 ## Capabilities and Constraints
 
-- Card stats: total contributions (commits, PRs, issues, reviews, private when signed in), best hour, reviews, stars earned, top three languages, streak, peak day, repositories, year-over-year growth, top repository, AI co-authored share, contribution heatmap, one generated sentence.
-- Card options: colourway, show/hide AI stat, show/hide private repository names.
+- Card stats: total contributions (commits, PRs, issues, reviews, private when signed in), best hour, reviews, stars earned, top three languages, streak, peak day, repositories, year-over-year growth, top repository, player class, contribution heatmap, one generated sentence.
+- Card options: colourway, show/hide private repository names.
 - Styling is plain CSS (`index.css`); the card is inline-styled at 1080×1440. The export renders the same card component in an iframe and rasterises it with html-to-image, so fonts used on the card must be self-hosted.
 - No secrets in the browser; all GitHub and Gemini calls run in `/api`.
 
@@ -49,6 +50,6 @@ GitWrap turns a GitHub username into a shareable year-in-review card. Success me
 ## Product Principles
 
 1. The card is the product; every screen exists to get someone to a card worth posting.
-2. Numbers are honest: private data needs the owner's sign-in, and the AI stat says it is a lower bound.
+2. Numbers are honest: private data needs the owner's sign-in, and the player class is computed, never random.
 3. Legible first: a stat must read in one glance at feed size.
 4. Seconds, not steps: one field, one button, a card.

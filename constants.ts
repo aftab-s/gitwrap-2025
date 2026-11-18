@@ -87,6 +87,7 @@ export function themeVars(theme: Theme): Record<string, string> {
     '--panel': c.panel,
     '--a1': c.a1,
     '--a2': c.a2,
+    '--led': c.led ?? c.a1,
     '--on-ground': c.onGround,
     '--on-ground-dim': c.onGroundDim,
     '--on-panel-dim': c.onPanelDim,

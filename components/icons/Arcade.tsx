@@ -26,14 +26,15 @@ export const Lock: React.FC<IconProps> = ({ size = 16, color = 'currentColor', s
   </svg>
 );
 
-/** Square-headed robot: the AI co-author. */
-export const Robot: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+export const Pause: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
   <svg {...base(size, style, className)}>
-    <path
-      d="M7 0h2v2h5v9H2V2h5V0zM4 4v5h8V4H4zm1 1h2v2H5V5zm4 0h2v2H9V5zM0 5h1v4H0V5zm15 0h1v4h-1V5zM4 12h3v4H4v-4zm5 0h3v4H9v-4z"
-      fill={color}
-      fillRule="evenodd"
-    />
+    <path d="M3 2h4v12H3V2zm6 0h4v12H9V2z" fill={color} />
+  </svg>
+);
+
+export const ArrowLeft: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+  <svg {...base(size, style, className)}>
+    <path d="M15 7H6V3L1 8l5 5V9h9V7z" fill={color} />
   </svg>
 );
 

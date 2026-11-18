@@ -1,3 +1,4 @@
+import PlayerAvatar from '../components/PlayerAvatar';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useParams, Link } from 'react-router-dom';
@@ -8,8 +9,9 @@ import { useAuth, isOwnProfile, markSignedOut } from '../services/auth';
 import Marquee from '../components/Marquee';
 import Footer from '../components/Footer';
 import GitHubSignIn from '../components/GitHubSignIn';
-import AIStatsPanel from '../components/AIStatsPanel';
-import { APP_REPO_URL, DEFAULT_YEAR } from '../config';
+import Stories from '../components/Stories';
+import { playerClass } from '../insights';
+import { APP_REPO_URL, EDITION } from '../config';
 import { THEMES, DEFAULT_THEME, themeVars } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
@@ -151,9 +153,10 @@ async function createExportEnvironment(width: number, height: number) {
   };
 }
 
+const year = EDITION.year;
+
 const UserPage: React.FC = () => {
-  const { username, year: yearParam } = useParams<{ username: string; year: string }>();
-  const year = Number(yearParam ?? DEFAULT_YEAR); // validated by <YearGate> in App
+  const { username } = useParams<{ username: string }>();
   const [userData, setUserData] = useState<UserStats | null>(null);
   const [funMessage, setFunMessage] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -161,8 +164,25 @@ const UserPage: React.FC = () => {
   const [activeTheme, setActiveTheme] = useState<Theme>(DEFAULT_THEME);
   const [isDownloading, setIsDownloading] = useState<AspectRatio | null>(null);
   const [embeddedAvatarUrl, setEmbeddedAvatarUrl] = useState<string | null>(null);
+  // The recap plays first; the card page follows. Once seen, a reload goes straight to the card.
+  const seenKey = `gw-recap-${(username ?? '').toLowerCase()}`;
+  const [phase, setPhase] = useState<'recap' | 'card'>(() => {
+    try {
+      return sessionStorage.getItem(seenKey) ? 'card' : 'recap';
+    } catch {
+      return 'recap';
+    }
+  });
+  const finishRecap = useCallback(() => {
+    try {
+      sessionStorage.setItem(seenKey, '1');
+    } catch {
+      /* storage unavailable: the recap simply plays again next time */
+    }
+    setPhase('card');
+    window.scrollTo(0, 0);
+  }, [seenKey]);
   // Card display options
-  const [showAIStat, setShowAIStat] = useState(true);
   const [showPrivateRepoNames, setShowPrivateRepoNames] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [rateLimited, setRateLimited] = useState(false);
@@ -218,12 +238,11 @@ const UserPage: React.FC = () => {
     if (!userData) return null;
     return {
       ...userData,
-      aiStats: showAIStat ? userData.aiStats : undefined,
       topRepos: showPrivateRepoNames
         ? userData.topRepos
         : userData.topRepos.map((r) => (r.isPrivate ? { ...r, name: 'Private repository', url: '' } : r)),
     };
-  }, [userData, showAIStat, showPrivateRepoNames]);
+  }, [userData, showPrivateRepoNames]);
 
   const hasPrivateTopRepo = Boolean(userData?.topRepos.some((r) => r.isPrivate));
 
@@ -355,12 +374,11 @@ const UserPage: React.FC = () => {
   };
 
   const vars = themeVars(activeTheme) as React.CSSProperties;
-  const yearHref = (y: number) => `/${y}/u/${username}`;
 
   if (loading) {
     return (
       <div className="gw" style={vars}>
-        <Marquee year={year} yearHref={yearHref} />
+        <Marquee year={year} />
         <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: 64, paddingBottom: 96 }}>
           <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', overflowWrap: 'anywhere' }}>
             Counting {username}&rsquo;s {year}
@@ -371,7 +389,7 @@ const UserPage: React.FC = () => {
             ))}
           </div>
           <p className="silk" style={{ marginTop: 24 }}>
-            Reading contributions · scanning commits for AI co-authors · takes a few seconds
+            Reading contributions · replaying your commits · takes a few seconds
           </p>
         </main>
       </div>
@@ -381,7 +399,7 @@ const UserPage: React.FC = () => {
   if (error) {
     return (
       <div className="gw" style={vars}>
-        <Marquee year={year} yearHref={yearHref} />
+        <Marquee year={year} />
         <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 64, paddingBottom: 96 }}>
           <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)' }}>No card this time</h1>
           <p className="strip strip-warn" role="alert" style={{ marginTop: 32, maxWidth: 560 }}>
@@ -391,7 +409,7 @@ const UserPage: React.FC = () => {
             <button type="button" className="key" onClick={() => fetchData()}>
               Try again
             </button>
-            <Link to={`/${year}`} className="key key-plain">
+            <Link to="/" className="key key-plain">
               Another username
             </Link>
             {rateLimited && <GitHubSignIn label="Sign in instead" />}
@@ -403,9 +421,23 @@ const UserPage: React.FC = () => {
 
   if (!userData || !cardData) return null;
 
+  if (phase === 'recap') {
+    return (
+      <div className="gw" style={vars}>
+        <h1 style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)' }}>
+          {userData.login}&rsquo;s {year} recap
+        </h1>
+        <Stories stats={cardData} funMessage={funMessage} theme={activeTheme} onDone={finishRecap} />
+      </div>
+    );
+  }
+
+  const cls = userData.totalContributions > 0 ? playerClass(userData) : undefined;
+  const moves = userData.commitInsights?.moves ?? [];
+
   return (
     <div className="gw" style={vars}>
-      <Marquee year={year} yearHref={yearHref} />
+      <Marquee year={year} />
 
       <main className="gw-wrap" style={{ paddingTop: 40, paddingBottom: 72, flex: '1 0 auto' }}>
         <div className="wrap-grid">
@@ -458,30 +490,47 @@ const UserPage: React.FC = () => {
                 </p>
               )}
               {username && <SocialShare username={username} year={year} />}
+              <p style={{ margin: '20px 0 0' }}>
+                <button type="button" className="link" onClick={() => setPhase('recap')}>
+                  Replay the recap
+                </button>
+              </p>
             </section>
 
             <section>
               <h2 className="heading">Colourway</h2>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
-              {(userData.aiStats || hasPrivateTopRepo) && (
-                <div style={{ display: 'grid', gap: 20, marginTop: 28 }}>
-                  {userData.aiStats && (
-                    <label className="switch">
-                      <input type="checkbox" checked={showAIStat} onChange={(e) => setShowAIStat(e.target.checked)} />
-                      Show the AI co-authored stat on the card
-                    </label>
-                  )}
-                  {hasPrivateTopRepo && (
-                    <label className="switch">
-                      <input type="checkbox" checked={showPrivateRepoNames} onChange={(e) => setShowPrivateRepoNames(e.target.checked)} />
-                      Show private repository names
-                    </label>
-                  )}
-                </div>
+              {hasPrivateTopRepo && (
+                <label className="switch" style={{ marginTop: 28 }}>
+                  <input type="checkbox" checked={showPrivateRepoNames} onChange={(e) => setShowPrivateRepoNames(e.target.checked)} />
+                  Show private repository names
+                </label>
               )}
             </section>
 
-            {userData.aiStats && <AIStatsPanel stats={userData.aiStats} />}
+            {cls && (
+              <section>
+                <h2 className="heading">Player class</h2>
+                <div className="window class-window">
+                  <PlayerAvatar name={cls.name} />
+                  <p className="display class-name">{cls.name}</p>
+                  <p style={{ fontWeight: 600 }}>{cls.line}</p>
+                  {moves.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      {moves.map((m) => (
+                        <div key={m.name} className="score-row">
+                          <span className="silk">Commits opening with &ldquo;{m.name}&rdquo;</span>
+                          <span className="score-value">{m.commits.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="silk" style={{ marginTop: 12 }}>
+                  Earned from your own numbers: hours, streaks, reviews and languages. Same year, same class.
+                </p>
+              </section>
+            )}
 
             <section>
               <h2 className="heading">Built by</h2>

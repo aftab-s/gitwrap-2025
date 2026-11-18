@@ -21,7 +21,6 @@ export async function generateFunMessage(stats: UserStats): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return templateOneLiner(stats);
 
-  const ai = stats.aiStats;
   const prompt = `
     Generate one funny single-sentence GitHub summary with no line breaks.
     Tone: light, simple, playful. No metaphors, no over-the-top jokes.
@@ -38,11 +37,7 @@ export async function generateFunMessage(stats: UserStats): Promise<string> {
     Top language: ${stats.topLanguages[0]?.name}
     Streak: ${stats.longestStreakDays} days
     Best day: ${stats.bestDayOfWeek}
-    Best hour: ${stats.bestHour}:00${
-      ai && ai.aiCommits > 0
-        ? `\n    AI co-authored commits: ${ai.commitShare}%${ai.tools[0] ? ` (mostly ${ai.tools[0].name})` : ''}`
-        : ''
-    }
+    Best hour: ${stats.bestHour}:00
   `;
 
   try {

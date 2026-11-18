@@ -1,27 +1,27 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Marquee from '../components/Marquee';
 import GitHubSignIn from '../components/GitHubSignIn';
 import GitWrapCard from '../components/GitWrapCard';
 import Footer from '../components/Footer';
 import { ArrowRight } from '../components/icons/Arcade';
 import { useAuth } from '../services/auth';
-import { DEFAULT_YEAR } from '../config';
+import { EDITION } from '../config';
 import { DEFAULT_THEME, themeVars } from '../constants';
 import { demoStats, DEMO_MESSAGE } from '../demo';
 
 // GitHub logins: letters, digits and single hyphens, up to 39 characters.
 const USERNAME_RE = /^[a-z\d](?:[a-z\d-]{0,38})$/i;
+const year = EDITION.year;
 
 const HomePage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const year = Number(useParams().year ?? DEFAULT_YEAR); // validated by <YearGate> in App
   const auth = useAuth();
   // Set by /api/auth/callback when sign-in didn't complete (e.g. ?auth_error=invalid_state)
   const authError = new URLSearchParams(window.location.search).get('auth_error');
-  const demo = useMemo(() => demoStats(year), [year]);
+  const demo = useMemo(() => demoStats(year), []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +31,7 @@ const HomePage: React.FC = () => {
     } else if (!USERNAME_RE.test(name)) {
       setError('That is not a GitHub username. Use letters, digits and hyphens only.');
     } else {
-      navigate(`/${year}/u/${name}`);
+      navigate(`/u/${name}`);
     }
   };
 
@@ -48,7 +48,7 @@ const HomePage: React.FC = () => {
           </h1>
 
           <p className="lede" style={{ marginTop: 32 }}>
-            One card for your year on GitHub: contributions, streaks, languages, and how much of it an AI co-wrote. Ready to post.
+            A short recap of your year on GitHub, then one card to post: contributions, streaks, languages, and the player class you earned.
           </p>
 
           <form onSubmit={handleSubmit} className="controls" style={{ marginTop: 40 }} noValidate>
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
             {auth.ready && (
               <div className="control">
                 {auth.login ? (
-                  <button type="button" className="key key-plain" onClick={() => navigate(`/${year}/u/${auth.login}`)}>
+                  <button type="button" className="key key-plain" onClick={() => navigate(`/u/${auth.login}`)}>
                     My full card
                   </button>
                 ) : (

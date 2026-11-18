@@ -54,8 +54,8 @@ export function isOwnProfile(auth: AuthState, username?: string): boolean {
 }
 
 /** Full-page redirect to GitHub; comes back to /u/<login>. */
-export function signIn(year: number) {
-  window.location.assign(`/api/auth/login?year=${year}`);
+export function signIn() {
+  window.location.assign('/api/auth/login');
 }
 
 export async function signOut(): Promise<void> {
