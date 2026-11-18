@@ -2,6 +2,7 @@ import React, { forwardRef, useMemo } from 'react';
 import type { UserStats, Theme } from '../types';
 import { Lock, PlayerArrow } from './icons/Arcade';
 import { playerClass } from '../insights';
+import { playerAvatar } from '../playerAvatars';
 
 /**
  * The wrap card, drawn as an arcade machine's printed control panel.
@@ -317,8 +318,9 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
         {cls && (
           <div
             style={{
-              width: 318,
+              width: 408,
               flexShrink: 0,
+              position: 'relative',
               background: c.a2,
               border: `${KEYLINE}px solid ${c.line}`,
               color: c.ink,
@@ -328,11 +330,17 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               flexDirection: 'column',
               justifyContent: 'space-between',
               gap: 8,
+              overflow: 'hidden',
             }}
           >
             <div style={label(c.ink, 18)}>Player class</div>
-            <div style={{ ...condensed(50, c.ink), lineHeight: 0.92, textTransform: 'uppercase' }}>{cls.name}</div>
-            <div style={{ ...label(c.ink, 18), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.short}</div>
+            <div style={{ ...condensed(46, c.ink), lineHeight: 0.92, textTransform: 'uppercase', maxWidth: 210 }}>{cls.name}</div>
+            <div style={{ ...label(c.ink, 18), maxWidth: 210, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.short}</div>
+            <img
+              src={playerAvatar(cls.name)}
+              alt=""
+              style={{ position: 'absolute', right: 8, top: 8, width: 140, height: 'calc(100% - 16px)', objectFit: 'contain', imageRendering: 'pixelated' }}
+            />
           </div>
         )}
       </section>

@@ -1236,6 +1236,23 @@ a {
   text-overflow: ellipsis;
 }
 
+/* the class companion, bobbing in two frames like a handheld pet */
+.story-pet {
+  align-self: flex-start;
+  margin-bottom: -0.5cqh;
+}
+
+.story-pet img {
+  width: min(38cqw, 176px) !important;
+  height: min(38cqw, 176px) !important;
+  animation: bob 900ms steps(1) infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
 /* the class reveal: the one stamped moment of the recap */
 .story-stamp {
   align-self: flex-start;
