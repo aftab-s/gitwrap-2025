@@ -3,6 +3,7 @@ import type { UserStats, Theme } from '../types';
 import { calendarFacts, formatDay, playerClass } from '../insights';
 import { toWeeks, LED_STEPS } from './ArcadeCard';
 import GitWrapCard from './GitWrapCard';
+import PlayerAvatar from './PlayerAvatar';
 import { ArrowLeft, ArrowRight, Pause, PlayerArrow } from './icons/Arcade';
 
 interface Props {
@@ -332,7 +333,10 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       seconds: 7.5,
       body: (
         <>
-          <p className="story-lead rise">That makes you {/^[aeiou]/i.test(cls.name) ? 'an' : 'a'}</p>
+          <div className="story-pet rise">
+            <PlayerAvatar name={cls.name} size={176} />
+          </div>
+          <p className="story-lead rise" style={i(1)}>That makes you {/^[aeiou]/i.test(cls.name) ? 'an' : 'a'}</p>
           <h2 className="display story-stamp" style={fit(cls.name.split(' ').sort((a, b) => b.length - a.length)[0] + 'xx')}>
             {cls.name}
           </h2>
