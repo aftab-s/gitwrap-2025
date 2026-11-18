@@ -26,6 +26,7 @@ interface Slide {
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const RANKS = ['1st', '2nd', '3rd'];
+const STORY_DURATION_SECONDS = 15;
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
@@ -69,15 +70,14 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
   slides.push({
     id: 'intro',
     tone: 'ground',
-    seconds: 4.5,
     body: (
       <>
         {stats.avatarUrl && <img className="story-avatar rise" src={stats.avatarUrl} alt="" />}
         <h2 className="display story-title rise" style={i(1)}>
-          {name}, this was your <span className="story-mark">{stats.year}</span>
+          {name}, here is your <span className="story-mark">{stats.year}</span>
         </h2>
         <p className="story-text rise" style={i(3)}>
-          A short recap, then your card.
+          Ready for a short recap?
         </p>
       </>
     ),
@@ -143,7 +143,6 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     slides.push({
       id: 'calendar',
       tone: 'dark',
-      seconds: 7.5,
       body: (
         <>
           <p className="story-lead rise">You showed up on</p>
@@ -297,40 +296,11 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       });
     }
 
-    const move = insights?.moves[0];
-    if (insights && move && move.commits >= 5) {
-      slides.push({
-        id: 'move',
-        tone: 'a2',
-        body: (
-          <>
-            <p className="story-lead rise">Your commits open with</p>
-            <div className="story-big rise" style={{ ...fit(move.name), ...i(1) }}>
-              {move.name}
-            </div>
-            <p className="story-lead rise" style={i(2)}>
-              {move.commits.toLocaleString()} times this year. Call it your signature move.
-            </p>
-            {insights.moves.length > 1 && (
-              <div className="story-table">
-                {insights.moves.slice(1).map((m, n) => (
-                  <div key={m.name} className="score-row rise" style={i(4 + n)}>
-                    <span className="story-row-label">{m.name}</span>
-                    <span className="score-value">{m.commits.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        ),
-      });
-    }
-
     const cls = playerClass(stats);
+
     slides.push({
       id: 'class',
-      tone: move ? 'a1' : 'a2',
-      seconds: 7.5,
+      tone: 'a1',
       body: (
         <>
           <div className="story-pet rise">
@@ -343,7 +313,53 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
           <p className="story-text rise" style={i(8)}>
             {cls.line}
           </p>
+          <p className="story-chip rise" style={i(10)}>
+            {cls.badge}
+          </p>
         </>
+      ),
+    });
+
+    const article = /^[aeiou]/i.test(cls.name) ? 'an' : 'a';
+
+    slides.push({
+      id: 'proof',
+      tone: 'a2',
+      body: (
+        <div className="story-proof">
+          <div className="story-proof-head rise">
+            <div className="story-proof-avatar-box">
+              <PlayerAvatar name={cls.name} size={46} />
+            </div>
+            <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+              <span className="story-proof-badge">{cls.badge}</span>
+              <h2 className="story-proof-title">
+                Why You&rsquo;re {article} {cls.name}
+              </h2>
+            </div>
+          </div>
+
+          <div className="story-proof-dialogue rise" style={i(2)}>
+            <span className="story-proof-dialogue-tag">The Verdict</span>
+            <p className="story-proof-dialogue-text">
+              &ldquo;{cls.proof.headline}&rdquo;
+            </p>
+          </div>
+
+          <div className="story-proof-grid">
+            {cls.proof.metrics.map((m, n) => (
+              <div key={m.label} className="story-proof-card rise" style={i(3 + n)}>
+                <span className="story-proof-card-label">{m.label}</span>
+                <span className="story-proof-card-val">{m.value}</span>
+                {m.hint && <span className="story-proof-card-hint">{m.hint}</span>}
+              </div>
+            ))}
+          </div>
+
+          <div className="story-proof-formula rise" style={i(8)}>
+            <span>⚡ {cls.proof.formula}</span>
+          </div>
+        </div>
       ),
     });
   }
@@ -367,6 +383,92 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
 
   return slides;
 }
+
+interface StorySegmentsProps {
+  slides: Slide[];
+  current: number;
+  paused: boolean;
+  onAdvance: () => void;
+}
+
+const StorySegments: React.FC<StorySegmentsProps> = ({ slides, current, paused, onAdvance }) => {
+  const last = slides.length - 1;
+  const isLast = current >= last;
+  const activeBarRef = useRef<HTMLElement | null>(null);
+  const elapsedRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+
+  const durationMs = (slides[current]?.seconds ?? STORY_DURATION_SECONDS) * 1000;
+
+  // Whenever the active slide index changes, reset elapsed time and bar transform
+  useEffect(() => {
+    elapsedRef.current = 0;
+    if (activeBarRef.current) {
+      activeBarRef.current.style.transform = 'scaleX(0)';
+    }
+  }, [current]);
+
+  // Handle RAF progress timer
+  useEffect(() => {
+    if (isLast || paused) {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
+    }
+
+    lastTimeRef.current = performance.now();
+
+    const tick = (now: number) => {
+      const delta = now - lastTimeRef.current;
+      lastTimeRef.current = now;
+      elapsedRef.current += delta;
+
+      const progress = Math.min(1, elapsedRef.current / durationMs);
+
+      if (activeBarRef.current) {
+        activeBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+
+      if (progress >= 1) {
+        onAdvance();
+      } else {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [current, isLast, paused, durationMs, onAdvance]);
+
+  return (
+    <div className="stories-segs" aria-hidden>
+      {slides.map((s, n) => {
+        const isDone = n < current || (n === current && isLast);
+        const isCurrent = n === current && !isLast;
+        return (
+          <span
+            key={s.id}
+            className={`stories-seg${isDone ? ' done' : isCurrent ? ' on' : ''}`}
+          >
+            <i
+              ref={isCurrent ? (el) => { activeBarRef.current = el; } : undefined}
+              style={isDone ? { transform: 'scaleX(1)' } : isCurrent ? undefined : { transform: 'scaleX(0)' }}
+            />
+          </span>
+        );
+      })}
+    </div>
+  );
+};
 
 /** The recap: a run of full-screen stories that ends on the card. */
 const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
@@ -432,17 +534,12 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
 
       <div className={`stories-frame tone-${slide.tone}`}>
         <div className="stories-top">
-          <div className="stories-segs" aria-hidden>
-            {slides.map((s, n) => (
-              <span key={s.id} className={`stories-seg${n < current || (n === current && n === last) ? ' done' : n === current ? ' on' : ''}`}>
-                <i
-                  key={n === current ? `run-${current}` : 'idle'}
-                  style={{ animationDuration: `${s.seconds ?? 6}s` }}
-                  onAnimationEnd={n === current ? () => go(1) : undefined}
-                />
-              </span>
-            ))}
-          </div>
+          <StorySegments
+            slides={slides}
+            current={current}
+            paused={paused}
+            onAdvance={() => go(1)}
+          />
           <div className="stories-bar">
             <span className="stories-brand">
               GitWrap {stats.year} · {current + 1}/{slides.length}

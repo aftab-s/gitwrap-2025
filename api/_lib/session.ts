@@ -20,7 +20,7 @@ const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours
 export function authEnv() {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-  const sessionSecret = process.env.SESSION_SECRET;
+  const sessionSecret = process.env.SESSION_SECRET || process.env.GITHUB_AUTH_SESSION_SECRET;
   const enabled = Boolean(clientId && clientSecret && sessionSecret && sessionSecret.length >= 32);
   return { clientId, clientSecret, sessionSecret, enabled };
 }
