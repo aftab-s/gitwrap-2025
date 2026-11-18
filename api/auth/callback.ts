@@ -1,7 +1,4 @@
-import {
-  authEnv, clearCookie, getOrigin, readReturnYear, redirect, sessionCookie, stateMatches, RETURN_YEAR_COOKIE, STATE_COOKIE,
-} from '../_lib/session.js';
-import { getEdition, DEFAULT_YEAR } from '../../config.js';
+import { authEnv, clearCookie, getOrigin, redirect, sessionCookie, stateMatches, STATE_COOKIE } from '../_lib/session.js';
 
 /**
  * GET /api/auth/callback?code=...&state=...
@@ -13,10 +10,7 @@ export async function GET(request: Request): Promise<Response> {
   const origin = getOrigin(request);
   const url = new URL(request.url, origin);
   const clearState = clearCookie(request, STATE_COOKIE);
-  const clearYear = clearCookie(request, RETURN_YEAR_COOKIE);
-  // Land back on the edition the user started from (validated: only known years are honoured).
-  const year = (getEdition(readReturnYear(request)) ?? getEdition(DEFAULT_YEAR)!).year;
-  const fail = (reason: string) => redirect(`${origin}/${year}?auth_error=${reason}`, [clearState, clearYear]);
+  const fail = (reason: string) => redirect(`${origin}/?auth_error=${reason}`, [clearState]);
 
   if (!enabled) return fail('not_configured');
   if (url.searchParams.get('error')) return fail('denied'); // user clicked "Cancel" on GitHub
@@ -43,10 +37,9 @@ export async function GET(request: Request): Promise<Response> {
     const user = (await userResp.json()) as { login?: string };
     if (!userResp.ok || !user.login) return fail('exchange_failed');
 
-    return redirect(`${origin}/${year}/u/${encodeURIComponent(user.login)}`, [
+    return redirect(`${origin}/u/${encodeURIComponent(user.login)}`, [
       sessionCookie(request, user.login, tokenBody.access_token),
       clearState,
-      clearYear,
     ]);
   } catch (err) {
     console.error('OAuth callback failed:', err);

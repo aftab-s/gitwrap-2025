@@ -1,4 +1,4 @@
-import type { AIStats } from '../../types.js';
+import type { CommitInsights } from '../../types.js';
 
 /** Minimal GraphQL caller (see github.ts). */
 export type Gql = <T>(query: string, variables: Record<string, unknown>) => Promise<T>;
@@ -6,57 +6,30 @@ export type Gql = <T>(query: string, variables: Record<string, unknown>) => Prom
 /**
  * Walks the user's own commits (default branch of the repos they committed to in the wrap window)
  * and derives two things from them:
- *   1. commit hours  -> "best hour" stat
- *   2. AI signals    -> "AI co-authored" stat
+ *   1. commit hours    -> "best hour" stat and the hour histogram
+ *   2. signature moves -> which verb opens their commit messages most often
  *
- * AI detection relies on the signatures that AI coding tools leave in commit messages, mostly
- * `Co-authored-by:` trailers (Claude Code, Copilot agent, Cursor agent, Codex, Aider, Jules, Devin...).
- * Inline autocomplete and copy/paste from a chat window leave no trace, so the result is a LOWER BOUND.
+ * Only a closed list of verbs is ever reported, so nothing from a commit message itself (which may
+ * come from a private repository) can end up on a card.
  */
 
-// ---------------------------------------------------------------------------
-// Detection rules
-// ---------------------------------------------------------------------------
-
-// Matched against the value of each `Co-authored-by:` trailer ("Name <email>").
-// Patterns are deliberately specific so that a human co-author called e.g. "Claude Martin" is not flagged.
-const CO_AUTHOR_RULES: Array<{ tool: string; match: RegExp }> = [
-  { tool: 'Claude', match: /@anthropic\.com|claude\[bot\]|\bclaude[ -](code|opus|sonnet|haiku|fable|mythos|agent)\b/i },
-  { tool: 'Copilot', match: /copilot/i },
-  { tool: 'Cursor', match: /@cursor\.(com|sh)|cursor ?agent|cursor\[bot\]/i },
-  { tool: 'Codex', match: /\bcodex\b|chatgpt|@openai\.com/i },
-  { tool: 'Gemini', match: /gemini|google-labs-jules|jules\[bot\]/i },
-  { tool: 'Aider', match: /\baider\b|aider\.chat/i },
-  { tool: 'Devin', match: /devin-ai-integration|devin ai|@cognition/i },
-  { tool: 'Windsurf', match: /windsurf|codeium/i },
-  { tool: 'Amazon Q', match: /amazon ?q\b/i },
-  { tool: 'Junie', match: /\bjunie\b/i },
+const MOVES: Array<{ name: string; match: RegExp }> = [
+  { name: 'Fix', match: /^(fix|fixes|fixed|fixing|bugfix|hotfix|patch)$/ },
+  { name: 'Add', match: /^(add|adds|added|adding|feat|feature|implement|implements|implemented|create|creates|created|introduce|new)$/ },
+  { name: 'Update', match: /^(update|updates|updated|updating|bump|bumps|upgrade|upgrades|chore|improve|improves|tweak|tweaks|change|changes)$/ },
+  { name: 'Remove', match: /^(remove|removes|removed|delete|deletes|deleted|drop|drops|cleanup|clean)$/ },
+  { name: 'Refactor', match: /^(refactor|refactors|refactored|rename|renames|move|moves|simplify|rework|restructure)$/ },
+  { name: 'Test', match: /^(test|tests|testing)$/ },
+  { name: 'Docs', match: /^(docs|doc|document|documents|readme)$/ },
+  { name: 'Revert', match: /^(revert|reverts|reverted)$/ },
+  { name: 'WIP', match: /^(wip)$/ },
 ];
 
-// Matched against the whole commit message.
-const MESSAGE_RULES: Array<{ tool: string; match: RegExp }> = [
-  { tool: 'Claude', match: /generated with \[?claude code/i },
-  { tool: 'Copilot', match: /generated (with|by) (github )?copilot/i },
-  { tool: 'Aider', match: /^aider: /m },
-];
-
-const CO_AUTHOR_RE = /^co-authored-by:\s*(.+)$/gim;
-
-/** Returns the AI tools detected in a commit message (empty array when none). */
-export function detectAITools(message: string): string[] {
-  const tools = new Set<string>();
-
-  for (const m of message.matchAll(CO_AUTHOR_RE)) {
-    const coAuthor = m[1];
-    for (const rule of CO_AUTHOR_RULES) {
-      if (rule.match.test(coAuthor)) tools.add(rule.tool);
-    }
-  }
-  for (const rule of MESSAGE_RULES) {
-    if (rule.match.test(message)) tools.add(rule.tool);
-  }
-
-  return [...tools];
+/** The move a commit message opens with ("fix(api): …" → Fix), or undefined when it is none of them. */
+export function detectMove(message: string): string | undefined {
+  const first = message.trimStart().match(/^[a-z]+/i)?.[0].toLowerCase();
+  if (!first) return undefined;
+  return MOVES.find((m) => m.match.test(first))?.name;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +46,6 @@ const REPO_HISTORY_QUERY = `
               pageInfo { hasNextPage endCursor }
               nodes {
                 message
-                additions
                 authoredDate
                 parents { totalCount }
               }
@@ -87,7 +59,6 @@ const REPO_HISTORY_QUERY = `
 
 interface HistoryNode {
   message: string;
-  additions: number;
   authoredDate: string;
   parents: { totalCount: number };
 }
@@ -115,11 +86,8 @@ export interface CommitAnalysisOptions {
 
 export interface CommitAnalysis {
   commitHours: number[];
-  aiStats?: AIStats;
+  commitInsights?: CommitInsights;
 }
-
-// One huge commit (lockfile, vendored code, generated assets) should not dominate the line share.
-const MAX_ADDITIONS_PER_COMMIT = 2000;
 
 async function fetchRepoCommits(
   gql: Gql,
@@ -183,31 +151,21 @@ export async function analyzeCommits(
   );
 
   const commitHours: number[] = [];
-  const toolCounts = new Map<string, number>();
+  const moveCounts = new Map<string, number>();
   let analyzedCommits = 0;
-  let aiCommits = 0;
-  let totalAdditions = 0;
-  let aiAdditions = 0;
 
   for (const commits of perRepo) {
     for (const commit of commits) {
       if (commit.parents.totalCount > 1) continue; // skip merge commits
-
       analyzedCommits++;
-      const additions = Math.min(commit.additions ?? 0, MAX_ADDITIONS_PER_COMMIT);
-      totalAdditions += additions;
 
       // authoredDate keeps the committer's UTC offset (e.g. 2026-03-15T23:10:00+05:30),
       // so reading the hour straight from the string gives their local hour.
       const hourMatch = commit.authoredDate?.match(/T(\d{2}):/);
       if (hourMatch) commitHours.push(parseInt(hourMatch[1], 10));
 
-      const tools = detectAITools(commit.message ?? '');
-      if (tools.length > 0) {
-        aiCommits++;
-        aiAdditions += additions;
-        for (const tool of tools) toolCounts.set(tool, (toolCounts.get(tool) ?? 0) + 1);
-      }
+      const move = detectMove(commit.message ?? '');
+      if (move) moveCounts.set(move, (moveCounts.get(move) ?? 0) + 1);
     }
   }
 
@@ -215,19 +173,18 @@ export async function analyzeCommits(
     return { commitHours };
   }
 
+  const hours = new Array(24).fill(0);
+  for (const h of commitHours) hours[h]++;
+
   return {
     commitHours,
-    aiStats: {
+    commitInsights: {
       analyzedCommits,
-      aiCommits,
-      commitShare: Math.round((aiCommits / analyzedCommits) * 100),
-      totalAdditions,
-      aiAdditions,
-      lineShare: totalAdditions > 0 ? Math.round((aiAdditions / totalAdditions) * 100) : 0,
-      tools: [...toolCounts.entries()]
+      hours,
+      moves: [...moveCounts.entries()]
         .map(([name, commits]) => ({ name, commits }))
-        .sort((a, b) => b.commits - a.commits),
-      reposScanned: targets.length,
+        .sort((a, b) => b.commits - a.commits)
+        .slice(0, 3),
     },
   };
 }

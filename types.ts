@@ -1,19 +1,13 @@
 import { z } from 'zod';
 
-// AI-assisted contribution stats, detected from commit trailers / signatures.
-// This is a lower bound: inline autocomplete and copy-pasted chat output leave no trace in git.
-export const aiStatsSchema = z.object({
+// Read from the user's own commits: when they commit, and which verb opens their messages.
+export const commitInsightsSchema = z.object({
   analyzedCommits: z.number(),
-  aiCommits: z.number(),
-  commitShare: z.number(), // 0-100, % of analyzed commits with an AI signal
-  totalAdditions: z.number(),
-  aiAdditions: z.number(),
-  lineShare: z.number(), // 0-100, % of added lines that came from AI-signed commits
-  tools: z.array(z.object({ name: z.string(), commits: z.number() })),
-  reposScanned: z.number(),
+  hours: z.array(z.number()), // 24 buckets, the committer's local hour
+  moves: z.array(z.object({ name: z.string(), commits: z.number() })), // top three, most used first
 });
 
-export type AIStats = z.infer<typeof aiStatsSchema>;
+export type CommitInsights = z.infer<typeof commitInsightsSchema>;
 
 export const userStatsSchema = z.object({
   /** Edition this wrap was generated for (2025, 2026, …). */
@@ -49,7 +43,7 @@ export const userStatsSchema = z.object({
   // Contributions made in private repos (authenticated mode) or the anonymized private count
   // GitHub exposes publicly when the user enabled "Include private contributions on my profile".
   privateContributions: z.number().optional(),
-  aiStats: aiStatsSchema.optional(),
+  commitInsights: commitInsightsSchema.optional(),
   longestStreakDays: z.number(),
   bestDayOfWeek: z.string(),
   bestHour: z.number(),

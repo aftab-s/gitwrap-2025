@@ -1,5 +1,6 @@
 import type { UserStats } from './types';
-import { getEdition } from './config';
+import { EDITION } from './config';
+import { calendarFacts } from './insights';
 
 /**
  * Sample data for the demo card on the landing page. Every number here is invented and the page
@@ -25,8 +26,7 @@ function seeded(seed: number) {
 }
 
 function demoCalendar(year: number) {
-  const edition = getEdition(year);
-  const start = new Date(edition ? edition.range.from : `${year - 1}-12-01T00:00:00Z`);
+  const start = new Date(year === EDITION.year ? EDITION.range.from : `${year - 1}-12-01T00:00:00Z`);
   const rand = seeded(year);
   const days: Array<{ date: string; count: number }> = [];
   for (let i = 0; i < 364; i++) {
@@ -46,7 +46,6 @@ export function demoStats(year: number): UserStats {
   const total = contributionCalendar.reduce((sum, d) => sum + d.count, 0);
   const prs = 96, issues = 41, reviews = 173;
   const commits = Math.max(total - prs - issues - reviews, 0);
-  const aiCommits = Math.round(commits * 0.38);
   return {
     year,
     login: 'player-one',
@@ -64,25 +63,28 @@ export function demoStats(year: number): UserStats {
       { name: 'Go', percent: 27.1 },
       { name: 'Python', percent: 14.5 },
     ],
-    topRepos: [{ name: 'coin-op', url: '', contributions: Math.round(commits * 0.6), stargazers: 88 }],
-    longestStreakDays: 41,
+    topRepos: [
+      { name: 'coin-op', url: '', contributions: Math.round(commits * 0.6), stargazers: 88 },
+      { name: 'high-score-api', url: '', contributions: Math.round(commits * 0.25), stargazers: 31 },
+      { name: 'dotfiles', url: '', contributions: Math.round(commits * 0.1), stargazers: 4 },
+    ],
+    longestStreakDays: calendarFacts(contributionCalendar).streak?.days ?? 0,
     bestDayOfWeek: 'Wednesday',
     bestHour: 16,
     contributionCalendar,
     githubAnniversary: 6,
     yearOverYearGrowth: { commitsGrowth: 18, prsGrowth: 9, issuesGrowth: -4, overallGrowth: 14 },
     includesPrivate: false,
-    aiStats: {
+    commitInsights: {
       analyzedCommits: commits,
-      aiCommits,
-      commitShare: 38,
-      totalAdditions: 52000,
-      aiAdditions: 23400,
-      lineShare: 45,
-      tools: [{ name: 'Claude', commits: aiCommits }],
-      reposScanned: 8,
+      hours: [2, 0, 0, 0, 0, 0, 3, 9, 22, 41, 58, 63, 37, 49, 70, 81, 96, 74, 40, 28, 33, 26, 14, 6].map((h) => Math.round((h * commits) / 752)),
+      moves: [
+        { name: 'Fix', commits: Math.round(commits * 0.31) },
+        { name: 'Add', commits: Math.round(commits * 0.27) },
+        { name: 'Refactor', commits: Math.round(commits * 0.12) },
+      ],
     },
   };
 }
 
-export const DEMO_MESSAGE = 'player-one reviewed 173 pull requests and still found time for a 41-day streak.';
+export const DEMO_MESSAGE = 'player-one reviewed 173 pull requests and still shipped 96 of their own.';

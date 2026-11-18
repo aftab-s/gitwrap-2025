@@ -1,13 +1,13 @@
 import { fetchGitHubStats, GitHubError } from './_lib/github.js';
 import { generateFunMessage } from './_lib/funMessage.js';
 import { getSession, clearCookie, json, SESSION_COOKIE } from './_lib/session.js';
-import { getEdition, DEFAULT_YEAR } from '../config.js';
+import { EDITION } from '../config.js';
 
 // GitHub logins: 1-39 chars, alphanumeric or single hyphens, no leading hyphen.
 const USERNAME_RE = /^[a-z\d](?:[a-z\d-]{0,38})$/i;
 
 /**
- * GET /api/stats?username=<login>[&year=2025|2026][&private=1]   (year defaults to the current edition)
+ * GET /api/stats?username=<login>[&private=1]
  *
  * - Default: public stats, fetched with the server's shared token. Cached at the CDN so repeat
  *   views don't spend GitHub quota.
@@ -21,10 +21,7 @@ export async function GET(request: Request): Promise<Response> {
     return json({ error: 'not_found', message: 'Invalid GitHub username' }, { status: 404 });
   }
 
-  const edition = getEdition(url.searchParams.get('year') ?? DEFAULT_YEAR);
-  if (!edition) {
-    return json({ error: 'not_found', message: 'Unknown year' }, { status: 404 });
-  }
+  const edition = EDITION;
 
   const wantsPrivate = url.searchParams.get('private') === '1';
   let userToken: string | undefined;

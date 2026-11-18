@@ -12,20 +12,16 @@
 
 - **Personalized Stats:** Commits, PRs, Issues, and Reviews aggregated into one card.
 - **🔒 Private contributions (new):** Sign in with GitHub to include work from private repositories. Private repo names are hidden on the card unless you opt in.
-- **🤖 AI co-authored stat (new, optional):** What share of your commits carry an AI co-author signature (Claude Code, Copilot, Cursor, Codex, Gemini/Jules, Aider, Devin, Windsurf, Amazon Q, Junie), with a per-tool breakdown.
+- **🕹️ Recap stories (new):** before the card, a tap-through recap of the year: score, calendar, best hour, streak, languages, top repositories.
+- **Player class and signature move (new):** an archetype earned from your own numbers (Night Owl, Streak Keeper, Code Reviewer, ...) and the verb that opens most of your commit messages.
 - **Six colourways** and a **shareable 1080×1440 PNG export**. What you see on screen is the exact image you download.
 - **AI (Text Only):** Gemini writes the one-liner on the card (falls back to a template).
 
-## 📅 Editions: one URL per year
+## 📅 The 2026 edition
 
-| URL | Shows |
-|---|---|
-| `/2025` | GitWrap 2025 (Dec 1 2024 → Dec 1 2025, the original window) |
-| `/2026` | GitWrap 2026 (Dec 1 2025 → Nov 30 2026) |
-| `/2025/u/<name>`, `/2026/u/<name>` | That user's wrap for that year |
-| `/`, unknown years, old `/u/<name>` links | Redirect to the current edition (`/2026`) |
+This app is GitWrap 2026 only (Dec 1 2025 → Nov 30 2026). `/` is the landing page and `/u/<name>` is a user's wrap. The original 2025 design (and its own data) lives separately in the `gitwrap-2025` project — it is not part of this codebase and this project never routes to it.
 
-Editions live in [`config.ts`](config.ts). To add 2027, add one entry to `EDITIONS` (and bump `DEFAULT_YEAR` when it should become the landing page). Signing in returns you to the edition you started from.
+The wrap window and repo URL live in [`config.ts`](config.ts)'s single `EDITION` constant.
 
 ## 🕹️ Design
 
@@ -82,20 +78,14 @@ Sign-in UI appears only when all three sign-in variables are set; without them t
 
 An OAuth App allows one callback URL, so create a second app for local development with the callback `http://localhost:3000/api/auth/callback`.
 
-## 🤖 How the AI co-authored stat works
+## 🕹️ How the player class works
 
-[`api/_lib/commitAnalysis.ts`](api/_lib/commitAnalysis.ts) reads your non-merge commits on the default branch of your most-active repositories in the wrap window (public view: top 8 repos × 100 commits; signed in: top 30 repos × 500 commits) and looks for the signatures AI tools leave in commit messages, mainly `Co-authored-by:` trailers.
-
-- **Headline:** % of commits with an AI signature. Also reported: % of added lines (per-commit additions capped at 2,000 so lockfiles don't skew it) and a per-tool breakdown.
-- **It's a lower bound.** Inline autocomplete and code pasted from a chat window leave no trace in git, and squash merges can drop trailers. The UI says so.
-- Rules are deliberately specific (e.g. `Claude` only matches `@anthropic.com` / `Claude Code|Opus|Sonnet…`), so a human co-author named Claude isn't counted.
-- Users can hide the stat on the card with the *Show AI co-authored stat* toggle.
-
-The same commit scan supplies real commit timestamps for **Best Hour**. It replaces the 2025 search-API call, which hit secondary rate limits.
+- The class is computed in `insights.ts` from the stats already on the card: commit hours, weekend share, longest streak, active days, reviews, pull requests and language mix. Each class has a threshold; the one cleared by the widest margin wins, so the same year always gives the same class.
+- The signature move comes from the server's commit scan (`api/_lib/commitAnalysis.ts`): the first word of each commit message, matched against a closed list of verbs (Fix, Add, Update, ...). Only those verbs are ever reported, never text from a commit message.
 
 ## 🧩 Project Structure
 
-- `config.ts` — editions (years + date ranges), repo URL (shared by client and server)
+- `config.ts` — the 2026 edition's date range, repo URL (shared by client and server)
 - `pages/`, `components/` — React UI: landing page, wrap page, the card (`ArcadeCard`), sign-in key, AI stats panel
 - `index.css`, `constants.ts` — the design system: type, keys, windows, and the six colourways
 - `services/api.ts`, `services/auth.ts` — browser-side calls to our own `/api`

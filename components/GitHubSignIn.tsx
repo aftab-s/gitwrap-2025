@@ -1,6 +1,4 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { DEFAULT_YEAR, getEdition } from '../config';
 import { signIn, useAuth } from '../services/auth';
 import { GitHubMark } from './icons/Arcade';
 
@@ -16,8 +14,6 @@ interface Props {
  */
 const GitHubSignIn: React.FC<Props> = ({ label = 'Sign in', className = '' }) => {
   const auth = useAuth();
-  // Remember which edition the visitor is on so sign-in brings them back to it.
-  const year = (getEdition(useParams().year) ?? getEdition(DEFAULT_YEAR)!).year;
 
   if (!auth.ready || auth.login) return null;
 
@@ -40,7 +36,7 @@ const GitHubSignIn: React.FC<Props> = ({ label = 'Sign in', className = '' }) =>
   }
 
   return (
-    <button type="button" className={`key key-plain ${className}`} onClick={() => signIn(year)}>
+    <button type="button" className={`key key-plain ${className}`} onClick={() => signIn()}>
       <GitHubMark size={18} />
       {label}
     </button>
