@@ -1,103 +1,187 @@
 <div align="center">
   <img alt="GitWrap 2026 Banner" src="public/images/banner-image.png" style="width:100%;max-width:1000px;border-radius:8px;box-shadow:0 8px 30px rgba(2,6,23,0.3)" />
 
-  <p style="margin-top:12px;font-size:18px;">Showcase your 2026 GitHub contributions with a polished, customizable year-in-review card - themeable, concise, and ready to share.</p>
+  <p style="margin-top:16px;font-size:18px;font-weight:600;">Showcase your 2026 GitHub contributions with a polished, arcade-inspired year-in-review card — themeable, responsive, and ready to share.</p>
 </div>
 
 # GitWrap 2026
 
-> Create a polished year-in-review card for your GitHub contributions and share it with your network.
+> Create a high-fidelity, arcade-crafted year-in-review card for your GitHub contributions and share it with your network.
 
-## ✨ Highlights
+---
 
-- **Personalized Stats:** Commits, PRs, Issues, and Reviews aggregated into one card.
-- **🔒 Private contributions (new):** Sign in with GitHub to include work from private repositories. Private repo names are hidden on the card unless you opt in.
-- **🕹️ Recap stories (new):** before the card, a tap-through recap of the year: score, calendar, best hour, streak, languages, top repositories.
-- **Player class and signature move (new):** an archetype earned from your own numbers (Night Owl, Streak Keeper, Code Reviewer, ...) and the verb that opens most of your commit messages.
-- **Six colourways** and a **shareable 1080×1440 PNG export**. What you see on screen is the exact image you download.
-- **AI (Text Only):** Gemini writes the one-liner on the card (falls back to a template).
+## ✨ Features & Highlights
 
-## 📅 The 2026 edition
+- **📊 Comprehensive Personal Telemetry:** Commits, Pull Requests, Issues, Code Reviews, streaks, and top 4 languages aggregated into a single cohesive control deck.
+- **🎨 Six Bespoke 2026 Colourways:**
+  - **Matchday '26** — Pitch chalk stripes, tactical 4-3-3 formation, and gold stars inspired by World Cup 2026.
+  - **Lunar Orbit** — Translunar trajectory vectors and celestial cartography inspired by NASA Artemis II.
+  - **Vice Sunset** — Neon coastal dusk gradients and palm silhouettes inspired by GTA VI.
+  - **Latverian Steel** — Mystic alchemy summoning circles and runic columns inspired by Avengers Doomsday.
+  - **Volt Matrix** — Cybernetic circuit traces, neon yellow terminals, and hex debug telemetry.
+  - **Tokyo Riso** — Japanese ISBN barcodes, red Hanko inspection seals, and Swiss editorial crop marks.
+- **🕹️ Multi-Theme Story Recap:** Before the card, an interactive tap-through storyline that takes you through your season score, attendance speedo gauge, 24-hour combat radar, streak multipliers, and earned player class.
+- **👾 Player Class & Signature Moves:** An archetype earned from your own numbers (Night Owl, PR Shipper, Code Reviewer, Polyglot, etc.) paired with an 8-bit companion pet and the verb that opens most of your commit messages.
+- **🔒 Private Contributions:** Sign in with GitHub to count commits from private repositories. Private repository names remain masked on the exported card unless you explicitly opt in.
+- **⚡ Cybernetic Loading HUD:** Animated concentric radar scanner and micro-segmented energy meter tracking real-time API telemetry during data compilation.
+- **📱 Native Apple Device & Safari Compatibility:** Complete Base64 pre-inlined asset pipeline, explicit `<base>` resolution in offscreen export iframes, and rasterizer warm-up passes ensuring 100% reliable 1080×1440 PNG downloads on iOS and macOS Safari.
+- **🤖 Dual-Provider AI One-Liners:** Google Gemini (primary) with automatic fallback to Groq or deterministic templates to synthesize a punchy, single-sentence summary on the card.
+- **👥 Open Source Community Shelf:** Built for developers by the community, featuring live contributor grid hydration.
 
-This app is GitWrap 2026 only (Dec 1 2025 → Nov 30 2026). `/` is the landing page and `/u/<name>` is a user's wrap. The original 2025 design (and its own data) lives separately in the `gitwrap-2025` project — it is not part of this codebase and this project never routes to it.
+---
 
-The wrap window and repo URL live in [`config.ts`](config.ts)'s single `EDITION` constant.
+## 📅 The 2026 Edition
 
-## 🕹️ Design
+GitWrap 2026 covers contributions logged across **Dec 1, 2025 → Nov 30, 2026**.
+- `/` is the landing page and username dispatcher.
+- `/u/<username>` is the dedicated player studio and export deck.
 
-The 2026 UI is drawn as the printed control panel of an arcade machine: one flat colour field per colourway, black keylines, square keys that press down, and no rounded corners or blur anywhere. The rules live in [`DESIGN.md`](DESIGN.md); colourways are defined in [`constants.ts`](constants.ts), and the card itself is [`components/ArcadeCard.tsx`](components/ArcadeCard.tsx).
+All edition windows, year constants, and repository links are centrally configured in [`config.ts`](config.ts).
 
-## 🔐 Architecture & security
+---
 
-The browser never holds an API token. A handful of Vercel serverless functions in [`api/`](api) do all the talking to GitHub and Gemini:
+## 🔐 Architecture & Security
 
-| Endpoint | What it does |
-|---|---|
-| `GET /api/stats?username=&year=` | Public wrap, fetched with the server's `GITHUB_APP_TOKEN`. CDN-cached for an hour. |
-| `GET /api/stats?username=&year=&private=1` | The signed-in owner's wrap incl. private repos, fetched with *their* token. Never cached. Rejected unless the session belongs to that username. |
-| `GET /api/auth/login` → `GET /api/auth/callback` | Standard GitHub OAuth web flow with a `state` check. The code → token exchange uses the client secret server-side. |
-| `GET /api/auth/me`, `POST /api/auth/logout` | Who is signed in (login only) / sign out. |
+The browser client never holds any elevated GitHub credentials or AI API keys. Serverless functions in [`api/`](api) handle all upstream communication with the GitHub GraphQL API, Gemini, and Groq:
 
-- **No secrets in the bundle.** No environment variable is `VITE_`-prefixed, so nothing is compiled into client JavaScript.
-- **The user's GitHub token is never exposed to the page.** It is stored only in an AES-256-GCM-encrypted, `HttpOnly`, `Secure`, `SameSite=Lax` cookie (8-hour lifetime) that only the `/api` functions can decrypt.
-- **Scopes:** `read:user` and `repo`. GitHub OAuth Apps have no read-only scope for private repositories; the server only ever sends read queries.
-- The private view is shown **only to the signed-in owner**. A shared link always shows the public view, and private repository names are hidden on the card unless the owner opts in.
-- **Organization repos:** if an org restricts third-party OAuth app access, its private repos stay invisible until an org owner approves the app.
+| Endpoint | Method | Purpose | Caching Strategy |
+|---|---|---|---|
+| `/api/stats?username=&year=` | `GET` | Public wrap data fetched using server's shared token. | CDN edge cached for 1 hour (`s-maxage=3600`). |
+| `/api/stats?username=&year=&private=1` | `GET` | Private wrap data fetched using the authenticated owner's token. | Strictly private (`no-store`), rejected unless session matches. |
+| `/api/auth/login` | `GET` | Initiates the GitHub OAuth authorization code flow. | No cache. |
+| `/api/auth/callback` | `GET` | Validates CSRF `state`, exchanges code for token, sets encrypted cookie. | No cache, redirects to `/u/<login>`. |
+| `/api/auth/me` | `GET` | Returns authenticated user's login and OAuth availability. | Session-checked. |
+| `/api/auth/logout` | `POST` | Clears the session cookie and signs the user out. | No cache. |
+
+### Security Guarantees:
+- **Zero Client-Side Secrets:** No environment variables use the `VITE_` prefix, preventing sensitive tokens from being bundled into client JavaScript.
+- **AES-256-GCM Session Encryption:** The user's OAuth access token is stored strictly inside an AES-256-GCM sealed, `HttpOnly`, `Secure`, `SameSite=Lax` cookie with an 8-hour TTL.
+- **Minimal Scopes:** Requests `read:user` and `repo` (required by GitHub OAuth to read commit contribution counts in private repositories). The server issues read-only GraphQL queries and never performs write operations.
+- **Private View Isolation:** The private contribution view is only visible to the signed-in repository owner. Shared links or third-party visitors always receive the sanitized public view.
+
+---
 
 ## 🚀 Quick Start (Development)
 
-```powershell
-git clone https://github.com/aftab-s/gitwrap-2026.git
-cd gitwrap-2026
-npm install
-copy .env.example .env.local   # then fill it in
-npm run dev                    # http://localhost:3000  (frontend + /api on one port)
+### 1. Clone the repository
+```bash
+git clone https://github.com/aftab-s/gitwrap.git
+cd gitwrap
 ```
 
-`npm run dev` serves the `/api` functions through a small Vite plugin (see [`vite.config.ts`](vite.config.ts)), so the Vercel CLI isn't needed locally.
+### 2. Install dependencies
+```bash
+npm install
+# or
+pnpm install
+```
 
-### Environment variables
+### 3. Configure environment variables
+Copy the example environment configuration to `.env.local`:
+```bash
+# On Linux / macOS:
+cp .env.example .env.local
 
-Set these in `.env.local` for development and in **Vercel → Project → Settings → Environment Variables** for production.
+# On Windows (PowerShell):
+copy .env.example .env.local
+```
+Fill in at least `GITHUB_APP_TOKEN` (a classic GitHub Personal Access Token with **no scopes**).
 
-| Variable | Required | Purpose |
+### 4. Run the local development server
+```bash
+npm run dev
+# or
+pnpm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+> **Note:** The Vite dev server includes a built-in API proxy plugin (see [`vite.config.ts`](vite.config.ts)) that executes the `/api` serverless endpoints locally without requiring the Vercel CLI.
+
+---
+
+## ⚙️ Environment Variables Reference
+
+Configure these in `.env.local` for local development and under **Vercel → Project Settings → Environment Variables** for production deployments:
+
+| Variable | Required | Description |
 |---|---|---|
-| `GITHUB_APP_TOKEN` | Yes | Token for public lookups. A classic PAT with **no scopes** is enough. |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | For sign-in | Your GitHub OAuth App's credentials. |
-| `SESSION_SECRET` | For sign-in | Random 32+ character string that encrypts the session cookie. `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
-| `GEMINI_API_KEY` | No | Gemini one-liner on the card (falls back to a template). `GEMINI_MODEL` overrides the model. |
-| `APP_URL` | No | Force the public origin used for the OAuth redirect (auto-detected by default). |
+| `GITHUB_APP_TOKEN` | **Yes** | Shared GitHub Personal Access Token (classic PAT, **0 scopes needed**) for public lookups (5,000 req/hr). |
+| `GITHUB_CLIENT_ID` | Optional | GitHub OAuth App Client ID (enables user sign-in & private contribution counting). |
+| `GITHUB_CLIENT_SECRET` | Optional | GitHub OAuth App Client Secret. |
+| `SESSION_SECRET` | Optional | Random 32+ character string used to encrypt session cookies via AES-256-GCM. |
+| `GEMINI_API_KEY` | Optional | Google Gemini API key for personalized AI one-liner summaries. |
+| `GEMINI_MODEL` | Optional | Model identifier (defaults to `gemini-2.5-flash-lite`). |
+| `GROQ_API_KEY` | Optional | Groq API key (used as alternative or fallback AI provider). |
+| `GROQ_MODEL` | Optional | Model identifier for Groq (defaults to `qwen/qwen3.8-27b`). |
+| `APP_URL` | Optional | Public origin override for OAuth callback redirect (auto-detected by default). |
+| `VITE_GITHUB_REPOSITORY`| Optional | Target repository for community contributors widget (defaults to `aftab-s/gitwrap-2026`). |
 
-Sign-in UI appears only when all three sign-in variables are set; without them the app works in public-only mode.
+Generate a secure `SESSION_SECRET` quickly with:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
 
-### GitHub sign-in setup (2 minutes)
+---
 
-1. GitHub → *Settings* → *Developer settings* → *OAuth Apps* → **New OAuth App**.
-2. *Homepage URL*: your site. *Authorization callback URL*: `<your site>/api/auth/callback`.
-3. Copy the **Client ID**, generate a **Client secret**, and set them with a `SESSION_SECRET` as above.
+## 🔑 GitHub OAuth Setup Guide (Sign-In)
 
-An OAuth App allows one callback URL, so create a second app for local development with the callback `http://localhost:3000/api/auth/callback`.
+To enable private repository contributions:
+1. Navigate to **GitHub → Settings → Developer settings → OAuth Apps → [New OAuth App](https://github.com/settings/applications/new)**.
+2. Fill in the details:
+   - **Application name:** `GitWrap 2026`
+   - **Homepage URL:** `http://localhost:3000` (or your live domain)
+   - **Authorization callback URL:** `http://localhost:3000/api/auth/callback` (or `https://your-domain.com/api/auth/callback`)
+3. Click **Register application**.
+4. Copy the **Client ID**, generate a **Client Secret**, and paste them into your `.env.local` alongside a generated `SESSION_SECRET`.
 
-## 🕹️ How the player class works
+---
 
-- The class is computed in `insights.ts` from the stats already on the card: commit hours, weekend share, longest streak, active days, reviews, pull requests and language mix. Each class has a threshold; the one cleared by the widest margin wins, so the same year always gives the same class.
-- The signature move comes from the server's commit scan (`api/_lib/commitAnalysis.ts`): the first word of each commit message, matched against a closed list of verbs (Fix, Add, Update, ...). Only those verbs are ever reported, never text from a commit message.
+## 📁 Project Structure
 
-## 🧩 Project Structure
+```
+gitwrap-2026/
+├── api/                        # Vercel Serverless Functions
+│   ├── _lib/                   # Server-only utilities (GitHub GQL, session crypto, AI)
+│   │   ├── commitAnalysis.ts   # Commit message verb parsing & local hour detection
+│   │   ├── funMessage.ts       # Gemini & Groq one-liner generation
+│   │   ├── github.ts           # GitHub GraphQL queries & stat normalization
+│   │   └── session.ts          # AES-256-GCM cookie sealing & OAuth helpers
+│   ├── auth/                   # Authentication endpoints (/login, /callback, /me, /logout)
+│   └── stats.ts                # Main wrap aggregation API endpoint
+├── components/                 # React UI Components
+│   ├── icons/                  # Arcade icons, GitHub, X, and LinkedIn vectors
+│   ├── ArcadeCard.tsx          # Master 1080×1440 arcade card canvas
+│   ├── ExportCard.tsx          # Offscreen print wrapper with inlined assets
+│   ├── FuturisticLoader.tsx    # Cybernetic HUD radar & telemetry loader
+│   ├── GitWrapCard.tsx         # Responsive auto-scaling preview container
+│   ├── Marquee.tsx             # Floating glassmorphism navigation bar
+│   ├── Stories.tsx             # Tap-through interactive recap carousel
+│   ├── StoryThemeBackdrop.tsx  # Dynamic vector backdrops for stories
+│   ├── ThemeBackdrop.tsx       # Bespoke thematic backdrops for cards
+│   └── ThemeSelector.tsx       # Six-colourway swatch picker
+├── pages/
+│   ├── HomePage.tsx            # Landing page with hero dispatcher & fusion backdrop
+│   └── UserPage.tsx            # Studio command deck, card preview & download controls
+├── public/                     # Static assets (fonts, virtual pet avatars, theme graphics)
+├── config.ts                   # Edition definitions & repository metadata
+├── constants.ts                # Colourway themes & design tokens
+├── insights.ts                 # Player class archetype scoring logic
+├── playerAvatars.ts            # 16-bit virtual pet companion mappings
+└── types.ts                    # TypeScript types & Zod schemas
+```
 
-- `config.ts` — the 2026 edition's date range, repo URL (shared by client and server)
-- `pages/`, `components/` — React UI: landing page, wrap page, the card (`ArcadeCard`), sign-in key, AI stats panel
-- `index.css`, `constants.ts` — the design system: type, keys, windows, and the six colourways
-- `services/api.ts`, `services/auth.ts` — browser-side calls to our own `/api`
-- `api/stats.ts`, `api/auth/*.ts` — serverless endpoints
-- `api/_lib/github.ts` — GraphQL fetch + stat derivation (server-only)
-- `api/_lib/commitAnalysis.ts` — commit scan, AI detection, commit hours (server-only)
-- `api/_lib/session.ts` — encrypted cookie session + OAuth state (server-only)
-- `api/_lib/funMessage.ts` — Gemini one-liner (server-only)
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome. Open an issue for discussion or submit a PR with your changes.
+Contributions are always welcome! Whether reporting a bug, improving responsive styles, or adding features:
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
+
+---
 
 ## 👥 Contributors
 
@@ -107,4 +191,6 @@ Contributions are welcome. Open an issue for discussion or submit a PR with your
 
 ---
 
-Happy wrapping! 🎁
+<div align="center">
+  <p>Crafted with pride for developers around the world. Happy wrapping! 🎁</p>
+</div>

@@ -71,6 +71,7 @@ export type GitHubUserData = UserStats;
 export interface Theme {
   id: string;
   name: string;
+  tagline?: string;
   c: {
     ground: string;
     line: string;

@@ -1,14 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Marquee from '../components/Marquee';
 import GitHubSignIn from '../components/GitHubSignIn';
-import GitWrapCard from '../components/GitWrapCard';
 import Footer from '../components/Footer';
 import { ArrowRight } from '../components/icons/Arcade';
+import HomeFusionBackdrop from '../components/HomeFusionBackdrop';
 import { useAuth } from '../services/auth';
 import { EDITION } from '../config';
-import { DEFAULT_THEME, themeVars } from '../constants';
-import { demoStats, DEMO_MESSAGE } from '../demo';
+import { HOME_FUSION_THEME, themeVars } from '../constants';
 
 // GitHub logins: letters, digits and single hyphens, up to 39 characters.
 const USERNAME_RE = /^[a-z\d](?:[a-z\d-]{0,38})$/i;
@@ -21,7 +20,6 @@ const HomePage: React.FC = () => {
   const auth = useAuth();
   // Set by /api/auth/callback when sign-in didn't complete (e.g. ?auth_error=invalid_state)
   const authError = new URLSearchParams(window.location.search).get('auth_error');
-  const demo = useMemo(() => demoStats(year), []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,22 +34,75 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="gw" style={themeVars(DEFAULT_THEME) as React.CSSProperties}>
+    <div
+      className="gw"
+      style={
+        {
+          ...themeVars(HOME_FUSION_THEME),
+          position: 'relative',
+          overflowX: 'hidden',
+        } as React.CSSProperties
+      }
+    >
+      <HomeFusionBackdrop />
       <Marquee year={year} />
 
-      <main className="gw-wrap hero">
-        <div className="hero-copy">
-          <h1 className="display hero-title">
+      <main
+        className="gw-wrap hero"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          minHeight: 'calc(100vh - 180px)',
+          paddingTop: 'calc(var(--u) * 8)',
+          paddingBottom: 'calc(var(--u) * 10)',
+        }}
+      >
+        <div
+          className="hero-copy"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            maxWidth: 640,
+            width: '100%',
+            margin: '0 auto',
+          }}
+        >
+          <h1 className="display hero-title" style={{ textAlign: 'center' }}>
             Your {year},
             <br />
             <span className="hero-accent">scored.</span>
           </h1>
 
-          <p className="lede" style={{ marginTop: 32 }}>
+          <p
+            className="lede"
+            style={{
+              marginTop: 28,
+              textAlign: 'center',
+              maxWidth: 520,
+              marginInline: 'auto',
+            }}
+          >
             A short recap of your year on GitHub, then one card to post: contributions, streaks, languages, and the player class you earned.
           </p>
 
-          <form onSubmit={handleSubmit} className="controls" style={{ marginTop: 40 }} noValidate>
+          <form
+            onSubmit={handleSubmit}
+            className="controls"
+            style={{
+              marginTop: 44,
+              width: '100%',
+              maxWidth: 540,
+              marginInline: 'auto',
+              textAlign: 'left',
+            }}
+            noValidate
+          >
             <div className="control control-wide">
               <label className="slot">
                 <span className="slot-at" aria-hidden>
@@ -101,21 +152,11 @@ const HomePage: React.FC = () => {
           </form>
 
           {authError && authError !== 'denied' && (
-            <p className="strip strip-warn" role="alert" style={{ maxWidth: 560, marginTop: 24 }}>
+            <p className="strip strip-warn" role="alert" style={{ maxWidth: 540, marginTop: 24, marginInline: 'auto' }}>
               GitHub sign-in did not finish. Press the sign-in key to try again.
             </p>
           )}
         </div>
-
-        <section className="hero-card" aria-label="Sample card">
-          <p className="silk" style={{ margin: '0 0 12px' }}>
-            Card out · sample with invented numbers
-          </p>
-          <div className="dispenser">
-            <div className="dispenser-mouth" aria-hidden />
-            <GitWrapCard className="dispenser-card" userData={demo} funMessage={DEMO_MESSAGE} theme={DEFAULT_THEME} />
-          </div>
-        </section>
       </main>
 
       <Footer />

@@ -5,6 +5,47 @@ import { toWeeks, LED_STEPS } from './ArcadeCard';
 import GitWrapCard from './GitWrapCard';
 import PlayerAvatar from './PlayerAvatar';
 import { ArrowLeft, ArrowRight, Pause, PlayerArrow } from './icons/Arcade';
+import StoryThemeBackdrop from './StoryThemeBackdrop';
+import { THEMES, themeVars } from '../constants';
+
+const THEME_MAP: Record<string, Theme> = THEMES.reduce((acc, t) => {
+  acc[t.id] = t;
+  return acc;
+}, {} as Record<string, Theme>);
+
+/**
+ * Progression story design: each slide is crafted around a specific 2026 theme world,
+ * taking the user through Maximalist Dark, Vice Sunset, Lunar Orbit, Latverian Steel,
+ * Matchday '26, and Tokyo Riso, before culminating in the user's selected card.
+ */
+function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number, userTheme: Theme): Theme {
+  if (slideIndex === totalSlides - 1 || slideId === 'card') {
+    return userTheme;
+  }
+  switch (slideId) {
+    case 'intro':
+      return THEME_MAP['artemis'] || userTheme;
+    case 'score':
+      return THEME_MAP['fifa'] || userTheme;
+    case 'calendar':
+      return THEME_MAP['gtavi'] || userTheme;
+    case 'rhythm':
+      return THEME_MAP['doomsday'] || userTheme;
+    case 'streak':
+      return THEME_MAP['maxdark'] || userTheme;
+    case 'languages':
+    case 'repos':
+      return THEME_MAP['maxlight'] || userTheme;
+    case 'class':
+    case 'proof':
+      return userTheme;
+    default: {
+      const sequence = ['artemis', 'fifa', 'gtavi', 'doomsday', 'maxdark', 'maxlight'];
+      const themeId = sequence[slideIndex % sequence.length];
+      return THEME_MAP[themeId] || userTheme;
+    }
+  }
+}
 
 interface Props {
   stats: UserStats;
@@ -98,151 +139,340 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       ),
     });
   } else {
-    const total = stats.totalContributions.toLocaleString();
+    const totalNum = stats.totalContributions;
     const growth = stats.yearOverYearGrowth?.overallGrowth;
-    const rows: Array<[string, number]> = [
-      ['Commits', stats.totalCommits],
-      ['Pull requests', stats.totalPRs],
-      ['Issues', stats.totalIssues],
-      ['Reviews', stats.totalPRReviews],
-    ];
+    const commitsPct = totalNum > 0 ? Math.round((stats.totalCommits / totalNum) * 100) : 0;
+    const prsPct = totalNum > 0 ? Math.round((stats.totalPRs / totalNum) * 100) : 0;
+    const reviewsPct = totalNum > 0 ? Math.round((stats.totalPRReviews / totalNum) * 100) : 0;
+    const issuesPct = totalNum > 0 ? Math.max(0, 100 - commitsPct - prsPct - reviewsPct) : 0;
+
     slides.push({
       id: 'score',
-      tone: 'panel',
+      tone: 'ground',
       body: (
         <>
-          <p className="story-lead rise">You put up</p>
-          <div className="story-big rise" style={{ ...fit(total), ...i(1) }}>
-            <CountUp to={stats.totalContributions} />
+          <div className="story-badge-header rise" style={i(0)}>
+            // MATCHDAY TELEMETRY · 2026 CAMPAIGN
           </div>
-          <p className="story-lead rise" style={i(2)}>
-            contributions in {stats.year}.
-          </p>
-          <div className="story-table">
-            {rows.map(([label, value], n) => (
-              <div key={label} className="score-row rise" style={i(4 + n)}>
-                <span className="story-row-label">{label}</span>
-                <span className="score-value">{value.toLocaleString()}</span>
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 1cqh' }}>
+            Season Score
+          </h2>
+
+          <div className="story-scoreboard rise" style={i(2)}>
+            <div className="story-scoreboard-top">
+              <span>Official Match Count</span>
+              <span>90&apos;+5 Verified</span>
+            </div>
+            <div className="story-scoreboard-value">
+              <CountUp to={totalNum} />
+            </div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 'clamp(0.65rem, 2.1cqw, 0.75rem)', color: 'var(--s-dim)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Total contributions logged on the board
+            </div>
+            {growth !== undefined && (
+              <div className="story-chip" style={{ alignSelf: 'flex-start', margin: '0.4cqh 0 0' }}>
+                ▲ {growth >= 0 ? '+' : ''}{growth}% vs {stats.year - 1} campaign
               </div>
-            ))}
+            )}
           </div>
-          {growth !== undefined && (
-            <p className="story-chip rise" style={i(9)}>
-              {growth >= 0 ? '+' : ''}
-              {growth}% on {stats.year - 1}
-            </p>
-          )}
+
+          {/* Tactical distribution strip */}
+          <div className="story-dist-bar rise" style={i(3)} aria-hidden>
+            <div className="story-dist-seg" style={{ width: `${commitsPct}%`, background: '#FFD21F' }} />
+            <div className="story-dist-seg" style={{ width: `${prsPct}%`, background: '#FF334B' }} />
+            <div className="story-dist-seg" style={{ width: `${reviewsPct}%`, background: '#96D4B0' }} />
+            <div className="story-dist-seg" style={{ width: `${issuesPct}%`, background: '#041E10' }} />
+          </div>
+
+          {/* 4-up tactical squad cards */}
+          <div className="story-squad-grid" aria-label="Contribution breakdown">
+            <div className="story-squad-card rise" style={i(4)}>
+              <span className="story-squad-label">Commits</span>
+              <span className="story-squad-val">{stats.totalCommits.toLocaleString()}</span>
+              <span className="story-squad-role">{commitsPct}% · Playmaker</span>
+            </div>
+            <div className="story-squad-card rise" style={i(5)}>
+              <span className="story-squad-label">Pull Requests</span>
+              <span className="story-squad-val">{stats.totalPRs.toLocaleString()}</span>
+              <span className="story-squad-role">Striker / Attacks</span>
+            </div>
+            <div className="story-squad-card rise" style={i(6)}>
+              <span className="story-squad-label">PR Reviews</span>
+              <span className="story-squad-val">{stats.totalPRReviews.toLocaleString()}</span>
+              <span className="story-squad-role">Assists &amp; Defense</span>
+            </div>
+            <div className="story-squad-card rise" style={i(7)}>
+              <span className="story-squad-label">Issues</span>
+              <span className="story-squad-val">{stats.totalIssues.toLocaleString()}</span>
+              <span className="story-squad-role">Tactical Strategy</span>
+            </div>
+          </div>
+
+          <p className="story-note rise" style={{ ...i(8), marginTop: '0.6cqh' }}>
+            Match grade telemetry · Official season whistle confirmed
+          </p>
         </>
       ),
     });
 
-    // Two rows of half a year each, so every lamp is big enough to read on a phone.
-    const weeks = toWeeks(stats.contributionCalendar);
-    const perRow = Math.max(Math.ceil(weeks.length / 2), 1);
-    const halves = [weeks.slice(0, perRow), weeks.slice(perRow)];
+    const activePct = Math.round((facts.activeDays / Math.max(facts.days, 1)) * 100);
+    const qActive = [0, 0, 0, 0];
+    const qTotal = [0, 0, 0, 0];
+    for (const d of stats.contributionCalendar) {
+      const month = new Date(d.date).getUTCMonth();
+      const qIdx = Math.min(3, Math.floor(month / 3));
+      qTotal[qIdx]++;
+      if (d.count > 0) qActive[qIdx]++;
+    }
+    const qLabels = ['Q1 [JAN-MAR]', 'Q2 [APR-JUN]', 'Q3 [JUL-SEP]', 'Q4 [OCT-DEC]'];
+    const arcLen = 299.5;
+    const arcFill = (activePct / 100) * arcLen;
+
     slides.push({
       id: 'calendar',
-      tone: 'dark',
+      tone: 'ground',
       body: (
         <>
-          <p className="story-lead rise">You showed up on</p>
-          <div className="story-big rise" style={{ ...fit(String(facts.activeDays)), ...i(1) }}>
-            <CountUp to={facts.activeDays} />
+          <div className="story-badge-header rise" style={i(0)}>
+            // VICE CRUISE TELEMETRY · 365 DAYS
           </div>
-          <p className="story-lead rise" style={i(2)}>
-            of {facts.days} days.
-          </p>
-          <div className="story-leds" aria-hidden>
-            {halves.map((half, h) => (
-              <div key={h} style={{ gridTemplateColumns: `repeat(${perRow}, 1fr)` }}>
-                {half.map((week, w) => (
-                  <div key={w} className="story-led-col" style={{ '--c': h * perRow + w } as React.CSSProperties}>
-                    {week.map((level, d) => (
-                      <span key={d} style={{ background: level <= 0 ? '#f6f4ec' : 'var(--s-hi)', opacity: level < 0 ? 0 : LED_STEPS[level] }} />
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.5cqh' }}>
+            Days on Duty
+          </h2>
+
+          {/* Speedometer Tachometer Gauge */}
+          <div className="story-speedo-frame rise" style={i(2)}>
+            <svg viewBox="0 0 260 145" style={{ width: 'min(72cqw, 280px)', overflow: 'visible' }}>
+              <defs>
+                <linearGradient id="viceSpeedoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#00F5D4" />
+                  <stop offset="50%" stopColor="#FF2A85" />
+                  <stop offset="100%" stopColor="#FFB703" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 57 122 A 78 78 0 1 1 203 122"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.12)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 57 122 A 78 78 0 1 1 203 122"
+                fill="none"
+                stroke="url(#viceSpeedoGrad)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={`${arcFill} ${arcLen}`}
+              />
+              <text x="130" y="82" textAnchor="middle" fill="#FFFFFF" fontFamily="'Doto', monospace" fontWeight="900" fontSize="38">
+                {facts.activeDays}
+              </text>
+              <text x="130" y="104" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontWeight="700" fontSize="10" letterSpacing="0.06em">
+                / {facts.days} DAYS ACTIVE
+              </text>
+            </svg>
+            <div className="story-chip" style={{ alignSelf: 'center', marginTop: '-1.5cqh' }}>
+              ▲ {activePct}% CRUISE ATTENDANCE
+            </div>
+          </div>
+
+          {/* 4-Quarter Cruise Velocity Breakdown */}
+          <div className="story-quarter-grid" aria-label="Quarterly attendance">
+            {qLabels.map((qLabel, qIdx) => {
+              const ratio = qActive[qIdx] / Math.max(qTotal[qIdx], 1);
+              const litCells = Math.round(ratio * 5);
+              return (
+                <div key={qLabel} className="story-quarter-card rise" style={i(4 + qIdx)}>
+                  <span className="story-quarter-title">{qLabel.split(' ')[0]}</span>
+                  <div className="story-quarter-bar" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((cell) => (
+                      <span key={cell} className={`story-quarter-cell${cell < litCells ? ' lit' : ''}`} />
                     ))}
                   </div>
-                ))}
-              </div>
-            ))}
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 'clamp(0.55rem, 1.8cqw, 0.65rem)', color: 'var(--s-dim)' }}>
+                    {Math.round(ratio * 100)}%
+                  </span>
+                </div>
+              );
+            })}
           </div>
+
           {facts.peak && (
-            <p className="story-note rise" style={i(12)}>
-              Busiest day: {formatDay(facts.peak.date)}, with {facts.peak.count.toLocaleString()} contributions
-            </p>
+            <div className="story-ticket-strip rise" style={i(8)}>
+              <span className="story-ticket-label">Peak Velocity Citation</span>
+              <span className="story-ticket-val">
+                {formatDay(facts.peak.date)} · {facts.peak.count.toLocaleString()} contributions logged
+              </span>
+            </div>
           )}
         </>
       ),
     });
 
     const bestDay = DAYS.indexOf(stats.bestDayOfWeek);
-    if (bestDay >= 0) {
-      const maxDay = Math.max(...facts.weekdayTotals, 1);
-      const maxHour = insights ? Math.max(...insights.hours, 1) : 1;
-      const hour = `${String(stats.bestHour).padStart(2, '0')}:00`;
-      slides.push({
-        id: 'rhythm',
-        tone: 'a1',
-        body: (
-          <>
-            <p className="story-lead rise">{insights ? 'Your hour was' : 'Your day was'}</p>
-            <div className="story-big rise" style={{ ...fit(insights ? hour : DAYS[bestDay].slice(0, 3)), ...i(1) }}>
-              {insights ? hour : DAYS[bestDay].slice(0, 3)}
-            </div>
-            {insights && (
-              <div className="story-hours rise" style={i(3)} aria-hidden>
-                {insights.hours.map((count, h) => (
-                  <span key={h} className={h === stats.bestHour ? 'on' : undefined} style={{ '--v': 0.12 + 0.88 * (count / maxHour) } as React.CSSProperties} />
-                ))}
-                <em>00</em>
-                <em>06</em>
-                <em>12</em>
-                <em>18</em>
-              </div>
-            )}
-            <p className="story-lead rise" style={i(5)}>
-              {insights ? `and ${DAYS[bestDay]}s were your day.` : `${DAYS[bestDay]}s carried the year.`}
-            </p>
-            <div className="story-bars" aria-hidden>
-              {facts.weekdayTotals.map((value, d) => (
-                <div key={d} className={d === bestDay ? 'on' : undefined}>
-                  <span style={{ height: `${Math.max(4, (value / maxDay) * 100)}%`, ...i(d) }} />
-                  <em>{DAYS[d][0]}</em>
-                </div>
+    const maxDay = Math.max(...facts.weekdayTotals, 1);
+    const maxHour = insights ? Math.max(...insights.hours, 1) : 1;
+    const hourNum = stats.bestHour;
+    const hourStr = `${String(hourNum).padStart(2, '0')}:00`;
+    const dayName = bestDay >= 0 ? DAYS[bestDay] : 'Weekdays';
+    const phaseName =
+      hourNum >= 0 && hourNum < 6
+        ? 'NIGHT OPS · ZERO VISIBILITY'
+        : hourNum < 12
+        ? 'DAWN STRIKE · EARLY ACCESS'
+        : hourNum < 18
+        ? 'AFTERNOON POWER · PRIME RUNTIME'
+        : 'EVENING SIEGE · PEAK OUTPUT';
+
+    const hourSpikes = Array.from({ length: 24 }, (_, h) => {
+      const cnt = insights ? insights.hours[h] : h === hourNum ? 10 : 0;
+      const angle = (h / 24) * 2 * Math.PI - Math.PI / 2;
+      const rInner = 50;
+      const rOuter = rInner + 8 + 26 * (cnt / maxHour);
+      const isPeak = h === hourNum;
+      const x1 = 110 + rInner * Math.cos(angle);
+      const y1 = 100 + rInner * Math.sin(angle);
+      const x2 = 110 + rOuter * Math.cos(angle);
+      const y2 = 100 + rOuter * Math.sin(angle);
+      return { h, cnt, isPeak, x1, y1, x2, y2 };
+    });
+
+    slides.push({
+      id: 'rhythm',
+      tone: 'ground',
+      body: (
+        <>
+          <div className="story-badge-header rise" style={i(0)}>
+            // CHRONO-TACTICAL LOCK-ON · TEMPORAL RETICLE
+          </div>
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.5cqh' }}>
+            Combat Rhythm
+          </h2>
+
+          {/* 24-Hour Chrono Radar */}
+          <div className="story-radar-container rise" style={i(2)}>
+            <svg viewBox="0 0 220 200" style={{ width: 'min(64cqw, 230px)', overflow: 'visible' }}>
+              <circle cx="110" cy="100" r="86" fill="none" stroke="#00FF88" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.3" />
+              <circle cx="110" cy="100" r="50" fill="none" stroke="#00FF88" strokeWidth="1" strokeDasharray="2 3" opacity="0.2" />
+              <line x1="110" y1="12" x2="110" y2="188" stroke="#00FF88" strokeWidth="1" opacity="0.18" />
+              <line x1="22" y1="100" x2="198" y2="100" stroke="#00FF88" strokeWidth="1" opacity="0.18" />
+              <text x="110" y="9" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">00h</text>
+              <text x="210" y="103" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">06h</text>
+              <text x="110" y="198" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">12h</text>
+              <text x="10" y="103" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">18h</text>
+              {hourSpikes.map(({ h, cnt, isPeak, x1, y1, x2, y2 }) => (
+                <line
+                  key={h}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={isPeak ? '#00FF88' : cnt > 0 ? '#00FF88' : 'rgba(255, 255, 255, 0.15)'}
+                  strokeWidth={isPeak ? 3.5 : cnt > 0 ? 2 : 1}
+                  opacity={isPeak ? 1 : cnt > 0 ? 0.35 + 0.65 * (cnt / maxHour) : 0.2}
+                />
               ))}
-            </div>
-          </>
-        ),
-      });
-    }
+              <text x="110" y="96" textAnchor="middle" fill="#00FF88" fontFamily="'Doto', monospace" fontWeight="900" fontSize="24">
+                {hourStr}
+              </text>
+              <text x="110" y="112" textAnchor="middle" fill="#9AA7B8" fontFamily="'Martian Mono', monospace" fontWeight="800" fontSize="7.5" letterSpacing="0.08em">
+                PEAK TARGET
+              </text>
+            </svg>
+          </div>
+
+          <div className="story-chip rise" style={{ alignSelf: 'center', marginTop: '-0.5cqh', ...i(3) }}>
+            [ {phaseName} ]
+          </div>
+
+          {/* 7-Day Frequency Matrix */}
+          <div className="story-days-grid" aria-label="Weekly distribution">
+            {facts.weekdayTotals.map((val, d) => {
+              const isPeak = d === bestDay;
+              const litCount = Math.round((val / maxDay) * 5);
+              return (
+                <div key={d} className={`story-day-col${isPeak ? ' on' : ''} rise`} style={i(4 + d)}>
+                  <div className="story-day-meter" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((cell) => (
+                      <span key={cell} className={`story-day-cell${cell < litCount ? ' lit' : ''}`} />
+                    ))}
+                  </div>
+                  <span className="story-day-name">{DAYS[d].slice(0, 3)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="story-note rise" style={{ ...i(11), marginTop: '0.4cqh' }}>
+            {dayName}s carried the year · Latveria chrono directive synchronized
+          </p>
+        </>
+      ),
+    });
 
     if (facts.streak && facts.streak.days >= 3) {
       const days = facts.streak.days;
+      const litCaps = Math.min(10, Math.max(1, Math.round((days / 30) * 10)));
+      const statusTitle =
+        days >= 45
+          ? 'GODLIKE // OVERCLOCK TIER IV'
+          : days >= 21
+          ? 'HYPERCHARGED // OVERCLOCK TIER III'
+          : days >= 7
+          ? 'SURGE VELOCITY // OVERCLOCK TIER II'
+          : 'MOMENTUM ONLINE // OVERCLOCK TIER I';
+
       slides.push({
         id: 'streak',
         tone: 'ground',
         body: (
           <>
-            <p className="story-lead rise">You held a combo for</p>
-            <div className="story-big rise" style={{ ...fit(String(days)), ...i(1) }}>
-              <CountUp to={days} ms={900} />
+            <div className="story-badge-header rise" style={i(0)}>
+              // PIPELINE RETENTION · COMBO MULTIPLIER
             </div>
-            <p className="story-lead rise" style={i(2)}>
-              days in a row.
-            </p>
-            <div className="story-combo" aria-hidden>
-              {Array.from({ length: Math.min(days, 60) }, (_, n) => (
-                <span key={n} style={i(n)} />
-              ))}
+            <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.8cqh' }}>
+              Unbroken Streak
+            </h2>
+
+            {/* Hero Arcade Combo Card */}
+            <div className="story-combo-card rise" style={i(2)}>
+              <span className="story-combo-badge">[ STREAK MULTIPLIER ]</span>
+              <div className="story-combo-digits">
+                <CountUp to={days} ms={900} />
+              </div>
+              <span className="story-combo-sub">Consecutive Days Unbroken</span>
             </div>
-            <p className="story-note rise" style={i(10)}>
-              {formatDay(facts.streak.from)} to {formatDay(facts.streak.to)}, without a miss
+
+            {/* Overclock Capacitor Bank */}
+            <div className="story-capacitors-wrap rise" style={i(3)}>
+              <div className="story-capacitors-header">
+                <span>Capacitor Overclock</span>
+                <span>{statusTitle}</span>
+              </div>
+              <div className="story-capacitors-bar" aria-hidden>
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((idx) => (
+                  <span key={idx} className={`story-cap-cell${idx < litCaps ? ' lit' : ''}`} />
+                ))}
+              </div>
+            </div>
+
+            {/* Hex Memory Dump Block */}
+            <div className="story-hex-block rise" style={i(4)}>
+              <div>START: <span>{formatDay(facts.streak.from)}</span></div>
+              <div>FINAL: <span>{formatDay(facts.streak.to)}</span></div>
+              <div style={{ marginTop: '0.2cqh' }}>BUFFER: <span>100% RETENTION · ZERO MISSED CYCLES</span></div>
+            </div>
+
+            <p className="story-note rise" style={{ ...i(5), marginTop: '0.4cqh' }}>
+              Hardware pipeline locked · Hex register 0x7E0 active
             </p>
           </>
         ),
       });
     }
 
-    const langs = stats.topLanguages.slice(0, 3);
+    const langs = stats.topLanguages.slice(0, 4);
     if (langs.length > 0) {
       slides.push({
         id: 'languages',
@@ -357,7 +587,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
           </div>
 
           <div className="story-proof-formula rise" style={i(8)}>
-            <span>⚡ {cls.proof.formula}</span>
+            <span>[FORMULA] {cls.proof.formula}</span>
           </div>
         </div>
       ),
@@ -483,6 +713,11 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
   const slide = slides[current];
   const paused = userPaused || held || hidden;
 
+  const currentSlideTheme = useMemo(
+    () => getSlideTheme(slide.id, current, slides.length, theme),
+    [slide.id, current, slides.length, theme]
+  );
+
   const go = useCallback(
     (step: number) => setIndex((n) => Math.max(0, Math.min(slides.length - 1, n + step))),
     [slides.length]
@@ -525,14 +760,25 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
   });
 
   return (
-    <section className={`stories${paused ? ' is-paused' : ''}`} aria-roledescription="carousel" aria-label={`${stats.login}'s ${stats.year} recap`}>
+    <section
+      className={`stories${paused ? ' is-paused' : ''}`}
+      style={themeVars(currentSlideTheme) as React.CSSProperties}
+      aria-roledescription="carousel"
+      aria-label={`${stats.login}'s ${stats.year} recap`}
+    >
       <div className="stories-side stories-side-prev">
         <button type="button" className="key key-plain" onClick={() => go(-1)} disabled={current === 0} aria-label="Previous story">
           <ArrowLeft size={20} />
         </button>
       </div>
 
-      <div className={`stories-frame tone-${slide.tone}`}>
+      <div
+        className={`stories-frame tone-${slide.tone}`}
+        style={themeVars(currentSlideTheme) as React.CSSProperties}
+      >
+        {/* Dynamic Slide Thematic Vector Backdrop */}
+        <StoryThemeBackdrop themeId={currentSlideTheme.id} c={currentSlideTheme.c} />
+
         <div className="stories-top">
           <StorySegments
             slides={slides}
