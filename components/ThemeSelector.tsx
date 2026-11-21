@@ -31,9 +31,16 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, activeTheme, onSe
         );
       })}
     </div>
-    <p className="silk" style={{ margin: '16px 0 0' }}>
-      {activeTheme.name}
-    </p>
+    <div style={{ marginTop: 14 }}>
+      <div style={{ fontWeight: 800, fontSize: '0.9375rem', letterSpacing: '0.01em' }}>
+        {activeTheme.name}
+      </div>
+      {activeTheme.tagline && (
+        <div className="silk" style={{ marginTop: 4, opacity: 0.85, fontSize: '0.78125rem' }}>
+          {activeTheme.tagline}
+        </div>
+      )}
+    </div>
   </div>
 );
 

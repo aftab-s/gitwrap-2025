@@ -11,8 +11,9 @@ import Footer from '../components/Footer';
 import GitHubSignIn from '../components/GitHubSignIn';
 import Stories from '../components/Stories';
 import { playerClass } from '../insights';
+import { playerAvatar } from '../playerAvatars';
 import { APP_REPO_URL, EDITION } from '../config';
-import { THEMES, DEFAULT_THEME, themeVars } from '../constants';
+import { THEMES, DEFAULT_THEME, USER_STUDIO_THEME, themeVars } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
@@ -24,9 +25,29 @@ import { Download, Lock, PlayerArrow } from '../components/icons/Arcade';
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
 
-const avatarDataUrlCache = new Map<string, string>();
+const dataUrlCache = new Map<string, string>();
 
-async function convertAvatarViaCanvas(url: string): Promise<string> {
+async function convertViaFetch(url: string): Promise<string> {
+  const isRemote = /^https?:\/\//i.test(url);
+  // Bust cache for remote avatars (e.g. GitHub CDN) so Safari sends Origin header and doesn't serve non-CORS cached image
+  const fetchUrl = isRemote
+    ? (url.includes('?') ? `${url}&_gwcb=${Date.now()}` : `${url}?_gwcb=${Date.now()}`)
+    : url;
+
+  const resp = await fetch(fetchUrl, { mode: 'cors', credentials: 'omit' });
+  if (!resp.ok) {
+    throw new Error(`Fetch failed with status ${resp.status}`);
+  }
+  const blob = await resp.blob();
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = (e) => reject(e);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function convertViaCanvas(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -57,43 +78,40 @@ async function convertAvatarViaCanvas(url: string): Promise<string> {
     };
 
     img.onerror = (event) => {
-      reject(event instanceof ErrorEvent ? event.error : new Error('Avatar image failed to load'));
+      reject(event instanceof ErrorEvent ? event.error : new Error('Image failed to load via canvas'));
     };
 
     img.src = url;
   });
 }
 
-async function convertAvatarViaFetch(url: string): Promise<string> {
-  const resp = await fetch(url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
-  if (!resp.ok) {
-    throw new Error(`Avatar fetch failed with status ${resp.status}`);
-  }
-  const blob = await resp.blob();
-  return await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = (e) => reject(e);
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function embedAvatarAsDataUrl(url?: string) {
+async function toDataUrl(url?: string): Promise<string | undefined> {
   if (!url) return undefined;
   if (url.startsWith('data:')) return url;
-  if (avatarDataUrlCache.has(url)) {
-    return avatarDataUrlCache.get(url);
+  if (dataUrlCache.has(url)) {
+    return dataUrlCache.get(url);
   }
 
-  const strategies = [convertAvatarViaCanvas, convertAvatarViaFetch];
-  for (const strategy of strategies) {
-    try {
-      const dataUrl = await strategy(url);
-      avatarDataUrlCache.set(url, dataUrl);
+  // 1. Try fetch with CORS & cache-busting first (fastest, cannot taint canvas)
+  try {
+    const dataUrl = await convertViaFetch(url);
+    if (dataUrl && dataUrl.startsWith('data:')) {
+      dataUrlCache.set(url, dataUrl);
       return dataUrl;
-    } catch (err) {
-      console.warn('Avatar embed strategy failed', err);
     }
+  } catch (err) {
+    // fallback to canvas
+  }
+
+  // 2. Fallback to canvas
+  try {
+    const dataUrl = await convertViaCanvas(url);
+    if (dataUrl && dataUrl.startsWith('data:')) {
+      dataUrlCache.set(url, dataUrl);
+      return dataUrl;
+    }
+  } catch (err) {
+    console.warn('Image to data URL failed', err);
   }
 
   return undefined;
@@ -115,8 +133,11 @@ async function createExportEnvironment(width: number, height: number) {
     zIndex: '-1',
   });
 
+  const baseHref = typeof window !== 'undefined' ? `${window.location.origin}/` : '/';
+
   iframe.srcdoc = `<!DOCTYPE html><html><head>
     <meta charset="utf-8" />
+    <base href="${baseHref}" />
     <meta name="viewport" content="width=${width}, initial-scale=1.0" />
     <style>
       @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; src: url('/fonts/Archivo-latin.woff2') format('woff2'); }
@@ -271,7 +292,7 @@ const UserPage: React.FC = () => {
     let cancelled = false;
     setEmbeddedAvatarUrl(null);
 
-    embedAvatarAsDataUrl(userData.avatarUrl)
+    toDataUrl(userData.avatarUrl)
       .then((dataUrl) => {
         if (!cancelled && dataUrl) {
           setEmbeddedAvatarUrl(dataUrl);
@@ -295,15 +316,22 @@ const UserPage: React.FC = () => {
     const targetWidth = 1080;
     const targetHeight = 1440;
 
-    const embeddedAvatar = embeddedAvatarUrl
-      ? embeddedAvatarUrl
-      : await embedAvatarAsDataUrl(userData.avatarUrl).catch(() => undefined);
+    const cls = userData.totalContributions > 0 ? playerClass(userData) : undefined;
+    const petPath = cls ? playerAvatar(cls.name) : undefined;
+    const backdropPath = activeTheme.id === 'doomsday' ? '/themes/latverian-minimal.jpg' : undefined;
+
+    // Convert all images to Base64 data URLs in parallel so Safari never needs network/CORS in iframe
+    const [embeddedAvatar, embeddedPet, embeddedBackdrop] = await Promise.all([
+      embeddedAvatarUrl ? Promise.resolve(embeddedAvatarUrl) : toDataUrl(userData.avatarUrl).catch(() => undefined),
+      petPath ? toDataUrl(petPath).catch(() => undefined) : Promise.resolve(undefined),
+      backdropPath ? toDataUrl(backdropPath).catch(() => undefined) : Promise.resolve(undefined),
+    ]);
 
     if (!embeddedAvatarUrl && embeddedAvatar) {
       setEmbeddedAvatarUrl(embeddedAvatar);
     }
 
-    // Prepare a shallow copy of userData for export so we can replace the avatar URL safely
+    // Prepare shallow copy of userData for export with embedded avatar
     const exportUserData = embeddedAvatar ? { ...userData, avatarUrl: embeddedAvatar } : userData;
 
     const { container: exportContainer, document: exportDocument, window: exportWindow, cleanup } =
@@ -315,6 +343,8 @@ const UserPage: React.FC = () => {
         userData={exportUserData}
         funMessage={funMessage}
         theme={activeTheme}
+        playerAvatarUrl={embeddedPet}
+        themeBackdropUrl={embeddedBackdrop}
       />
     );
 
@@ -330,7 +360,7 @@ const UserPage: React.FC = () => {
         await fontSet.ready.catch(() => undefined);
       }
 
-      // Wait for images to load
+      // Wait for all images to fully load and decode (critical for Apple WebKit/Safari)
       const images: HTMLImageElement[] = Array.from(exportContainer.querySelectorAll('img'));
       if (images.length > 0) {
         await Promise.race([
@@ -338,10 +368,17 @@ const UserPage: React.FC = () => {
             images.map(
               (img) =>
                 new Promise<void>((resolve) => {
-                  if (img.complete) {
-                    resolve();
+                  const onComplete = () => {
+                    if (typeof img.decode === 'function') {
+                      img.decode().then(() => resolve()).catch(() => resolve());
+                    } else {
+                      resolve();
+                    }
+                  };
+                  if (img.complete && img.naturalWidth > 0) {
+                    onComplete();
                   } else {
-                    img.addEventListener('load', () => resolve(), { once: true });
+                    img.addEventListener('load', onComplete, { once: true });
                     img.addEventListener('error', () => resolve(), { once: true });
                   }
                 })
@@ -355,6 +392,15 @@ const UserPage: React.FC = () => {
       const captureTarget = cardElement ?? exportContainer;
       const computedStyles = (exportWindow || window).getComputedStyle(captureTarget);
       const backgroundColor = computedStyles.backgroundColor;
+
+      // Safari warm-up pass: forces WebKit to decode images into the canvas rasterizer
+      await htmlToImage.toPng(captureTarget, {
+        pixelRatio: 1,
+        width: targetWidth,
+        height: targetHeight,
+      }).catch(() => undefined);
+
+      await new Promise((resolve) => setTimeout(resolve, 80));
 
       const dataUrl = await htmlToImage.toPng(captureTarget, {
         pixelRatio: 1, // Force exact 1080x1440 output
@@ -389,7 +435,7 @@ const UserPage: React.FC = () => {
     }
   };
 
-  const vars = themeVars(activeTheme) as React.CSSProperties;
+  const vars = themeVars(USER_STUDIO_THEME) as React.CSSProperties;
 
   if (loading) {
     return (
@@ -455,174 +501,208 @@ const UserPage: React.FC = () => {
     <div className="gw" style={vars}>
       <Marquee year={year} />
 
-      <main className="gw-wrap" style={{ paddingTop: 40, paddingBottom: 72, flex: '1 0 auto' }}>
-        <div className="wrap-grid">
-          <GitWrapCard className="wrap-card" userData={cardData} funMessage={funMessage} theme={activeTheme} />
-
-          <div className="stack">
-            <section>
-              <h1 className="display" style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', overflowWrap: 'anywhere' }}>
-                {userData.login}&rsquo;s {year}
-              </h1>
-              {userData.includesPrivate ? (
-                <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <p className="strip" style={{ margin: 0, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <Lock size={18} style={{ marginTop: 2 }} />
-                    <span>
-                      Your private repositories are counted
-                      {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} commits)` : ''}. Only you see this
-                      version; a shared link shows the public one.
-                    </span>
-                  </p>
-                  {hasPrivateTopRepo && (
-                    <label className="switch" style={{ alignSelf: 'flex-start' }}>
-                      <input
-                        type="checkbox"
-                        checked={showPrivateRepoNames}
-                        onChange={(e) => handleTogglePrivateRepos(e.target.checked)}
-                      />
-                      Show private repository names
-                    </label>
-                  )}
-                </div>
-              ) : (
-                <div style={{ marginTop: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
-                  <p className="dim" style={{ margin: 0, maxWidth: '44ch', fontSize: '0.9375rem' }}>
-                    Public activity only.{' '}
-                    {auth.login
-                      ? `You are signed in as @${auth.login}; private repositories count only on your own card.`
-                      : 'Is this you? Sign in to count your private contributions too.'}
-                  </p>
-                  <GitHubSignIn label="Sign in" className="key-sm" />
-                </div>
-              )}
-            </section>
-
-            {cls && (
-              <section>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <h2 className="heading" style={{ margin: 0 }}>Player class</h2>
-                  <span className="silk" style={{ letterSpacing: '0.06em', opacity: 0.85 }}>
-                    {cls.badge}
-                  </span>
-                </div>
-
-                <div className="window class-window">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                    <PlayerAvatar name={cls.name} />
-                    <div style={{ minWidth: 0, flex: '1 1 auto' }}>
-                      <p className="display class-name" style={{ margin: 0 }}>{cls.name}</p>
-                      <p style={{ fontWeight: 600, marginTop: 4, lineHeight: 1.35 }}>{cls.line}</p>
-                    </div>
-                  </div>
-
-                  {/* Archetype Proof Spotlight */}
-                  <div
-                    style={{
-                      marginTop: 20,
-                      padding: '12px 14px',
-                      background: 'rgba(0, 0, 0, 0.08)',
-                      borderLeft: '4px solid currentColor',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 4,
-                    }}
-                  >
-                    <div className="silk" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
-                      Class Proof · {cls.proof.formula}
-                    </div>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 600, opacity: 0.9 }}>
-                      {cls.proof.headline}
-                    </div>
-                  </div>
-
-                  {/* Tailored Archetype Metrics */}
-                  <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {cls.proof.metrics.map((m) => (
-                      <div
-                        key={m.label}
-                        className="score-row"
-                        style={{
-                          padding: '10px 0',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'baseline',
-                          gap: 16,
-                        }}
-                      >
-                        <div style={{ minWidth: 0 }}>
-                          <div className="silk" style={{ fontWeight: 700 }}>{m.label}</div>
-                          {m.hint && (
-                            <div className="silk" style={{ opacity: 0.7, fontSize: '0.75rem', marginTop: 2 }}>
-                              {m.hint}
-                            </div>
-                          )}
-                        </div>
-                        <span className="score-value" style={{ fontSize: '1.25rem', whiteSpace: 'nowrap' }}>
-                          {m.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="silk" style={{ marginTop: 12 }}>
-                  Earned from your own numbers: hours, streaks, reviews and languages. Same year, same class.
-                </p>
-              </section>
+      <main className="gw-wrap" style={{ paddingTop: 36, paddingBottom: 80, flex: '1 0 auto' }}>
+        {/* Profile Command Header */}
+        <header className="user-profile-header">
+          <div className="user-profile-identity">
+            {userData.avatarUrl && (
+              <img src={userData.avatarUrl} alt="" className="user-profile-avatar" />
             )}
+            <div>
+              <div className="user-profile-meta">
+                <span className="user-profile-tag">GitWrap // {year} Recap</span>
+                {userData.includesPrivate && (
+                  <span className="user-profile-tag user-profile-tag-private">
+                    <Lock size={12} /> Includes Private
+                  </span>
+                )}
+              </div>
+              <h1 className="display user-profile-title">
+                {userData.name || userData.login}
+                <span className="user-profile-handle">@{userData.login}</span>
+              </h1>
+            </div>
+          </div>
 
-            <section>
-              <h2 className="heading">Colourway</h2>
+          <div className="user-profile-actions">
+            <button
+              type="button"
+              className="key key-plain user-replay-btn"
+              onClick={() => setPhase('recap')}
+              title="Replay recap stories"
+            >
+              <PlayerArrow size={18} />
+              Replay Recap
+            </button>
+          </div>
+        </header>
+
+        {/* Main Studio Grid: Sticky Card Preview on Left, Command Deck on Right */}
+        <div className="user-studio-grid">
+          {/* Left Column: Sticky Card Showcase */}
+          <div className="user-card-stage">
+            <div className="user-card-anchor">
+              <GitWrapCard
+                className="user-card-display"
+                userData={cardData}
+                funMessage={funMessage}
+                theme={activeTheme}
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Studio Control Deck */}
+          <div className="user-control-deck">
+            {/* Section A: Theme Selector (Top priority for immediate live feedback!) */}
+            <section className="window user-deck-window">
+              <div className="user-deck-window-head">
+                <h2 className="heading" style={{ margin: 0 }}>Card Colourway</h2>
+                <span className="silk" style={{ opacity: 0.85 }}>Live Preview</span>
+              </div>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
             </section>
 
-            <section>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {/* Section B: Action Hub (Download, Share, Privacy) */}
+            <section className="window user-deck-window">
+              <div className="user-deck-window-head">
+                <h2 className="heading" style={{ margin: 0 }}>Export &amp; Share</h2>
+                <span className="silk" style={{ opacity: 0.85 }}>PNG Export</span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <button
                   type="button"
-                  className="key key-lg"
-                  style={{ flex: '1 1 200px' }}
+                  className="key key-lg key-block"
                   onClick={() => handleDownload(AspectRatio.Social)}
                   disabled={!!isDownloading}
                   aria-busy={!!isDownloading}
+                  style={{ justifyContent: 'center' }}
                 >
                   <Download size={22} />
-                  {isDownloading ? 'Printing the card' : 'Download card'}
+                  {isDownloading ? 'Printing the card...' : 'Download Card (PNG)'}
                 </button>
-                <button
-                  type="button"
-                  className="key key-lg key-plain"
-                  style={{ flex: '0 0 auto' }}
-                  onClick={() => setPhase('recap')}
-                  title="Replay the recap"
-                >
-                  <PlayerArrow size={20} />
-                  Replay
-                </button>
-              </div>
-              <p className="silk" style={{ margin: '20px 0 16px' }}>
-                PNG · 1080 × 1440 · sized for feeds
-              </p>
-              {downloadError && (
-                <p className="strip strip-warn" role="alert" style={{ marginBottom: 16 }}>
-                  {downloadError}
+                <p className="silk" style={{ margin: '-4px 0 0', textAlign: 'center', opacity: 0.75, fontSize: '0.75rem' }}>
+                  PNG · 1080 × 1440 · 300 DPI
                 </p>
-              )}
-              {username && <SocialShare username={username} year={year} />}
+
+                {downloadError && (
+                  <p className="strip strip-warn" role="alert" style={{ margin: 0 }}>
+                    {downloadError}
+                  </p>
+                )}
+
+                {username && <SocialShare username={username} year={year} />}
+
+                {/* Privacy controls & toggles */}
+                {userData.includesPrivate ? (
+                  <div className="user-privacy-box">
+                    <p className="strip" style={{ margin: 0, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <Lock size={16} style={{ marginTop: 2, flexShrink: 0 }} />
+                      <span>
+                        Your private repositories are included
+                        {userData.privateContributions ? ` (${userData.privateContributions.toLocaleString()} commits)` : ''}.
+                        Shared links display public view only.
+                      </span>
+                    </p>
+                    {hasPrivateTopRepo && (
+                      <label className="switch" style={{ alignSelf: 'flex-start', marginTop: 4 }}>
+                        <input
+                          type="checkbox"
+                          checked={showPrivateRepoNames}
+                          onChange={(e) => handleTogglePrivateRepos(e.target.checked)}
+                        />
+                        Show private repository names on card
+                      </label>
+                    )}
+                  </div>
+                ) : (
+                  <div className="user-privacy-box">
+                    <p className="dim" style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.4 }}>
+                      Public activity only.{' '}
+                      {auth.login
+                        ? `Signed in as @${auth.login}; private repositories count only on your own card.`
+                        : 'Sign in with GitHub to count your private contributions on your card.'}
+                    </p>
+                    {!auth.login && (
+                      <GitHubSignIn label="Sign in for private repos" className="key-sm" style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+                    )}
+                  </div>
+                )}
+              </div>
             </section>
 
-            <section>
-              <h2 className="heading">Built by</h2>
-              <Contributors />
-              <p style={{ margin: '20px 0 0' }}>
-                <a className="link" href={APP_REPO_URL} target="_blank" rel="noopener noreferrer">
-                  Contribute on GitHub
-                </a>
-              </p>
-            </section>
+            {/* Section C: Player Class Archetype Dossier */}
+            {cls && (
+              <section className="window user-deck-window">
+                <div className="user-deck-window-head">
+                  <h2 className="heading" style={{ margin: 0 }}>Player Class Dossier</h2>
+                  <span className="silk" style={{ color: 'var(--a1)', fontWeight: 800 }}>{cls.badge}</span>
+                </div>
+
+                <div className="user-dossier-hero">
+                  <div className="user-dossier-avatar-frame">
+                    <PlayerAvatar name={cls.name} />
+                  </div>
+                  <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+                    <div className="silk" style={{ textTransform: 'uppercase', letterSpacing: '0.06em', opacity: 0.8 }}>
+                      Archetype Identified
+                    </div>
+                    <h3 className="display" style={{ margin: '2px 0 0', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', lineHeight: 1 }}>
+                      {cls.name}
+                    </h3>
+                    <p style={{ margin: '6px 0 0', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.35, opacity: 0.9 }}>
+                      {cls.line}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Verdict Quote Box */}
+                <div className="user-dossier-verdict">
+                  <div className="silk" style={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 800 }}>
+                    System Verdict // {cls.proof.formula}
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.4 }}>
+                    &ldquo;{cls.proof.headline}&rdquo;
+                  </p>
+                </div>
+
+                {/* Metrics Grid */}
+                <div className="user-dossier-metrics">
+                  {cls.proof.metrics.map((m) => (
+                    <div key={m.label} className="user-dossier-metric-card">
+                      <span className="user-dossier-metric-label">{m.label}</span>
+                      <span className="user-dossier-metric-val">{m.value}</span>
+                      {m.hint && <span className="user-dossier-metric-hint">{m.hint}</span>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         </div>
+
+        {/* Community & Contributors Shelf */}
+        <section className="user-community-shelf window" style={{ marginTop: 48 }}>
+          <div className="user-community-head">
+            <div className="user-community-info">
+              <h2 className="heading" style={{ margin: 0 }}>Built Open Source</h2>
+              <p className="dim" style={{ margin: '6px 0 0', fontSize: '0.875rem', lineHeight: 1.4 }}>
+                Built for developers by the community. Completely free and open-source.
+              </p>
+            </div>
+            <a
+              className="key key-sm key-plain user-community-btn"
+              href={APP_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub Repository
+            </a>
+          </div>
+          <div style={{ marginTop: 20 }}>
+            <Contributors />
+          </div>
+        </section>
       </main>
 
       <Footer />

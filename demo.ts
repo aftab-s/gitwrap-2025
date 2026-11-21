@@ -59,9 +59,10 @@ export function demoStats(year: number): UserStats {
     totalStarsGiven: 212,
     totalRepositories: 27,
     topLanguages: [
-      { name: 'TypeScript', percent: 58.4 },
-      { name: 'Go', percent: 27.1 },
+      { name: 'TypeScript', percent: 52.4 },
+      { name: 'Go', percent: 24.1 },
       { name: 'Python', percent: 14.5 },
+      { name: 'Rust', percent: 9.0 },
     ],
     topRepos: [
       { name: 'coin-op', url: '', contributions: Math.round(commits * 0.6), stargazers: 88 },

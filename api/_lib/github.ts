@@ -237,7 +237,7 @@ function aggregateLanguages(repos: RepoContribution[]): Array<{ name: string; pe
       color: data.color,
     }))
     .sort((a, b) => b.percent - a.percent)
-    .slice(0, 3);
+    .slice(0, 6);
 }
 
 // Get top repositories by contributions
