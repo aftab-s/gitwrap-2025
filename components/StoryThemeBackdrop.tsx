@@ -224,8 +224,8 @@ export const StoryThemeBackdrop: React.FC<Props> = ({ themeId, c }) => {
           </defs>
           <rect width="460" height="820" fill="url(#storyRisoHalftone)" />
 
-          {/* JAPANESE ISBN BARCODE in upper right */}
-          <g transform="translate(330, 48)" opacity="0.45" fill="#0B1B61">
+          {/* JAPANESE ISBN BARCODE moved safely to bottom right */}
+          <g transform="translate(330, 755)" opacity="0.4" fill="#0B1B61">
             <rect x="0" y="0" width="2.5" height="24" />
             <rect x="4" y="0" width="1.5" height="24" />
             <rect x="7" y="0" width="3" height="24" />
@@ -245,8 +245,8 @@ export const StoryThemeBackdrop: React.FC<Props> = ({ themeId, c }) => {
             </text>
           </g>
 
-          {/* SLANTED RED HANKO SEAL STAMP in bottom left */}
-          <g transform="translate(36, 755) rotate(-6)" opacity="0.55">
+          {/* SLANTED RED HANKO SEAL STAMP in bottom left with subtle watermark opacity */}
+          <g transform="translate(24, 762) rotate(-6)" opacity="0.22">
             <rect x="-4" y="-4" width="100" height="28" fill="none" stroke="#FF3366" strokeWidth="2" strokeDasharray="5 2.5" />
             <text x="46" y="10" fill="#FF3366" fontSize="8.5" fontFamily="'Martian Mono', monospace" fontWeight="900" textAnchor="middle" letterSpacing="0.08em">
               初版限定 2026

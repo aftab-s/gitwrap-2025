@@ -44,6 +44,12 @@ export const Download: React.FC<IconProps> = ({ size = 16, color = 'currentColor
   </svg>
 );
 
+export const Share: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+  <svg {...base(size, style, className)}>
+    <path d="M11 1h4v4h-2V3.41l-5.29 5.3-1.42-1.42 5.3-5.29H11V1zM2 4h6v2H4v8h8v-4h2v6H2V4z" fill={color} />
+  </svg>
+);
+
 export const ArrowRight: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
   <svg {...base(size, style, className)}>
     <path d="M1 7h9V3l5 5-5 5V9H1V7z" fill={color} />
