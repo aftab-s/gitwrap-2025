@@ -15,7 +15,8 @@ function devApi(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+        const rawUrl = (req.url ?? '/').replace(/^\/\/+/, '/');
+        const url = new URL(rawUrl, `http://${req.headers.host ?? 'localhost'}`);
         if (!url.pathname.startsWith('/api/')) return next();
 
         // /api/auth/login → api/auth/login.ts  (files/folders starting with "_" are private helpers)

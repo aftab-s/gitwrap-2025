@@ -352,7 +352,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
 
           {/* 24-Hour Chrono Radar */}
           <div className="story-radar-container rise" style={i(2)}>
-            <svg viewBox="0 0 220 200" style={{ width: 'min(64cqw, 230px)', overflow: 'visible' }}>
+            <svg viewBox="0 0 220 200" style={{ width: 'min(50cqw, 25cqh, 175px)', maxHeight: '25cqh', overflow: 'visible' }}>
               <circle cx="110" cy="100" r="86" fill="none" stroke="#00FF88" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.3" />
               <circle cx="110" cy="100" r="50" fill="none" stroke="#00FF88" strokeWidth="1" strokeDasharray="2 3" opacity="0.2" />
               <line x1="110" y1="12" x2="110" y2="188" stroke="#00FF88" strokeWidth="1" opacity="0.18" />
@@ -404,8 +404,8 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
             })}
           </div>
 
-          <p className="story-note rise" style={{ ...i(11), marginTop: '0.4cqh' }}>
-            {dayName}s carried the year · Latveria chrono directive synchronized
+          <p className="story-note rise" style={{ ...i(11), marginTop: '0.4cqh', textWrap: 'balance' }}>
+            {dayName}s carried the year · Chrono synchronized
           </p>
         </>
       ),
@@ -723,6 +723,18 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
     [slides.length]
   );
 
+  // Lock document scroll while recap modal is active to prevent inert mobile scrollbars
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1);
@@ -741,6 +753,36 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [go, onDone]);
+
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: performance.now(),
+      };
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const elapsed = performance.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    // Horizontal swipe detected: >= 40px, predominantly horizontal, within 600ms
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2 && elapsed < 600) {
+      if (deltaX < 0) {
+        go(1); // Swipe left -> next slide
+      } else {
+        go(-1); // Swipe right -> previous slide
+      }
+    }
+  };
 
   // A quick tap moves; a longer press only holds the story still.
   const zone = (step: number) => ({
@@ -775,6 +817,8 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
       <div
         className={`stories-frame tone-${slide.tone}`}
         style={themeVars(currentSlideTheme) as React.CSSProperties}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Dynamic Slide Thematic Vector Backdrop */}
         <StoryThemeBackdrop themeId={currentSlideTheme.id} c={currentSlideTheme.c} />
