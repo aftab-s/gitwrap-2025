@@ -4,7 +4,7 @@
   <p style="margin-top:16px;font-size:18px;font-weight:600;">Showcase your 2026 GitHub contributions with a polished, arcade-inspired year-in-review card — themeable, responsive, and ready to share.</p>
 </div>
 
-# GitWrap 2026
+# GitWrap 2026 
 
 > Create a high-fidelity, arcade-crafted year-in-review card for your GitHub contributions and share it with your network.
 
