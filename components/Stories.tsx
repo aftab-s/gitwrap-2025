@@ -723,6 +723,18 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
     [slides.length]
   );
 
+  // Lock document scroll while recap modal is active to prevent inert mobile scrollbars
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1);
