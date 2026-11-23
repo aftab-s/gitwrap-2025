@@ -1,0 +1,63 @@
+{
+  "generator": "Built-in image_gen",
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frames": 8
+  },
+  "instructions": "Eight distinct articulated poses matching source avatar, fixed scale, equal square cells, transparent background, no grid lines. Frame eight returns to neutral.",
+  "characters": [
+    {
+      "slug": "new-challenger",
+      "action": "blink, crouch, lift shell, cheer, tail swish, return"
+    },
+    {
+      "slug": "night-owl",
+      "action": "sleepy blink, adjust headphones with wings, nod to music, wings relax"
+    },
+    {
+      "slug": "early-riser",
+      "action": "blink awake, open beak to crow, spread wings, fold wings"
+    },
+    {
+      "slug": "bug-hunter",
+      "action": "raise magnifying glass to eye, peer through it, scan sideways with head, lower glass"
+    },
+    {
+      "slug": "weekend-warrior",
+      "action": "bend knees on skateboard, push with one foot, lift board nose, land and grin"
+    },
+    {
+      "slug": "streak-keeper",
+      "action": "raise arms, flame flickers into different shapes, glowing square chain swings, relax"
+    },
+    {
+      "slug": "marathoner",
+      "action": "steady running in place with alternating legs and swinging arms, sweat droplet changes"
+    },
+    {
+      "slug": "code-reviewer",
+      "action": "look down at clipboard, move pen to write check, lift clipboard proudly, blink"
+    },
+    {
+      "slug": "pr-shipper",
+      "action": "lift parcel, spread flippers, waddle with alternating feet, present parcel"
+    },
+    {
+      "slug": "polyglot",
+      "action": "open mouth, speech bubbles appear one by one, blink, tail curls differently"
+    },
+    {
+      "slug": "specialist",
+      "action": "raise wand with arm, star sparkles, hat tip bends, lower wand"
+    },
+    {
+      "slug": "sprinter",
+      "action": "running in place with articulated alternating leg strides and arms pumping, ears flex"
+    },
+    {
+      "slug": "all-rounder",
+      "action": "juggle three shapes along an arc with different hand poses, shapes change positions each frame"
+    }
+  ]
+}

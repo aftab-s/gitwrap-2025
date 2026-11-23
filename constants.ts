@@ -186,3 +186,13 @@ export function themeVars(theme: Theme): Record<string, string> {
     '--on-panel-dim': c.onPanelDim,
   };
 }
+
+/** Shared page accents sourced directly from the six card colourways. */
+export const CHROME_ACCENTS = {
+  '--chrome-lunar': THEMES[0].c.a2,
+  '--chrome-matchday': THEMES[1].c.a1,
+  '--chrome-vice': THEMES[2].c.a1,
+  '--chrome-steel': THEMES[3].c.a1,
+  '--chrome-volt': THEMES[4].c.a1,
+  '--chrome-riso': THEMES[5].c.a1,
+};

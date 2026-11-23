@@ -1,3 +1,4 @@
+import HomeFusionBackdrop from '../components/HomeFusionBackdrop';
 import PlayerAvatar from '../components/PlayerAvatar';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -13,7 +14,7 @@ import Stories from '../components/Stories';
 import { playerClass } from '../insights';
 import { playerAvatar } from '../playerAvatars';
 import { APP_REPO_URL, EDITION } from '../config';
-import { THEMES, DEFAULT_THEME, USER_STUDIO_THEME, themeVars } from '../constants';
+import { THEMES, DEFAULT_THEME, USER_STUDIO_THEME, CHROME_ACCENTS, themeVars } from '../constants';
 import GitWrapCard from '../components/GitWrapCard';
 import ExportCard from '../components/ExportCard';
 import ThemeSelector from '../components/ThemeSelector';
@@ -300,7 +301,6 @@ const UserPage: React.FC = () => {
     };
   }, [userData, showPrivateRepoNames]);
 
-  const hasPrivateTopRepo = Boolean(userData?.topRepos.some((r) => r.isPrivate));
 
   useEffect(() => {
     if (!userData?.avatarUrl) {
@@ -451,11 +451,12 @@ const UserPage: React.FC = () => {
     }
   };
 
-  const vars = themeVars(USER_STUDIO_THEME) as React.CSSProperties;
+  const vars = { ...themeVars(USER_STUDIO_THEME), ...CHROME_ACCENTS } as React.CSSProperties;
 
   if (loading) {
     return (
-      <div className="gw" style={vars}>
+      <div className="gw circuit-shell studio-shell" style={vars}>
+      <HomeFusionBackdrop />
         <Marquee year={year} />
         <main
           className="gw-wrap"
@@ -477,7 +478,8 @@ const UserPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="gw" style={vars}>
+      <div className="gw circuit-shell studio-shell" style={vars}>
+      <HomeFusionBackdrop />
         <Marquee year={year} />
         <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 96, paddingBottom: 96 }}>
           <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)' }}>No card this time</h1>
@@ -502,7 +504,8 @@ const UserPage: React.FC = () => {
 
   if (phase === 'recap') {
     return (
-      <div className="gw" style={vars}>
+      <div className="gw circuit-shell studio-shell" style={vars}>
+      <HomeFusionBackdrop />
         <h1 style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)' }}>
           {userData.login}&rsquo;s {year} recap
         </h1>
@@ -514,7 +517,8 @@ const UserPage: React.FC = () => {
   const cls = userData.totalContributions > 0 ? playerClass(userData) : undefined;
 
   return (
-    <div className="gw" style={vars}>
+    <div className="gw circuit-shell studio-shell" style={vars}>
+      <HomeFusionBackdrop />
       <Marquee year={year} />
 
       <main className="gw-wrap" style={{ paddingTop: 96, paddingBottom: 80, flex: '1 0 auto' }}>
@@ -579,7 +583,7 @@ const UserPage: React.FC = () => {
             </section>
 
             {/* Section B: Action Hub (Download, Share, Privacy) */}
-            <section className="window user-deck-window">
+            <section className="window user-deck-window user-export-panel">
               <div className="user-deck-window-head">
                 <h2 className="heading" style={{ margin: 0 }}>Export &amp; Share</h2>
                 <span className="silk" style={{ opacity: 0.85 }}>PNG Export</span>
@@ -620,7 +624,6 @@ const UserPage: React.FC = () => {
                         Shared links display public view only.
                       </span>
                     </p>
-                    {hasPrivateTopRepo && (
                       <label className="switch" style={{ alignSelf: 'flex-start', marginTop: 4 }}>
                         <input
                           type="checkbox"
@@ -629,7 +632,6 @@ const UserPage: React.FC = () => {
                         />
                         Show private repository names on card
                       </label>
-                    )}
                   </div>
                 ) : (
                   <div className="user-privacy-box">

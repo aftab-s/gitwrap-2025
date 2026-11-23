@@ -35,6 +35,18 @@ const GTAVI_STORY_THEME: Theme = {
  * taking the user through Maximalist Dark, Vice Sunset, Lunar Orbit, Latverian Steel,
  * Matchday '26, and Tokyo Riso, before culminating in the user's selected card.
  */
+// Calm, fixed palettes for the character reveal and supporting evidence.
+const CLASS_STORY_THEME: Theme = {
+  id: 'story-sage', name: 'Quiet Grove', tagline: 'Player profile',
+  c: { ground: '#202C29', line: '#40534B', ink: '#18241F', panel: '#E5ECE5',
+    a1: '#B5CFB9', a2: '#C5BCAB', onGround: '#EDF0E8', onGroundDim: '#B9C5BC', onPanelDim: '#526459' },
+};
+const PROOF_STORY_THEME: Theme = {
+  id: 'story-slate', name: 'Evening Slate', tagline: 'Class details',
+  c: { ground: '#272C39', line: '#485064', ink: '#202430', panel: '#E8EAF0',
+    a1: '#BAC5DC', a2: '#C5BDD5', onGround: '#EDEEF3', onGroundDim: '#B8BECE', onPanelDim: '#586176' },
+};
+
 function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number, userTheme: Theme): Theme {
   if (slideIndex === totalSlides - 1 || slideId === 'card') {
     return userTheme;
@@ -54,8 +66,9 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
     case 'repos':
       return THEME_MAP['maxlight'] || userTheme;
     case 'class':
+      return CLASS_STORY_THEME;
     case 'proof':
-      return userTheme;
+      return PROOF_STORY_THEME;
     default: {
       const sequence = ['artemis', 'fifa', 'gtavi', 'doomsday', 'maxdark', 'maxlight'];
       const themeId = sequence[slideIndex % sequence.length];
@@ -87,17 +100,10 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 const RANKS = ['1st', '2nd', '3rd'];
 const STORY_DURATION_SECONDS = 15;
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
-
 /** A score counter that rolls up to its value. */
 const CountUp: React.FC<{ to: number; ms?: number }> = ({ to, ms = 1100 }) => {
-  const [value, setValue] = useState(() => (prefersReducedMotion() ? to : 0));
+  const [value, setValue] = useState(0);
   useEffect(() => {
-    if (prefersReducedMotion()) {
-      setValue(to);
-      return;
-    }
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -131,17 +137,22 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     tone: 'ground',
     body: (
       <>
-        {stats.avatarUrl && (
-          <div className="story-avatar-wrap">
-            <img className="story-avatar" src={stats.avatarUrl} alt="" />
+        <div className="story-player-edition rise" style={i(0)}><span>GitWrap / {stats.year}</span><span>Player 01</span></div>
+        <div className="story-player-stage">
+          <span className="story-player-echo" aria-hidden="true">{stats.year}</span>
+          <div className="story-player-pass">
+            <div className="story-player-photo">
+              {stats.avatarUrl ? <img src={stats.avatarUrl} alt="" /> : <span className="story-player-initial">{name.slice(0, 1)}</span>}
+            </div>
+            <span className="story-player-handle">@{stats.login}</span>
           </div>
-        )}
-        <h2 className="display story-title rise" style={i(1)}>
-          {name}, here is your <span className="story-mark">{stats.year}</span>
-        </h2>
-        <p className="story-text rise" style={i(3)}>
-          Ready for a short recap?
-        </p>
+          <span className="story-player-sticker">MAIN<br />CHARACTER</span>
+          <svg className="story-player-spark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 2v12m0 12v12M2 20h12m12 0h12M7 7l8 8m10 10 8 8M7 33l8-8m10-10 8-8" /></svg>
+        </div>
+        <h2 className="display story-player-title rise" style={i(3)}>Player one.<br /><span>You're up.</span></h2>
+        <p className="story-player-name rise" style={i(4)}>{name}, this is your {stats.year}.</p>
+        <p className="story-player-copy rise" style={i(5)}>The late nights. The little wins.<br />The commits that made it yours.</p>
+        <div className="story-player-footer rise" style={i(6)}><span>Let’s roll the highlights</span><ArrowRight size={18} /></div>
       </>
     ),
   });
@@ -560,7 +571,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     if (langs.length > 0) {
       slides.push({
         id: 'languages',
-        tone: 'panel',
+        tone: 'ground',
         body: (
           <>
             <h2 className="display story-h rise">Your loadout</h2>
@@ -589,7 +600,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     if (repos.length > 0) {
       slides.push({
         id: 'repos',
-        tone: 'panel',
+        tone: 'ground',
         body: (
           <>
             <h2 className="display story-h rise">High scores</h2>
@@ -617,60 +628,55 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
 
     slides.push({
       id: 'class',
-      tone: 'a1',
+      tone: 'ground',
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
-            // ARCHETYPE UNLOCKED
+            // PLAYER PROFILE · CLASS UNLOCKED
           </div>
-          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.6cqh' }}>
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.4cqh' }}>
             Player Class
           </h2>
-
-          {/* Arcade Character Showcase Pedestal */}
-          <div className="story-archetype-showcase" style={{ animationDelay: '200ms' }}>
-            <div className="story-archetype-header">
-              <span className="story-archetype-badge">[ {cls.badge} ]</span>
-              <span className="story-archetype-tier">CLASS ARCHETYPE</span>
+          <div className="story-scoreboard story-class-console rise" style={i(2)}>
+            <div className="story-scoreboard-top">
+              <span>{cls.badge}</span><span>{stats.year} Roster</span>
             </div>
-
-            <div className="story-archetype-stage">
-              <div className="story-archetype-avatar">
-                <PlayerAvatar name={cls.name} size={128} />
+            <div className="story-class-screen">
+              <span className="story-class-screen-label">PLAYER / 01</span>
+              <div className="story-class-sprite">
+                <PlayerAvatar name={cls.name} size={168} animated />
               </div>
-              <div className="story-archetype-pedestal" aria-hidden />
+              <span className="story-class-screen-status">UNLOCKED</span>
             </div>
-
-            <h3 className="story-archetype-name">{cls.name}</h3>
-            <p className="story-archetype-desc">{cls.line}</p>
+            <h3 className="display story-class-name">{cls.name}</h3>
+            <p className="story-class-description">{cls.line}</p>
           </div>
-
-          {/* Archetype Loadout Specs */}
-          <div className="story-archetype-specs">
-            <div className="story-archetype-spec-card" style={{ animationDelay: '600ms' }}>
-              <span className="story-spec-label">Top Move</span>
-              <span className="story-spec-val">{topMoveName}</span>
+          <div className="story-squad-grid story-class-loadout" aria-label="Player loadout">
+            <div className="story-class-stat rise" style={i(4)}>
+              <span className="story-squad-label">Signature move</span>
+              <span className="story-class-stat-value">{topMoveName}</span>
             </div>
-            <div className="story-archetype-spec-card" style={{ animationDelay: '900ms' }}>
-              <span className="story-spec-label">Main Language</span>
-              <span className="story-spec-val">{primaryWeapon}</span>
+            <div className="story-class-stat rise" style={i(5)}>
+              <span className="story-squad-label">Main language</span>
+              <span className="story-class-stat-value">{primaryWeapon}</span>
             </div>
-            <div className="story-archetype-spec-card" style={{ animationDelay: '1200ms' }}>
-              <span className="story-spec-label">Peak Slot</span>
-              <span className="story-spec-val">{peakCadence}</span>
+            <div className="story-class-stat rise" style={i(6)}>
+              <span className="story-squad-label">Peak slot</span>
+              <span className="story-class-stat-value">{peakCadence}</span>
+            </div>
+            <div className="story-class-stat rise" style={i(7)}>
+              <span className="story-squad-label">Class signal</span>
+              <span className="story-class-stat-value">{cls.short}</span>
             </div>
           </div>
-
-          <div className="story-chip story-chip-telemetry" style={{ animationDelay: '1400ms' }}>
-            {`[ ${cls.short.toUpperCase()} · TELEMETRY ]`}
-          </div>
+          <p className="story-note rise" style={i(8)}>Your habits. Your class. Your season.</p>
         </>
       ),
     });
 
     slides.push({
       id: 'proof',
-      tone: 'a2',
+      tone: 'ground',
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
@@ -715,8 +721,23 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     tone: 'ground',
     body: (
       <>
-        <h2 className="display story-h story-h-sm rise">Your card is ready</h2>
-        <GitWrapCard className="story-print" userData={stats} funMessage={funMessage} theme={theme} />
+        <div className="story-badge-header rise">// SEASON COMPLETE · REWARD UNLOCKED</div>
+        <h2 className="display story-h story-h-sm rise" style={i(1)}>Your year. Minted.</h2>
+        <div className="story-reward">
+          <div className="story-reward-slot" aria-hidden="true">
+            <span>GITWRAP / {stats.year}</span>
+            <span className="story-reward-led" />
+          </div>
+          <div className="story-reward-feed">
+            <GitWrapCard className="story-print" userData={stats} funMessage={funMessage} theme={theme} />
+          </div>
+          <div className="story-reward-confetti" aria-hidden="true">
+            {Array.from({ length: 12 }, (_, n) => (
+              <span key={n} style={{ '--x': `${Math.cos(n * Math.PI / 6) * 115}%`, '--y': `${Math.sin(n * Math.PI / 6) * 110}%`, '--turn': `${n % 2 ? 150 : -120}deg`, animationDelay: `${1250 + (n % 3) * 60}ms` } as React.CSSProperties} />
+            ))}
+          </div>
+          <span className="story-reward-stamp" aria-hidden="true">YEAR CLEARED ✓</span>
+        </div>
         <div className="story-actions">
           <button type="button" className="key key-lg key-block" onClick={onDone}>
             Get my card
