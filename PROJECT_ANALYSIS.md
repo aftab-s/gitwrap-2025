@@ -4,7 +4,7 @@
 
 **GitWrap 2025** is a web application that generates beautiful, shareable year-in-review cards for GitHub users. It showcases a developer's 2025 GitHub contributions with personalized stats, multiple themes, and AI-generated fun messages.
 
-**Live URL:** https://gitwrap-2025.vercel.app
+**Live URL:** https://gitwrap.vercel.app
 
 ---
 
@@ -44,7 +44,7 @@
 
 ### Directory Structure
 ```
-gitwrap-2025/
+gitwrap/
 ├── components/          # React components
 │   ├── layouts/        # Card layout variations (Classic, Modern, Compact)
 │   ├── icons/          # SVG icon components
@@ -314,7 +314,7 @@ createExportEnvironment(1080, 1440)
 **4. Download Trigger**
 ```typescript
 const link = document.createElement('a');
-link.download = `gitwrap-2025-${username}-${theme}.png`;
+link.download = `gitwrap-${username}-${theme}.png`;
 link.href = dataUrl;
 link.click();
 ```
