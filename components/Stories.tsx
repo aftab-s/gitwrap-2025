@@ -1,17 +1,34 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { UserStats, Theme } from '../types';
-import { calendarFacts, formatDay, playerClass } from '../insights';
+import { calendarFacts, formatDay, formatHour, playerClass } from '../insights';
 import { toWeeks, LED_STEPS } from './ArcadeCard';
 import GitWrapCard from './GitWrapCard';
 import PlayerAvatar from './PlayerAvatar';
 import { ArrowLeft, ArrowRight, Pause, PlayerArrow } from './icons/Arcade';
-import StoryThemeBackdrop from './StoryThemeBackdrop';
 import { THEMES, themeVars } from '../constants';
 
 const THEME_MAP: Record<string, Theme> = THEMES.reduce((acc, t) => {
   acc[t.id] = t;
   return acc;
 }, {} as Record<string, Theme>);
+
+const GTAVI_STORY_THEME: Theme = {
+  id: 'gtavi',
+  name: 'Vice Sunset',
+  tagline: 'Neon Dusk Leonida',
+  c: {
+    ground: '#18072B',
+    line: '#090014',
+    ink: '#0E011C',
+    panel: '#FFF6FA',
+    a1: '#FF2A85',
+    a2: '#00F5D4',
+    led: '#FFB703',
+    onGround: '#FFFFFF',
+    onGroundDim: '#DCA8FF',
+    onPanelDim: '#704688',
+  },
+};
 
 /**
  * Progression story design: each slide is crafted around a specific 2026 theme world,
@@ -28,7 +45,7 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
     case 'score':
       return THEME_MAP['fifa'] || userTheme;
     case 'calendar':
-      return THEME_MAP['gtavi'] || userTheme;
+      return GTAVI_STORY_THEME;
     case 'rhythm':
       return THEME_MAP['doomsday'] || userTheme;
     case 'streak':
@@ -42,6 +59,7 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
     default: {
       const sequence = ['artemis', 'fifa', 'gtavi', 'doomsday', 'maxdark', 'maxlight'];
       const themeId = sequence[slideIndex % sequence.length];
+      if (themeId === 'gtavi') return GTAVI_STORY_THEME;
       return THEME_MAP[themeId] || userTheme;
     }
   }
@@ -113,7 +131,11 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     tone: 'ground',
     body: (
       <>
-        {stats.avatarUrl && <img className="story-avatar rise" src={stats.avatarUrl} alt="" />}
+        {stats.avatarUrl && (
+          <div className="story-avatar-wrap">
+            <img className="story-avatar" src={stats.avatarUrl} alt="" />
+          </div>
+        )}
         <h2 className="display story-title rise" style={i(1)}>
           {name}, here is your <span className="story-mark">{stats.year}</span>
         </h2>
@@ -164,44 +186,44 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
               <span>90&apos;+5 Verified</span>
             </div>
             <div className="story-scoreboard-value">
-              <CountUp to={totalNum} />
+              <CountUp to={totalNum} ms={1800} />
             </div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 'clamp(0.65rem, 2.1cqw, 0.75rem)', color: 'var(--s-dim)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Total contributions logged on the board
             </div>
             {growth !== undefined && (
-              <div className="story-chip" style={{ alignSelf: 'flex-start', margin: '0.4cqh 0 0' }}>
+              <div className="story-chip" style={{ alignSelf: 'flex-start', margin: '0.4cqh 0 0', animationDelay: '600ms' }}>
                 ▲ {growth >= 0 ? '+' : ''}{growth}% vs {stats.year - 1} campaign
               </div>
             )}
           </div>
 
           {/* Tactical distribution strip */}
-          <div className="story-dist-bar rise" style={i(3)} aria-hidden>
-            <div className="story-dist-seg" style={{ width: `${commitsPct}%`, background: '#FFD21F' }} />
-            <div className="story-dist-seg" style={{ width: `${prsPct}%`, background: '#FF334B' }} />
-            <div className="story-dist-seg" style={{ width: `${reviewsPct}%`, background: '#96D4B0' }} />
-            <div className="story-dist-seg" style={{ width: `${issuesPct}%`, background: '#041E10' }} />
+          <div className="story-dist-bar" aria-hidden>
+            <div className="story-dist-seg" style={{ width: `${commitsPct}%`, background: '#FFD21F', animationDelay: '400ms' }} />
+            <div className="story-dist-seg" style={{ width: `${prsPct}%`, background: '#FF334B', animationDelay: '900ms' }} />
+            <div className="story-dist-seg" style={{ width: `${reviewsPct}%`, background: '#96D4B0', animationDelay: '1400ms' }} />
+            <div className="story-dist-seg" style={{ width: `${issuesPct}%`, background: '#041E10', animationDelay: '1900ms' }} />
           </div>
 
           {/* 4-up tactical squad cards */}
           <div className="story-squad-grid" aria-label="Contribution breakdown">
-            <div className="story-squad-card rise" style={i(4)}>
+            <div className="story-squad-card" style={{ animationDelay: '600ms' }}>
               <span className="story-squad-label">Commits</span>
               <span className="story-squad-val">{stats.totalCommits.toLocaleString()}</span>
               <span className="story-squad-role">{commitsPct}% · Playmaker</span>
             </div>
-            <div className="story-squad-card rise" style={i(5)}>
+            <div className="story-squad-card" style={{ animationDelay: '850ms' }}>
               <span className="story-squad-label">Pull Requests</span>
               <span className="story-squad-val">{stats.totalPRs.toLocaleString()}</span>
               <span className="story-squad-role">Striker / Attacks</span>
             </div>
-            <div className="story-squad-card rise" style={i(6)}>
+            <div className="story-squad-card" style={{ animationDelay: '1100ms' }}>
               <span className="story-squad-label">PR Reviews</span>
               <span className="story-squad-val">{stats.totalPRReviews.toLocaleString()}</span>
               <span className="story-squad-role">Assists &amp; Defense</span>
             </div>
-            <div className="story-squad-card rise" style={i(7)}>
+            <div className="story-squad-card" style={{ animationDelay: '1350ms' }}>
               <span className="story-squad-label">Issues</span>
               <span className="story-squad-val">{stats.totalIssues.toLocaleString()}</span>
               <span className="story-squad-role">Tactical Strategy</span>
@@ -219,14 +241,13 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     const qActive = [0, 0, 0, 0];
     const qTotal = [0, 0, 0, 0];
     for (const d of stats.contributionCalendar) {
-      const month = new Date(d.date).getUTCMonth();
+      const month = new Date(`${d.date}T00:00:00Z`).getUTCMonth();
       const qIdx = Math.min(3, Math.floor(month / 3));
       qTotal[qIdx]++;
       if (d.count > 0) qActive[qIdx]++;
     }
-    const qLabels = ['Q1 [JAN-MAR]', 'Q2 [APR-JUN]', 'Q3 [JUL-SEP]', 'Q4 [OCT-DEC]'];
-    const arcLen = 299.5;
-    const arcFill = (activePct / 100) * arcLen;
+    const qLabels = ['Q1 (Jan–Mar)', 'Q2 (Apr–Jun)', 'Q3 (Jul–Sep)', 'Q4 (Oct–Dec)'];
+    const weeks = toWeeks(stats.contributionCalendar);
 
     slides.push({
       id: 'calendar',
@@ -234,65 +255,87 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
-            // VICE CRUISE TELEMETRY · 365 DAYS
+            // ACTIVITY · 365 DAYS
           </div>
-          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.5cqh' }}>
-            Days on Duty
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.4cqh' }}>
+            Days Active
           </h2>
 
-          {/* Speedometer Tachometer Gauge */}
-          <div className="story-speedo-frame rise" style={i(2)}>
-            <svg viewBox="0 0 260 145" style={{ width: 'min(72cqw, 280px)', overflow: 'visible' }}>
-              <defs>
-                <linearGradient id="viceSpeedoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#00F5D4" />
-                  <stop offset="50%" stopColor="#FF2A85" />
-                  <stop offset="100%" stopColor="#FFB703" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 57 122 A 78 78 0 1 1 203 122"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.12)"
-                strokeWidth="12"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 57 122 A 78 78 0 1 1 203 122"
-                fill="none"
-                stroke="url(#viceSpeedoGrad)"
-                strokeWidth="12"
-                strokeLinecap="round"
-                strokeDasharray={`${arcFill} ${arcLen}`}
-              />
-              <text x="130" y="82" textAnchor="middle" fill="#FFFFFF" fontFamily="'Doto', monospace" fontWeight="900" fontSize="38">
-                {facts.activeDays}
-              </text>
-              <text x="130" y="104" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontWeight="700" fontSize="10" letterSpacing="0.06em">
-                / {facts.days} DAYS ACTIVE
-              </text>
-            </svg>
-            <div className="story-chip" style={{ alignSelf: 'center', marginTop: '-1.5cqh' }}>
-              ▲ {activePct}% CRUISE ATTENDANCE
+          {/* Hero Active Count & 52-Week Mini Heatmap Mosaic */}
+          <div className="story-heat-card rise" style={i(2)}>
+            <div className="story-heat-card-top">
+              <span>Contribution Consistency</span>
+              <span>{activePct}% OF YEAR</span>
+            </div>
+            <div className="story-heat-card-val">
+              <CountUp to={facts.activeDays} ms={1600} />
+            </div>
+            <div className="story-heat-card-sub">
+              Active days recorded out of {facts.days} total
+            </div>
+
+            {/* 52-Week Micro Contribution Mosaic */}
+            <div className="story-heat-strip" aria-label="Year contribution graph">
+              <svg viewBox="0 0 252 35" style={{ width: '100%', height: 'auto', display: 'block' }}>
+                {weeks.map((w, wIdx) => {
+                  const x = wIdx * 4.75;
+                  return w.map((lvl, dIdx) => {
+                    if (lvl < 0) return null;
+                    const y = dIdx * 4.75;
+                    const fill =
+                      lvl === 0
+                        ? 'rgba(255, 255, 255, 0.08)'
+                        : lvl === 1
+                          ? 'color-mix(in srgb, var(--s-hi) 35%, transparent)'
+                          : lvl === 2
+                            ? 'color-mix(in srgb, var(--s-hi) 60%, transparent)'
+                            : lvl === 3
+                              ? 'color-mix(in srgb, var(--s-hi) 85%, transparent)'
+                              : 'var(--s-hi)';
+                    return (
+                      <rect
+                        key={`${wIdx}-${dIdx}`}
+                        x={x}
+                        y={y}
+                        width="3.6"
+                        height="3.6"
+                        rx="0.8"
+                        fill={fill}
+                        className={lvl > 0 ? 'story-mosaic-cell lit' : 'story-mosaic-cell'}
+                        style={{ animationDelay: `${250 + wIdx * 35 + dIdx * 10}ms` }}
+                      />
+                    );
+                  });
+                })}
+              </svg>
             </div>
           </div>
 
-          {/* 4-Quarter Cruise Velocity Breakdown */}
-          <div className="story-quarter-grid" aria-label="Quarterly attendance">
+          {/* 4 Quarterly Activity Pods */}
+          <div className="story-q-grid" aria-label="Quarterly activity breakdown">
             {qLabels.map((qLabel, qIdx) => {
               const ratio = qActive[qIdx] / Math.max(qTotal[qIdx], 1);
               const litCells = Math.round(ratio * 5);
+              const qShort = qLabel.split(' ')[0];
+              const qPeriod = qLabel.split(' ')[1].replace(/[()]/g, '');
               return (
-                <div key={qLabel} className="story-quarter-card rise" style={i(4 + qIdx)}>
-                  <span className="story-quarter-title">{qLabel.split(' ')[0]}</span>
-                  <div className="story-quarter-bar" aria-hidden>
+                <div key={qLabel} className="story-q-card" style={{ animationDelay: `${600 + qIdx * 220}ms` }}>
+                  <div className="story-q-head">
+                    <span className="story-q-tag">{qShort}</span>
+                    <span className="story-q-period">{qPeriod}</span>
+                  </div>
+                  <div className="story-q-num">
+                    {qActive[qIdx]} <span className="story-q-num-sub">days</span>
+                  </div>
+                  <div className="story-q-bar" aria-hidden>
                     {[0, 1, 2, 3, 4].map((cell) => (
-                      <span key={cell} className={`story-quarter-cell${cell < litCells ? ' lit' : ''}`} />
+                      <span
+                        key={cell}
+                        className={`story-q-cell${cell < litCells ? ' lit' : ''}`}
+                        style={cell < litCells ? { animationDelay: `${750 + qIdx * 200 + cell * 80}ms` } : undefined}
+                      />
                     ))}
                   </div>
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 'clamp(0.55rem, 1.8cqw, 0.65rem)', color: 'var(--s-dim)' }}>
-                    {Math.round(ratio * 100)}%
-                  </span>
                 </div>
               );
             })}
@@ -300,7 +343,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
 
           {facts.peak && (
             <div className="story-ticket-strip rise" style={i(8)}>
-              <span className="story-ticket-label">Peak Velocity Citation</span>
+              <span className="story-ticket-label">Most Active Day</span>
               <span className="story-ticket-val">
                 {formatDay(facts.peak.date)} · {facts.peak.count.toLocaleString()} contributions logged
               </span>
@@ -312,29 +355,34 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
 
     const bestDay = DAYS.indexOf(stats.bestDayOfWeek);
     const maxDay = Math.max(...facts.weekdayTotals, 1);
-    const maxHour = insights ? Math.max(...insights.hours, 1) : 1;
+    const maxHour = insights ? Math.max(...insights.hours, 1) : 10;
     const hourNum = stats.bestHour;
-    const hourStr = `${String(hourNum).padStart(2, '0')}:00`;
+    const hourStr = formatHour(hourNum);
     const dayName = bestDay >= 0 ? DAYS[bestDay] : 'Weekdays';
-    const phaseName =
-      hourNum >= 0 && hourNum < 6
-        ? 'NIGHT OPS · ZERO VISIBILITY'
+    const coderCategory =
+      hourNum >= 0 && hourNum < 5
+        ? 'Late Night Coder'
         : hourNum < 12
-        ? 'DAWN STRIKE · EARLY ACCESS'
-        : hourNum < 18
-        ? 'AFTERNOON POWER · PRIME RUNTIME'
-        : 'EVENING SIEGE · PEAK OUTPUT';
+          ? 'Early Morning Coder'
+          : hourNum < 18
+            ? 'Afternoon Coder'
+            : 'Evening Coder';
 
     const hourSpikes = Array.from({ length: 24 }, (_, h) => {
-      const cnt = insights ? insights.hours[h] : h === hourNum ? 10 : 0;
+      let cnt = insights ? insights.hours[h] : 0;
+      if (!insights && hourNum >= 0) {
+        // Natural distribution curve centered around the user's peak hour
+        const dist = Math.min(Math.abs(h - hourNum), 24 - Math.abs(h - hourNum));
+        cnt = Math.max(1, Math.round(10 * Math.exp(-(dist * dist) / 18)));
+      }
       const angle = (h / 24) * 2 * Math.PI - Math.PI / 2;
-      const rInner = 50;
-      const rOuter = rInner + 8 + 26 * (cnt / maxHour);
+      const rInner = 48;
+      const rOuter = rInner + 6 + 24 * (cnt / maxHour);
       const isPeak = h === hourNum;
       const x1 = 110 + rInner * Math.cos(angle);
-      const y1 = 100 + rInner * Math.sin(angle);
+      const y1 = 95 + rInner * Math.sin(angle);
       const x2 = 110 + rOuter * Math.cos(angle);
-      const y2 = 100 + rOuter * Math.sin(angle);
+      const y2 = 95 + rOuter * Math.sin(angle);
       return { h, cnt, isPeak, x1, y1, x2, y2 };
     });
 
@@ -344,23 +392,23 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
-            // CHRONO-TACTICAL LOCK-ON · TEMPORAL RETICLE
+            // PEAK HOURS & DAYS
           </div>
-          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.5cqh' }}>
-            Combat Rhythm
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.4cqh' }}>
+            When You Code
           </h2>
 
-          {/* 24-Hour Chrono Radar */}
-          <div className="story-radar-container rise" style={i(2)}>
-            <svg viewBox="0 0 220 200" style={{ width: 'min(50cqw, 25cqh, 175px)', maxHeight: '25cqh', overflow: 'visible' }}>
-              <circle cx="110" cy="100" r="86" fill="none" stroke="#00FF88" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.3" />
-              <circle cx="110" cy="100" r="50" fill="none" stroke="#00FF88" strokeWidth="1" strokeDasharray="2 3" opacity="0.2" />
-              <line x1="110" y1="12" x2="110" y2="188" stroke="#00FF88" strokeWidth="1" opacity="0.18" />
-              <line x1="22" y1="100" x2="198" y2="100" stroke="#00FF88" strokeWidth="1" opacity="0.18" />
-              <text x="110" y="9" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">00h</text>
-              <text x="210" y="103" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">06h</text>
-              <text x="110" y="198" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">12h</text>
-              <text x="10" y="103" textAnchor="middle" fill="#00FF88" opacity="0.75" fontFamily="'Martian Mono', monospace" fontSize="8">18h</text>
+          {/* 24-Hour Circular Activity Clock */}
+          <div className="story-clock-frame rise" style={i(2)}>
+            <svg viewBox="0 0 220 190" style={{ width: 'min(52cqw, 24cqh, 175px)', maxHeight: '24cqh', overflow: 'visible' }}>
+              <circle cx="110" cy="95" r="82" fill="none" stroke="var(--s-fg)" strokeWidth="1" opacity="0.15" />
+              <circle cx="110" cy="95" r="48" fill="none" stroke="var(--s-hi)" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
+              <line x1="110" y1="12" x2="110" y2="178" stroke="var(--s-fg)" strokeWidth="1" opacity="0.12" />
+              <line x1="27" y1="95" x2="193" y2="95" stroke="var(--s-fg)" strokeWidth="1" opacity="0.12" />
+              <text x="110" y="8" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontSize="8">00:00</text>
+              <text x="210" y="98" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontSize="8">06:00</text>
+              <text x="110" y="188" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontSize="8">12:00</text>
+              <text x="10" y="98" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontSize="8">18:00</text>
               {hourSpikes.map(({ h, cnt, isPeak, x1, y1, x2, y2 }) => (
                 <line
                   key={h}
@@ -368,60 +416,79 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
                   y1={y1}
                   x2={x2}
                   y2={y2}
-                  stroke={isPeak ? '#00FF88' : cnt > 0 ? '#00FF88' : 'rgba(255, 255, 255, 0.15)'}
+                  className={isPeak ? 'story-clock-peak-spike' : cnt > 0 ? 'story-clock-spike' : undefined}
+                  stroke={isPeak ? 'var(--s-hi)' : cnt > 0 ? 'var(--s-hi)' : 'var(--s-fg)'}
                   strokeWidth={isPeak ? 3.5 : cnt > 0 ? 2 : 1}
-                  opacity={isPeak ? 1 : cnt > 0 ? 0.35 + 0.65 * (cnt / maxHour) : 0.2}
+                  opacity={isPeak ? 1 : cnt > 0 ? 0.35 + 0.65 * (cnt / maxHour) : 0.15}
+                  style={cnt > 0 ? { animationDelay: `${350 + h * 55}ms` } : undefined}
                 />
               ))}
-              <text x="110" y="96" textAnchor="middle" fill="#00FF88" fontFamily="'Doto', monospace" fontWeight="900" fontSize="24">
+              <text x="110" y="91" textAnchor="middle" fill="var(--s-hi)" fontFamily="'Doto', monospace" fontWeight="900" fontSize="22" className="story-clock-center-text">
                 {hourStr}
               </text>
-              <text x="110" y="112" textAnchor="middle" fill="#9AA7B8" fontFamily="'Martian Mono', monospace" fontWeight="800" fontSize="7.5" letterSpacing="0.08em">
-                PEAK TARGET
+              <text x="110" y="106" textAnchor="middle" fill="var(--s-dim)" fontFamily="'Martian Mono', monospace" fontWeight="800" fontSize="7.5" letterSpacing="0.08em">
+                PEAK TIME
               </text>
             </svg>
           </div>
 
           <div className="story-chip rise" style={{ alignSelf: 'center', marginTop: '-0.5cqh', ...i(3) }}>
-            [ {phaseName} ]
+            [ {coderCategory} · Peak at {hourStr} ]
           </div>
 
-          {/* 7-Day Frequency Matrix */}
-          <div className="story-days-grid" aria-label="Weekly distribution">
+          {/* 7-Day Weekday Equalizer */}
+          <div className="story-week-grid" aria-label="Weekly contribution distribution">
             {facts.weekdayTotals.map((val, d) => {
               const isPeak = d === bestDay;
-              const litCount = Math.round((val / maxDay) * 5);
+              const litCount = val > 0 ? Math.max(1, Math.min(6, Math.round((val / maxDay) * 6))) : 0;
               return (
-                <div key={d} className={`story-day-col${isPeak ? ' on' : ''} rise`} style={i(4 + d)}>
-                  <div className="story-day-meter" aria-hidden>
-                    {[0, 1, 2, 3, 4].map((cell) => (
-                      <span key={cell} className={`story-day-cell${cell < litCount ? ' lit' : ''}`} />
+                <div
+                  key={d}
+                  className={`story-week-col${isPeak ? ' on' : ''}`}
+                  style={{ animationDelay: `${400 + d * 140}ms` }}
+                >
+                  <div className="story-week-meter" aria-hidden>
+                    {[0, 1, 2, 3, 4, 5].map((cell) => (
+                      <span
+                        key={cell}
+                        className={`story-week-cell${cell < litCount ? ' lit' : ''}`}
+                        style={cell < litCount ? { animationDelay: `${600 + d * 110 + cell * 75}ms` } : undefined}
+                      />
                     ))}
                   </div>
-                  <span className="story-day-name">{DAYS[d].slice(0, 3)}</span>
+                  <span className="story-week-name">{DAYS[d].slice(0, 3)}</span>
                 </div>
               );
             })}
           </div>
 
           <p className="story-note rise" style={{ ...i(11), marginTop: '0.4cqh', textWrap: 'balance' }}>
-            {dayName}s carried the year · Chrono synchronized
+            {dayName}s had your highest volume · Weekdays: {Math.round((1 - facts.weekendShare) * 100)}% / Weekends: {Math.round(facts.weekendShare * 100)}%
           </p>
         </>
       ),
     });
 
-    if (facts.streak && facts.streak.days >= 3) {
+    if (facts.streak && facts.streak.days >= 1) {
       const days = facts.streak.days;
       const litCaps = Math.min(10, Math.max(1, Math.round((days / 30) * 10)));
-      const statusTitle =
-        days >= 45
-          ? 'GODLIKE // OVERCLOCK TIER IV'
-          : days >= 21
-          ? 'HYPERCHARGED // OVERCLOCK TIER III'
-          : days >= 7
-          ? 'SURGE VELOCITY // OVERCLOCK TIER II'
-          : 'MOMENTUM ONLINE // OVERCLOCK TIER I';
+      const streakNote =
+        days >= 30
+          ? 'Over a month of daily commits without skipping a single day.'
+          : days >= 14
+            ? 'Two full weeks of continuous daily shipping.'
+            : days >= 7
+              ? 'Over a week of daily code pushed to GitHub.'
+              : days > 1
+                ? 'Consecutive days of uninterrupted commits.'
+                : 'Peak single-day contribution run.';
+
+      const milestones = [
+        { label: '3d', name: 'Starter', reached: days >= 3 },
+        { label: '7d', name: '1 Week', reached: days >= 7 },
+        { label: '14d', name: '2 Weeks', reached: days >= 14 },
+        { label: '30d+', name: '1 Month', reached: days >= 30 },
+      ];
 
       slides.push({
         id: 'streak',
@@ -429,43 +496,60 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
         body: (
           <>
             <div className="story-badge-header rise" style={i(0)}>
-              // PIPELINE RETENTION · COMBO MULTIPLIER
+              // DAILY COMMIT CONSISTENCY
             </div>
-            <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.8cqh' }}>
-              Unbroken Streak
+            <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.6cqh' }}>
+              Longest Streak
             </h2>
 
-            {/* Hero Arcade Combo Card */}
+            {/* Hero Arcade Streak Card */}
             <div className="story-combo-card rise" style={i(2)}>
-              <span className="story-combo-badge">[ STREAK MULTIPLIER ]</span>
+              <div className="story-combo-badge">DAILY MOMENTUM RECORD</div>
               <div className="story-combo-digits">
-                <CountUp to={days} ms={900} />
+                <CountUp to={days} ms={1600} />
               </div>
-              <span className="story-combo-sub">Consecutive Days Unbroken</span>
+              <span className="story-combo-sub">Consecutive Days Active</span>
+              <div className="story-combo-range">
+                {formatDay(facts.streak.from)} — {formatDay(facts.streak.to)}
+              </div>
             </div>
 
-            {/* Overclock Capacitor Bank */}
-            <div className="story-capacitors-wrap rise" style={i(3)}>
-              <div className="story-capacitors-header">
-                <span>Capacitor Overclock</span>
-                <span>{statusTitle}</span>
+            {/* Milestone Checkpoint Track */}
+            <div className="story-milestone-track rise" style={i(3)}>
+              <div className="story-milestone-header">
+                <span>Streak Milestones</span>
+                <span>{days >= 30 ? 'Elite Tier' : days >= 14 ? 'High Flow' : days >= 7 ? 'Pace Keeper' : 'Active Run'}</span>
               </div>
-              <div className="story-capacitors-bar" aria-hidden>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((idx) => (
-                  <span key={idx} className={`story-cap-cell${idx < litCaps ? ' lit' : ''}`} />
+              <div className="story-milestones-row">
+                {milestones.map((m) => (
+                  <div key={m.label} className={`story-milestone-pod${m.reached ? ' reached' : ''}`}>
+                    <div className="story-milestone-dot" />
+                    <span className="story-milestone-tag">{m.label}</span>
+                    <span className="story-milestone-name">{m.name}</span>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Hex Memory Dump Block */}
-            <div className="story-hex-block rise" style={i(4)}>
-              <div>START: <span>{formatDay(facts.streak.from)}</span></div>
-              <div>FINAL: <span>{formatDay(facts.streak.to)}</span></div>
-              <div style={{ marginTop: '0.2cqh' }}>BUFFER: <span>100% RETENTION · ZERO MISSED CYCLES</span></div>
+            {/* Segmented Momentum LED Bar */}
+            <div className="story-capacitors-wrap rise" style={i(4)}>
+              <div className="story-capacitors-header">
+                <span>Consistency Meter</span>
+                <span>{Math.min(100, Math.round((days / 30) * 100))}% Capacity</span>
+              </div>
+              <div className="story-capacitors-bar" aria-hidden>
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((idx) => (
+                  <span
+                    key={idx}
+                    className={`story-cap-cell${idx < litCaps ? ' lit' : ''}`}
+                    style={idx < litCaps ? { animationDelay: `${500 + idx * 160}ms` } : undefined}
+                  />
+                ))}
+              </div>
             </div>
 
             <p className="story-note rise" style={{ ...i(5), marginTop: '0.4cqh' }}>
-              Hardware pipeline locked · Hex register 0x7E0 active
+              {streakNote}
             </p>
           </>
         ),
@@ -488,7 +572,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
                     <span className="score-value">{lang.percent.toFixed(1)}%</span>
                   </div>
                   <div className="story-meter">
-                    <span className={`m${n}`} style={{ width: `${Math.max(lang.percent, 2)}%`, ...i(2 + n * 2) }} />
+                    <span className={`m${n}`} style={{ width: `${Math.max(lang.percent, 2)}%`, animationDelay: `${450 + n * 350}ms` }} />
                   </div>
                 </div>
               ))}
@@ -505,13 +589,13 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     if (repos.length > 0) {
       slides.push({
         id: 'repos',
-        tone: 'dark',
+        tone: 'panel',
         body: (
           <>
             <h2 className="display story-h rise">High scores</h2>
             <ol className="story-ranks">
               {repos.map((repo, n) => (
-                <li key={`${repo.name}-${n}`} className="rise" style={i(1 + n * 2)}>
+                <li key={`${repo.name}-${n}`} style={{ animationDelay: `${400 + n * 300}ms` }}>
                   <span className="story-rank">{RANKS[n]}</span>
                   <span className="story-rank-name">{repo.name}</span>
                   <span className="story-rank-score">{repo.contributions.toLocaleString()}</span>
@@ -527,69 +611,101 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
     }
 
     const cls = playerClass(stats);
+    const topMoveName = stats.commitInsights?.moves[0]?.name?.toUpperCase() || 'COMMIT';
+    const primaryWeapon = stats.topLanguages[0]?.name || 'Code';
+    const peakCadence = `${stats.bestDayOfWeek ? stats.bestDayOfWeek.slice(0, 3) : 'Day'} @ ${formatHour(stats.bestHour)}`;
 
     slides.push({
       id: 'class',
       tone: 'a1',
       body: (
         <>
-          <div className="story-pet rise">
-            <PlayerAvatar name={cls.name} size={176} />
+          <div className="story-badge-header rise" style={i(0)}>
+            // ARCHETYPE UNLOCKED
           </div>
-          <p className="story-lead rise" style={i(1)}>That makes you {/^[aeiou]/i.test(cls.name) ? 'an' : 'a'}</p>
-          <h2 className="display story-stamp" style={fit(cls.name.split(' ').sort((a, b) => b.length - a.length)[0] + 'xx')}>
-            {cls.name}
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.6cqh' }}>
+            Player Class
           </h2>
-          <p className="story-text rise" style={i(8)}>
-            {cls.line}
-          </p>
-          <p className="story-chip rise" style={i(10)}>
-            {cls.badge}
-          </p>
+
+          {/* Arcade Character Showcase Pedestal */}
+          <div className="story-archetype-showcase" style={{ animationDelay: '200ms' }}>
+            <div className="story-archetype-header">
+              <span className="story-archetype-badge">[ {cls.badge} ]</span>
+              <span className="story-archetype-tier">CLASS ARCHETYPE</span>
+            </div>
+
+            <div className="story-archetype-stage">
+              <div className="story-archetype-avatar">
+                <PlayerAvatar name={cls.name} size={128} />
+              </div>
+              <div className="story-archetype-pedestal" aria-hidden />
+            </div>
+
+            <h3 className="story-archetype-name">{cls.name}</h3>
+            <p className="story-archetype-desc">{cls.line}</p>
+          </div>
+
+          {/* Archetype Loadout Specs */}
+          <div className="story-archetype-specs">
+            <div className="story-archetype-spec-card" style={{ animationDelay: '600ms' }}>
+              <span className="story-spec-label">Top Move</span>
+              <span className="story-spec-val">{topMoveName}</span>
+            </div>
+            <div className="story-archetype-spec-card" style={{ animationDelay: '900ms' }}>
+              <span className="story-spec-label">Main Language</span>
+              <span className="story-spec-val">{primaryWeapon}</span>
+            </div>
+            <div className="story-archetype-spec-card" style={{ animationDelay: '1200ms' }}>
+              <span className="story-spec-label">Peak Slot</span>
+              <span className="story-spec-val">{peakCadence}</span>
+            </div>
+          </div>
+
+          <div className="story-chip story-chip-telemetry" style={{ animationDelay: '1400ms' }}>
+            {`[ ${cls.short.toUpperCase()} · TELEMETRY ]`}
+          </div>
         </>
       ),
     });
-
-    const article = /^[aeiou]/i.test(cls.name) ? 'an' : 'a';
 
     slides.push({
       id: 'proof',
       tone: 'a2',
       body: (
-        <div className="story-proof">
-          <div className="story-proof-head rise">
-            <div className="story-proof-avatar-box">
-              <PlayerAvatar name={cls.name} size={46} />
+        <>
+          <div className="story-badge-header rise" style={i(0)}>
+            // ALGORITHM VERIFICATION
+          </div>
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.6cqh' }}>
+            Class Telemetry
+          </h2>
+
+          {/* Qualifying Criteria Strip */}
+          <div className="story-audit-bar" style={{ animationDelay: '220ms' }}>
+            <div className="story-audit-bar-top">
+              <span className="story-audit-dot" />
+              <span className="story-audit-tag">CRITERIA AUDIT</span>
             </div>
-            <div style={{ minWidth: 0, flex: '1 1 auto' }}>
-              <span className="story-proof-badge">{cls.badge}</span>
-              <h2 className="story-proof-title">
-                Why You&rsquo;re {article} {cls.name}
-              </h2>
-            </div>
+            <div className="story-audit-formula">{cls.proof.formula}</div>
           </div>
 
-          <div className="story-proof-dialogue rise" style={i(2)}>
-            <span className="story-proof-dialogue-tag">The Verdict</span>
-            <p className="story-proof-dialogue-text">
-              &ldquo;{cls.proof.headline}&rdquo;
-            </p>
-          </div>
-
-          <div className="story-proof-grid">
+          {/* 2x2 Telemetry Metric Matrix */}
+          <div className="story-audit-grid">
             {cls.proof.metrics.map((m, n) => (
-              <div key={m.label} className="story-proof-card rise" style={i(3 + n)}>
-                <span className="story-proof-card-label">{m.label}</span>
-                <span className="story-proof-card-val">{m.value}</span>
-                {m.hint && <span className="story-proof-card-hint">{m.hint}</span>}
+              <div key={m.label} className="story-audit-card" style={{ animationDelay: `${500 + n * 280}ms` }}>
+                <span className="story-audit-card-label">{m.label}</span>
+                <span className="story-audit-card-val">{m.value}</span>
+                {m.hint && <span className="story-audit-card-hint">{m.hint}</span>}
               </div>
             ))}
           </div>
 
-          <div className="story-proof-formula rise" style={i(8)}>
-            <span>[FORMULA] {cls.proof.formula}</span>
+          {/* Audit Verification Footer */}
+          <div className="story-audit-footer" style={{ animationDelay: '1300ms' }}>
+            <span>DETERMINISTIC CLASSIFICATION</span>
+            <span>{stats.totalContributions.toLocaleString()} CONTRIBUTIONS AUDITED</span>
           </div>
-        </div>
+        </>
       ),
     });
   }
@@ -820,9 +936,6 @@ const Stories: React.FC<Props> = ({ stats, funMessage, theme, onDone }) => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Dynamic Slide Thematic Vector Backdrop */}
-        <StoryThemeBackdrop themeId={currentSlideTheme.id} c={currentSlideTheme.c} />
-
         <div className="stories-top">
           <StorySegments
             slides={slides}

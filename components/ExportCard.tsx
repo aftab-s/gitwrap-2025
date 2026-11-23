@@ -7,7 +7,6 @@ interface ExportCardProps {
   funMessage: string;
   theme: Theme;
   playerAvatarUrl?: string;
-  themeBackdropUrl?: string;
 }
 
 /**
@@ -19,14 +18,12 @@ const ExportCard: React.FC<ExportCardProps> = ({
   funMessage,
   theme,
   playerAvatarUrl,
-  themeBackdropUrl,
 }) => (
   <ArcadeCard
     userData={userData}
     funMessage={funMessage}
     theme={theme}
     playerAvatarUrl={playerAvatarUrl}
-    themeBackdropUrl={themeBackdropUrl}
   />
 );
 

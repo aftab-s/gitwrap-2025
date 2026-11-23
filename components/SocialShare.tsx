@@ -10,7 +10,7 @@ interface SocialShareProps {
 
 const SocialShare: React.FC<SocialShareProps> = ({ username, year }) => {
   const [canNativeShare, setCanNativeShare] = useState(false);
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : '';
   const text = `My GitHub ${year}, scored. #GitWrap${year}`;
   const title = `${username}'s GitWrap ${year}`;
 

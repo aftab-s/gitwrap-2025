@@ -14,7 +14,7 @@ const fallback: Contributor[] = [
 // Repository to query. Prefer Vite env var `VITE_GITHUB_REPOSITORY` (owner/repo),
 // fallback to the current repo used in this codebase.
 const _env = (import.meta as any).env || {};
-const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2026';
+const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2025';
 const GITHUB_API = `https://api.github.com/repos/${REPOSITORY}/contributors?per_page=100`;
 
 const CACHE_KEY = 'contributors-cache-v1';
@@ -25,11 +25,6 @@ const Contributors: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-
-    // Clear stale cache on mount to ensure fresh data
-    try {
-      sessionStorage.removeItem(CACHE_KEY);
-    } catch (e) {}
 
     async function loadFromPublicJson(): Promise<Contributor[] | null> {
       try {
@@ -63,7 +58,15 @@ const Contributors: React.FC = () => {
     }
 
     async function load() {
-      // Try session cache first
+      // 1) Prioritize bundled static /contributors.json (instant, no rate-limits, zero 404s)
+      const publicData = await loadFromPublicJson();
+      if (publicData && mounted) {
+        setContributors(publicData);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) {}
+        return;
+      }
+
+      // 2) Try session cache
       try {
         const raw = sessionStorage.getItem(CACHE_KEY);
         if (raw) {
@@ -73,31 +76,20 @@ const Contributors: React.FC = () => {
             return;
           }
         }
-      } catch (err) {
-        // ignore
-      }
+      } catch (err) {}
 
-      // 1) Prioritize GitHub API to get live, complete contributor list
-      const allowClientFetch = Boolean(_env.DEV) || _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
-      let ghData: Contributor[] | null = null;
+      // 3) Try GitHub API if explicitly enabled or if local JSON was absent
+      const allowClientFetch = _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
       if (allowClientFetch) {
-        ghData = await loadFromGitHubApi();
-      }
-      if (ghData && mounted) {
-        setContributors(ghData);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ghData })); } catch (e) {}
-        return;
-      }
-
-      // 2) Fallback to public contributors.json (static file, may be outdated)
-      const publicData = await loadFromPublicJson();
-      if (publicData && mounted) {
-        setContributors(publicData);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) {}
-        return;
+        const ghData = await loadFromGitHubApi();
+        if (ghData && mounted) {
+          setContributors(ghData);
+          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ghData })); } catch (e) {}
+          return;
+        }
       }
 
-      // 3) Final fallback
+      // 4) Final fallback
       if (mounted) setContributors(fallback);
     }
 

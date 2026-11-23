@@ -29,7 +29,6 @@ interface Props {
   funMessage: string;
   theme: Theme;
   playerAvatarUrl?: string;
-  themeBackdropUrl?: string;
 }
 
 // ---------- small typographic helpers ----------
@@ -65,8 +64,10 @@ function level(count: number): number {
 }
 
 /** Calendar days → week columns (Sunday on top), like GitHub's graph. */
-export function toWeeks(calendar: Array<{ date: string; count: number }>): number[][] {
-  const sorted = [...calendar].sort((a, b) => a.date.localeCompare(b.date));
+export function toWeeks(calendar: Array<{ date?: string; count?: number }>): number[][] {
+  const sorted = calendar
+    .filter((d): d is { date: string; count: number } => typeof d.date === 'string')
+    .sort((a, b) => a.date.localeCompare(b.date));
   const weeks: number[][] = [];
   let week: number[] = [];
   for (const day of sorted) {
@@ -111,9 +112,9 @@ function getHazardStyle(themeId: string, c: Theme['c']): React.CSSProperties {
       return {
         height: 18,
         flexShrink: 0,
-        backgroundImage: `linear-gradient(90deg, #FF2A85 0%, #FFB703 50%, #00F5D4 100%)`,
+        backgroundImage: `linear-gradient(90deg, #F3937B 0%, #A480D4 50%, #5E8DA8 100%)`,
         border: `3px solid ${c.line}`,
-        boxShadow: `0 0 18px rgba(255, 42, 133, 0.4)`,
+        boxShadow: `0 0 18px rgba(243, 147, 123, 0.35)`,
       };
     case 'doomsday':
       return {
@@ -155,7 +156,7 @@ function getFooterInks(themeId: string, c: Theme['c']): string[] {
     case 'artemis':
       return [c.a1, '#00E5FF', c.line, c.panel, c.a1, '#00E5FF', c.line, c.panel, '#00E5FF'];
     case 'gtavi':
-      return ['#FF2A85', '#FFB703', '#00F5D4', c.line, '#FF2A85', '#FFB703', '#00F5D4', c.panel, '#FF2A85'];
+      return ['#F3937B', '#A480D4', '#5E8DA8', '#8EA2E5', '#A5769B', '#FDE0C8', '#6B3B5E', c.line, '#F3937B'];
     case 'doomsday':
       return ['#00FF88', '#FFC107', c.line, c.panel, '#00FF88', '#FFC107', c.line, c.panel, '#00FF88'];
     case 'maxdark':
@@ -212,7 +213,7 @@ function getLangInks(themeId: string, c: Theme['c']): string[] {
     case 'artemis':
       return [c.a1, c.a2, '#8CA0C0', c.panel];
     case 'gtavi':
-      return [c.a1, c.a2, '#FFB703', c.panel];
+      return ['#F3937B', '#5E8DA8', '#8EA2E5', '#A480D4'];
     case 'doomsday':
       return [c.a1, c.a2, '#9AA7B8', c.panel];
     case 'maxdark':
@@ -224,7 +225,7 @@ function getLangInks(themeId: string, c: Theme['c']): string[] {
   }
 }
 
-const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, theme, playerAvatarUrl, themeBackdropUrl }, ref) => {
+const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, theme, playerAvatarUrl }, ref) => {
   const { c } = theme;
   const led = c.led ?? c.a1; // lit colour inside the dark display windows
   const d = userData;
@@ -299,8 +300,8 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
         position: 'relative',
       }}
     >
-      {/* ---------- Bespoke Theme Backdrop & Watermarks ---------- */}
-      <ThemeBackdrop themeId={theme.id} c={c} overrideImgUrl={themeBackdropUrl} />
+      {/* ---------- Bespoke Theme Backdrop for Volt Matrix & Tokyo Riso ---------- */}
+      <ThemeBackdrop themeId={theme.id} c={c} />
 
       {/* ---------- Theme Identity Tag ---------- */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1, minHeight: 20 }}>
@@ -358,17 +359,28 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
 
         <div
           style={{
-            background:
-              theme.id === 'fifa'
-                ? '#041E10'
-                : theme.id === 'gtavi'
-                ? '#0A0014'
-                : theme.id === 'doomsday'
-                ? '#0E1118'
-                : theme.id === 'maxlight'
-                ? '#0B1B61'
-                : '#0B0D17',
-            border: `${KEYLINE}px solid ${c.line}`,
+            ...(theme.id === 'gtavi'
+              ? {
+                  background: 'linear-gradient(135deg, rgba(253, 224, 200, 0.28) 0%, rgba(94, 141, 168, 0.22) 50%, rgba(107, 59, 94, 0.5) 100%)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '3px solid rgba(253, 224, 200, 0.65)',
+                  boxShadow:
+                    'inset 0 2px 0 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 0 rgba(66, 30, 56, 0.5), 0 8px 24px -4px rgba(66, 30, 56, 0.45)',
+                  position: 'relative' as const,
+                  overflow: 'hidden' as const,
+                }
+              : {
+                  background:
+                    theme.id === 'fifa'
+                      ? '#041E10'
+                      : theme.id === 'doomsday'
+                      ? '#0E1118'
+                      : theme.id === 'maxlight'
+                      ? '#0B1B61'
+                      : '#0B0D17',
+                  border: `${KEYLINE}px solid ${c.line}`,
+                }),
             padding: '10px 24px',
             display: 'flex',
             alignItems: 'center',
@@ -376,7 +388,54 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
             flexShrink: 0,
           }}
         >
-          <div style={{ fontFamily: DOT, fontWeight: 900, fontSize: 96, lineHeight: 1, color: led, letterSpacing: '0.02em' }}>{d.year}</div>
+          {theme.id === 'gtavi' && (
+            <>
+              {/* Subtle VCR scanline texture */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.16) 2px 4px)',
+                  pointerEvents: 'none',
+                }}
+              />
+              {/* Subtle VCR Playback Status */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 5,
+                  left: 8,
+                  fontFamily: MONO,
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  color: '#FDE0C8',
+                  opacity: 0.75,
+                }}
+              >
+                PLAY ▶
+              </span>
+            </>
+          )}
+          <div
+            style={{
+              fontFamily: DOT,
+              fontWeight: 900,
+              fontSize: 96,
+              lineHeight: 1,
+              color: theme.id === 'gtavi' ? '#FDE0C8' : led,
+              letterSpacing: '0.02em',
+              textShadow:
+                theme.id === 'gtavi'
+                  ? '0 0 10px #F3937B, 0 0 22px rgba(243, 147, 123, 0.85), 0 0 36px rgba(164, 128, 212, 0.65)'
+                  : undefined,
+              position: 'relative' as const,
+              zIndex: 1,
+            }}
+          >
+            {d.year}
+          </div>
         </div>
       </header>
 

@@ -11,8 +11,10 @@ export interface CalendarFacts {
   weekendShare: number;
 }
 
-export function calendarFacts(calendar: Array<{ date: string; count: number }>): CalendarFacts {
-  const sorted = [...calendar].sort((a, b) => a.date.localeCompare(b.date));
+export function calendarFacts(calendar: Array<{ date?: string; count?: number }>): CalendarFacts {
+  const sorted = calendar
+    .filter((d): d is { date: string; count: number } => typeof d.date === 'string')
+    .sort((a, b) => a.date.localeCompare(b.date));
   const weekdayTotals = new Array(7).fill(0);
   let total = 0;
   let activeDays = 0;

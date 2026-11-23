@@ -14,5 +14,5 @@ export const EDITION: Edition = {
   prevRange: { from: '2024-12-01T00:00:00Z', to: '2025-11-30T23:59:59Z' },
 };
 
-export const APP_REPO = 'aftab-s/gitwrap-2026';
+export const APP_REPO = 'aftab-s/gitwrap-2025';
 export const APP_REPO_URL = `https://github.com/${APP_REPO}`;

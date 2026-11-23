@@ -1,7 +1,7 @@
 import PlayerAvatar from '../components/PlayerAvatar';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import type { UserStats, Theme } from '../types';
 import { AspectRatio } from '../types';
 import { fetchWrap, WrapError } from '../services/api';
@@ -179,6 +179,9 @@ const year = EDITION.year;
 
 const UserPage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
+  const [searchParams] = useSearchParams();
+  const justAuthed = searchParams.get('auth') === '1';
+
   const [userData, setUserData] = useState<UserStats | null>(null);
   const [funMessage, setFunMessage] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -189,6 +192,7 @@ const UserPage: React.FC = () => {
   // The recap plays first; the card page follows. Once seen, a reload goes straight to the card.
   const seenKey = `gw-recap-${(username ?? '').toLowerCase()}`;
   const [phase, setPhase] = useState<'recap' | 'card'>(() => {
+    if (justAuthed) return 'recap';
     try {
       return sessionStorage.getItem(seenKey) ? 'card' : 'recap';
     } catch {
@@ -227,6 +231,21 @@ const UserPage: React.FC = () => {
   const auth = useAuth();
   // The private view is only requested for the signed-in user's own profile (the server re-checks this).
   const includePrivate = isOwnProfile(auth, username);
+
+  // Automatically replay stories right after loader when user logs in with GitHub
+  const prevIncludePrivate = useRef(includePrivate);
+  useEffect(() => {
+    if (justAuthed || (!prevIncludePrivate.current && includePrivate)) {
+      try {
+        sessionStorage.removeItem(seenKey);
+      } catch {}
+      setPhase('recap');
+      if (justAuthed) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+    prevIncludePrivate.current = includePrivate;
+  }, [justAuthed, includePrivate, seenKey]);
 
 
   const fetchData = useCallback(async () => {
@@ -318,13 +337,11 @@ const UserPage: React.FC = () => {
 
     const cls = userData.totalContributions > 0 ? playerClass(userData) : undefined;
     const petPath = cls ? playerAvatar(cls.name) : undefined;
-    const backdropPath = activeTheme.id === 'doomsday' ? '/themes/latverian-minimal.jpg' : undefined;
 
     // Convert all images to Base64 data URLs in parallel so Safari never needs network/CORS in iframe
-    const [embeddedAvatar, embeddedPet, embeddedBackdrop] = await Promise.all([
+    const [embeddedAvatar, embeddedPet] = await Promise.all([
       embeddedAvatarUrl ? Promise.resolve(embeddedAvatarUrl) : toDataUrl(userData.avatarUrl).catch(() => undefined),
       petPath ? toDataUrl(petPath).catch(() => undefined) : Promise.resolve(undefined),
-      backdropPath ? toDataUrl(backdropPath).catch(() => undefined) : Promise.resolve(undefined),
     ]);
 
     if (!embeddedAvatarUrl && embeddedAvatar) {
@@ -344,7 +361,6 @@ const UserPage: React.FC = () => {
         funMessage={funMessage}
         theme={activeTheme}
         playerAvatarUrl={embeddedPet}
-        themeBackdropUrl={embeddedBackdrop}
       />
     );
 
@@ -449,7 +465,7 @@ const UserPage: React.FC = () => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            paddingTop: 32,
+            paddingTop: 96,
             paddingBottom: 64,
           }}
         >
@@ -463,7 +479,7 @@ const UserPage: React.FC = () => {
     return (
       <div className="gw" style={vars}>
         <Marquee year={year} />
-        <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 64, paddingBottom: 96 }}>
+        <main className="gw-wrap" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 96, paddingBottom: 96 }}>
           <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)' }}>No card this time</h1>
           <p className="strip strip-warn" role="alert" style={{ marginTop: 32, maxWidth: 560 }}>
             {error}
@@ -501,7 +517,7 @@ const UserPage: React.FC = () => {
     <div className="gw" style={vars}>
       <Marquee year={year} />
 
-      <main className="gw-wrap" style={{ paddingTop: 36, paddingBottom: 80, flex: '1 0 auto' }}>
+      <main className="gw-wrap" style={{ paddingTop: 96, paddingBottom: 80, flex: '1 0 auto' }}>
         {/* Profile Command Header */}
         <header className="user-profile-header">
           <div className="user-profile-identity">
