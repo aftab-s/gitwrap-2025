@@ -4,6 +4,7 @@ import Marquee from '../components/Marquee';
 import GitHubSignIn from '../components/GitHubSignIn';
 import Footer from '../components/Footer';
 import HomeFusionBackdrop from '../components/HomeFusionBackdrop';
+import HeroContributionGraph from '../components/HeroContributionGraph';
 import { useAuth } from '../services/auth';
 import { EDITION } from '../config';
 import { HOME_FUSION_THEME, CHROME_ACCENTS, themeVars } from '../constants';
@@ -48,21 +49,18 @@ const HomePage: React.FC = () => {
       <Marquee year={year} />
 
       <main className="gw-wrap hero" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', minHeight: 'calc(100vh - 180px)', paddingTop: 'calc(var(--u) * 12)', paddingBottom: 'calc(var(--u) * 10)' }}>
-        <div className="hero-copy" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 640, width: '100%', margin: '0 auto' }}>
+        <div className="hero-copy" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 760, width: '100%', margin: '0 auto' }}>
           <div className="landing-edition">
             <span className="landing-edition-led" aria-hidden="true" />
             GITWRAP // {year} EDITION
           </div>
-          <h1 className="display hero-title" style={{ textAlign: 'center' }}>
-            YOUR {year},<br />
-            <span className="hero-scoreboard">
-              <span className="hero-scoreboard-bezel">
-                <span className="hero-scoreboard-led" aria-hidden="true" />
-                <span className="hero-scoreboard-text">SCORED.</span>
-              </span>
-            </span>
-          </h1>
-          <p className="lede" style={{ marginTop: 28, textAlign: 'center', maxWidth: 520, marginInline: 'auto' }}>Your commits, streaks, and late-night breakthroughs. One year of building, turned into your personal recap.</p>
+
+          {/* Semantic title for screen readers & SEO */}
+         
+          {/* Animated 7x52 contribution graph spelling YOUR 2026 with Scored seal */}
+          <HeroContributionGraph year={year} />
+
+          <p className="lede" style={{ marginTop: 32, textAlign: 'center', maxWidth: 540, marginInline: 'auto' }}>Your commits, streaks, and late-night breakthroughs. One year of building, turned into your personal recap.</p>
           <form onSubmit={handleSubmit} className="controls" style={{ marginTop: 44, width: '100%', maxWidth: 540, marginInline: 'auto', textAlign: 'left' }} noValidate>
             <div className="control control-wide">
               <label className="slot"><span className="slot-at" aria-hidden>@</span>
