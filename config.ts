@@ -1,4 +1,4 @@
-// GitWrap 2026. The 2025 edition (old design) lives on its own, in the separate gitwrap-2025 project.
+// GitWrap 2026. The 2025 edition (old design) lives on its own, in the separate gitwrap project.
 
 export interface Edition {
   year: number;
@@ -14,5 +14,5 @@ export const EDITION: Edition = {
   prevRange: { from: '2024-12-01T00:00:00Z', to: '2025-11-30T23:59:59Z' },
 };
 
-export const APP_REPO = 'aftab-s/gitwrap-2025';
+export const APP_REPO = 'aftab-s/gitwrap';
 export const APP_REPO_URL = `https://github.com/${APP_REPO}`;

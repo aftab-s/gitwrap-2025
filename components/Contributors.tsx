@@ -14,7 +14,7 @@ const fallback: Contributor[] = [
 // Repository to query. Prefer Vite env var `VITE_GITHUB_REPOSITORY` (owner/repo),
 // fallback to the current repo used in this codebase.
 const _env = (import.meta as any).env || {};
-const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2025';
+const REPOSITORY = _env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap';
 const GITHUB_API = `https://api.github.com/repos/${REPOSITORY}/contributors?per_page=100`;
 
 const CACHE_KEY = 'contributors-cache-v1';
@@ -62,7 +62,7 @@ const Contributors: React.FC = () => {
       const publicData = await loadFromPublicJson();
       if (publicData && mounted) {
         setContributors(publicData);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) {}
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: publicData })); } catch (e) { }
         return;
       }
 
@@ -76,7 +76,7 @@ const Contributors: React.FC = () => {
             return;
           }
         }
-      } catch (err) {}
+      } catch (err) { }
 
       // 3) Try GitHub API if explicitly enabled or if local JSON was absent
       const allowClientFetch = _env.VITE_ALLOW_CLIENT_GITHUB === 'true';
@@ -84,7 +84,7 @@ const Contributors: React.FC = () => {
         const ghData = await loadFromGitHubApi();
         if (ghData && mounted) {
           setContributors(ghData);
-          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ghData })); } catch (e) {}
+          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ghData })); } catch (e) { }
           return;
         }
       }
