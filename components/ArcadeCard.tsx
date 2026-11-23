@@ -4,6 +4,7 @@ import { Lock, PlayerArrow } from './icons/Arcade';
 import { playerClass } from '../insights';
 import { playerAvatar } from '../playerAvatars';
 import ThemeBackdrop from './ThemeBackdrop';
+import { CARD_W, CARD_H, LED_STEPS, toWeeks } from '../constants';
 
 /**
  * The wrap card, drawn as an arcade machine's printed control panel.
@@ -12,16 +13,11 @@ import ThemeBackdrop from './ThemeBackdrop';
  * the export iframe and the on-screen preview render the same pixels. On screen it is scaled to
  * fit by <GitWrapCard>; nothing here is responsive on purpose.
  */
-export const CARD_W = 1080;
-export const CARD_H = 1440;
-
 const DISPLAY = "'Archivo', 'Arial Narrow', sans-serif";
 const MONO = "'Martian Mono', ui-monospace, 'Cascadia Mono', monospace";
 const DOT = "'Doto', 'Martian Mono', monospace";
 
 const KEYLINE = 4;
-// Lamp brightness per activity level: unlit stays faint, every lit level clears the dark glass.
-export const LED_STEPS = [0.09, 0.5, 0.7, 0.85, 1];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 interface Props {
@@ -54,38 +50,6 @@ const condensed = (size: number, color: string, weight = 900): React.CSSProperti
   color,
 });
 
-/** 0-4 intensity, same thresholds GitHub's own calendar reads as. */
-function level(count: number): number {
-  if (count <= 0) return 0;
-  if (count <= 2) return 1;
-  if (count <= 5) return 2;
-  if (count <= 10) return 3;
-  return 4;
-}
-
-/** Calendar days → week columns (Sunday on top), like GitHub's graph. */
-export function toWeeks(calendar: Array<{ date?: string; count?: number }>): number[][] {
-  const sorted = calendar
-    .filter((d): d is { date: string; count: number } => typeof d.date === 'string')
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const weeks: number[][] = [];
-  let week: number[] = [];
-  for (const day of sorted) {
-    const dow = new Date(`${day.date}T00:00:00Z`).getUTCDay();
-    if (dow === 0 && week.length > 0) {
-      weeks.push(week);
-      week = [];
-    }
-    while (week.length < dow) week.push(-1); // before the range starts
-    week.push(level(day.count));
-  }
-  if (week.length) {
-    while (week.length < 7) week.push(-1);
-    weeks.push(week);
-  }
-  return weeks.slice(-53);
-}
-
 function formatHour(h: number): string {
   return `${String(h).padStart(2, '0')}:00`;
 }
@@ -96,17 +60,17 @@ function getHazardStyle(themeId: string, c: Theme['c']): React.CSSProperties {
       return {
         height: 16,
         flexShrink: 0,
-        backgroundImage: `repeating-linear-gradient(-45deg, ${c.line} 0 14px, ${c.a1} 14px 28px)`,
-        border: `3px solid ${c.line}`,
-        boxShadow: `0 0 12px rgba(255, 209, 59, 0.28)`,
+        backgroundImage: `repeating-linear-gradient(-45deg, #16468F 0 14px, #F7D154 14px 28px)`,
+        border: `3px solid #16468F`,
+        boxShadow: `0 0 12px rgba(247, 209, 84, 0.35)`,
       };
     case 'artemis':
       return {
         height: 16,
         flexShrink: 0,
-        backgroundImage: `repeating-linear-gradient(-45deg, #02050A 0 16px, ${c.a1} 16px 32px)`,
+        backgroundImage: `repeating-linear-gradient(-45deg, #040A17 0 14px, #E59A1A 14px 28px)`,
         border: `3px solid ${c.line}`,
-        boxShadow: `0 0 14px rgba(0, 229, 255, 0.25)`,
+        boxShadow: `0 0 14px rgba(229, 154, 26, 0.35)`,
       };
     case 'gtavi':
       return {
@@ -120,9 +84,9 @@ function getHazardStyle(themeId: string, c: Theme['c']): React.CSSProperties {
       return {
         height: 16,
         flexShrink: 0,
-        backgroundImage: `repeating-linear-gradient(-45deg, #0A0D14 0 14px, #00FF88 14px 28px)`,
+        backgroundImage: `repeating-linear-gradient(-45deg, #121512 0 14px, #28D443 14px 28px)`,
         border: `3px solid ${c.line}`,
-        boxShadow: `0 0 14px rgba(0, 255, 136, 0.35)`,
+        boxShadow: `0 0 14px rgba(40, 212, 67, 0.35)`,
       };
     case 'maxdark':
       return {
@@ -152,13 +116,13 @@ function getHazardStyle(themeId: string, c: Theme['c']): React.CSSProperties {
 function getFooterInks(themeId: string, c: Theme['c']): string[] {
   switch (themeId) {
     case 'fifa':
-      return [c.a1, '#FF2E4D', c.line, c.panel, c.a1, '#FF2E4D', c.line, c.panel, c.a1];
+      return ['#F7D154', '#C42B30', '#16468F', '#EAECEF', '#60B552', '#8A5A10', '#176840', '#F7D154', '#EAECEF'];
     case 'artemis':
-      return [c.a1, '#00E5FF', c.line, c.panel, c.a1, '#00E5FF', c.line, c.panel, '#00E5FF'];
+      return ['#7CD6FF', '#E59A1A', '#5078A8', '#D8E7F6', '#162C4E', '#7A460A', '#7CD6FF', c.line, '#E59A1A'];
     case 'gtavi':
       return ['#F3937B', '#A480D4', '#5E8DA8', '#8EA2E5', '#A5769B', '#FDE0C8', '#6B3B5E', c.line, '#F3937B'];
     case 'doomsday':
-      return ['#00FF88', '#FFC107', c.line, c.panel, '#00FF88', '#FFC107', c.line, c.panel, '#00FF88'];
+      return ['#28D443', '#D42329', '#8D9694', '#D5E3A3', '#506340', '#243326', '#28D443', c.line, '#28D443'];
     case 'maxdark':
       return ['#D4FF00', '#FF5500', '#000000', c.panel, '#D4FF00', '#FF5500', '#000000', c.panel, '#D4FF00'];
     case 'maxlight':
@@ -171,19 +135,19 @@ function getFooterInks(themeId: string, c: Theme['c']): string[] {
 function getFooterBadge(themeId: string): string {
   switch (themeId) {
     case 'fifa':
-      return "MATCHDAY '26";
+      return "GITWRAP 2026";
     case 'artemis':
-      return "LUNAR ORBIT '26";
+      return "GITWRAP 2026";
     case 'gtavi':
-      return "VICE SUNSET '26";
+      return "GITWRAP 2026";
     case 'doomsday':
-      return "LATVERIAN STEEL '26";
+      return "GITWRAP 2026";
     case 'maxdark':
-      return "VOLT MATRIX '26";
+      return "GITWRAP 2026";
     case 'maxlight':
-      return "TOKYO RISO '26";
+      return "GITWRAP 2026";
     default:
-      return 'GitWrap 2026';
+      return 'GITWRAP 2026';
   }
 }
 
@@ -209,13 +173,13 @@ function getFooterEasterEgg(themeId: string): string {
 function getLangInks(themeId: string, c: Theme['c']): string[] {
   switch (themeId) {
     case 'fifa':
-      return [c.a1, c.a2, '#96D4B0', c.panel];
+      return ['#F7D154', '#60B552', '#C42B30', '#16468F'];
     case 'artemis':
-      return [c.a1, c.a2, '#8CA0C0', c.panel];
+      return ['#7CD6FF', '#E59A1A', '#5078A8', '#D8E7F6'];
     case 'gtavi':
       return ['#F3937B', '#5E8DA8', '#8EA2E5', '#A480D4'];
     case 'doomsday':
-      return [c.a1, c.a2, '#9AA7B8', c.panel];
+      return ['#28D443', '#D5E3A3', '#8D9694', '#506340'];
     case 'maxdark':
       return [c.a1, c.a2, '#8A8E9A', c.panel];
     case 'maxlight':
@@ -266,14 +230,14 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
     theme.id === 'gtavi'
       ? '0 6px 24px -4px rgba(255, 42, 133, 0.22)'
       : theme.id === 'doomsday'
-      ? '0 6px 20px -4px rgba(0, 255, 136, 0.18)'
-      : theme.id === 'maxdark'
-      ? '5px 5px 0 0 #000000'
-      : theme.id === 'maxlight'
-      ? '5px 5px 0 0 #0B1B61'
-      : theme.id === 'fifa'
-      ? '0 6px 20px -4px rgba(255, 209, 59, 0.18)'
-      : '0 6px 24px -4px rgba(0, 229, 255, 0.16)';
+        ? '0 6px 20px -4px rgba(40, 212, 67, 0.22), 0 2px 0 0 #0A0D0A'
+        : theme.id === 'maxdark'
+          ? '5px 5px 0 0 #000000'
+          : theme.id === 'maxlight'
+            ? '5px 5px 0 0 #0B1B61'
+            : theme.id === 'fifa'
+              ? '0 6px 20px -4px rgba(247, 209, 84, 0.35), 0 2px 0 0 #16468F'
+              : '0 6px 20px -4px rgba(124, 214, 255, 0.22), 0 2px 0 0 #020610';
 
   const window_: React.CSSProperties = {
     background: c.panel,
@@ -306,12 +270,12 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
       {/* ---------- Theme Identity Tag ---------- */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1, minHeight: 20 }}>
         <span style={{ ...label(c.onGroundDim, 15), letterSpacing: '0.12em', fontWeight: 800 }}>
-          {theme.id === 'fifa' && "★ MATCHDAY '26 // NORTH AMERICAN CUP TELEMETRY"}
-          {theme.id === 'artemis' && '▲ LUNAR ORBIT // TRANSLUNAR INJECTION TELEMETRY'}
-          {theme.id === 'gtavi' && "🌴 VICE SUNSET // LEONIDA ARCHIVES // REPLAY"}
-          {theme.id === 'doomsday' && '⚡ LATVERIAN STEEL // FORGED SOVEREIGN DIRECTIVE'}
-          {theme.id === 'maxdark' && '◼ VOLT MATRIX // HIGH-DENSITY DEV TELEMETRY'}
-          {theme.id === 'maxlight' && '✦ TOKYO RISO // ARCHIVAL PRESS ISSUE NO. 01'}
+          {theme.id === 'fifa' && "Trionda"}
+          {theme.id === 'artemis' && 'Integrity'}
+          {theme.id === 'gtavi' && 'Emotion 98.3'}
+          {theme.id === 'doomsday' && 'Earth-616'}
+          {theme.id === 'maxdark' && 'DEV TELEMETRY'}
+          {theme.id === 'maxlight' && 'ARCHIVAL PRESS ISSUE NO. 01'}
         </span>
         <span style={{ ...label(c.onGroundDim, 14), opacity: 0.85, letterSpacing: '0.08em' }}>
           {theme.id === 'fifa' && 'MATCH GRADE'}
@@ -361,26 +325,49 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
           style={{
             ...(theme.id === 'gtavi'
               ? {
-                  background: 'linear-gradient(135deg, rgba(253, 224, 200, 0.28) 0%, rgba(94, 141, 168, 0.22) 50%, rgba(107, 59, 94, 0.5) 100%)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  border: '3px solid rgba(253, 224, 200, 0.65)',
+                background: 'linear-gradient(135deg, rgba(253, 224, 200, 0.28) 0%, rgba(94, 141, 168, 0.22) 50%, rgba(107, 59, 94, 0.5) 100%)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '3px solid rgba(253, 224, 200, 0.65)',
+                boxShadow:
+                  'inset 0 2px 0 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 0 rgba(66, 30, 56, 0.5), 0 8px 24px -4px rgba(66, 30, 56, 0.45)',
+                position: 'relative' as const,
+                overflow: 'hidden' as const,
+              }
+              : theme.id === 'doomsday'
+                ? {
+                  background: 'linear-gradient(180deg, #243326 0%, #161D17 40%, #121512 100%)',
+                  border: '3px solid #506340',
                   boxShadow:
-                    'inset 0 2px 0 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 0 rgba(66, 30, 56, 0.5), 0 8px 24px -4px rgba(66, 30, 56, 0.45)',
+                    '0 0 0 1.5px #28D443, inset 0 2px 0 0 rgba(213, 227, 163, 0.45), inset 0 -2px 0 0 #0A0D0A, 0 8px 24px -2px rgba(40, 212, 67, 0.35)',
                   position: 'relative' as const,
                   overflow: 'hidden' as const,
                 }
-              : {
-                  background:
-                    theme.id === 'fifa'
-                      ? '#041E10'
-                      : theme.id === 'doomsday'
-                      ? '#0E1118'
-                      : theme.id === 'maxlight'
-                      ? '#0B1B61'
-                      : '#0B0D17',
-                  border: `${KEYLINE}px solid ${c.line}`,
-                }),
+                : theme.id === 'artemis'
+                  ? {
+                    background: 'linear-gradient(180deg, #162C4E 0%, #081426 50%, #040A17 100%)',
+                    border: '3px solid #5078A8',
+                    boxShadow:
+                      '0 0 0 1.5px rgba(124, 214, 255, 0.45), inset 0 2px 0 0 rgba(216, 231, 246, 0.35), inset 0 -2px 0 0 #020610, 0 8px 24px -2px rgba(124, 214, 255, 0.25)',
+                    position: 'relative' as const,
+                    overflow: 'hidden' as const,
+                  }
+                  : theme.id === 'fifa'
+                    ? {
+                      background: 'linear-gradient(135deg, #16468F 0%, #0F3062 100%)',
+                      border: '3px solid #F7D154',
+                      boxShadow:
+                        '0 0 0 1.5px #8A5A10, inset 0 2px 0 0 rgba(247, 209, 84, 0.45), 0 8px 24px -2px rgba(247, 209, 84, 0.35)',
+                      position: 'relative' as const,
+                      overflow: 'hidden' as const,
+                    }
+                    : {
+                      background:
+                        theme.id === 'maxlight'
+                          ? '#0B1B61'
+                          : '#0B0D17',
+                      border: `${KEYLINE}px solid ${c.line}`,
+                    }),
             padding: '10px 24px',
             display: 'flex',
             alignItems: 'center',
@@ -418,20 +405,115 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               </span>
             </>
           )}
+          {theme.id === 'doomsday' && (
+            <>
+              {/* Subtle vertical metal scratches */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage:
+                    'repeating-linear-gradient(90deg, transparent 0 3px, rgba(141, 150, 148, 0.08) 3px 4px, transparent 4px 9px, rgba(213, 227, 163, 0.04) 9px 10px)',
+                  pointerEvents: 'none',
+                }}
+              />
+              {/* Latverian technical mark */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 5,
+                  left: 8,
+                  fontFamily: MONO,
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  color: '#8D9694',
+                  opacity: 0.85,
+                }}
+              >
+                LATVERIA // STEEL
+              </span>
+            </>
+          )}
+          {theme.id === 'artemis' && (
+            <span
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: 8,
+                fontFamily: MONO,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                color: c.onGroundDim,
+                opacity: 0.9,
+              }}
+            >
+              ARTEMIS // II · ORBIT
+            </span>
+          )}
+          {theme.id === 'fifa' && (
+            <span
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: 8,
+                fontFamily: MONO,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                color: '#F7D154',
+                opacity: 0.9,
+              }}
+            >
+              MATCHDAY // '26
+            </span>
+          )}
           <div
             style={{
               fontFamily: DOT,
               fontWeight: 900,
               fontSize: 96,
               lineHeight: 1,
-              color: theme.id === 'gtavi' ? '#FDE0C8' : led,
               letterSpacing: '0.02em',
-              textShadow:
-                theme.id === 'gtavi'
-                  ? '0 0 10px #F3937B, 0 0 22px rgba(243, 147, 123, 0.85), 0 0 36px rgba(164, 128, 212, 0.65)'
-                  : undefined,
               position: 'relative' as const,
               zIndex: 1,
+              ...(theme.id === 'gtavi'
+                ? {
+                  color: '#FDE0C8',
+                  textShadow:
+                    '0 0 10px #F3937B, 0 0 22px rgba(243, 147, 123, 0.85), 0 0 36px rgba(164, 128, 212, 0.65)',
+                }
+                : theme.id === 'doomsday'
+                  ? {
+                    background:
+                      'linear-gradient(180deg, #FFFFFF 0%, #D5E3A3 16%, #8D9694 44%, #3A4240 50%, #8D9694 72%, #243326 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    color: '#8D9694',
+                    filter:
+                      'drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.75)) drop-shadow(0 2px 0 #0A0D0A) drop-shadow(0 0 1px #28D443) drop-shadow(0 0 12px rgba(40, 212, 67, 0.65))',
+                  }
+                  : theme.id === 'artemis'
+                    ? {
+                      color: '#7CD6FF',
+                    }
+                    : theme.id === 'fifa'
+                      ? {
+                        background:
+                          'linear-gradient(180deg, #FFFFFF 0%, #F7D154 22%, #FFEAA7 44%, #8A5A10 50%, #5A3A0A 54%, #F7D154 75%, #8A5A10 100%)',
+                        WebkitBackgroundClip: 'text',
+                        backgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        color: '#F7D154',
+                        filter:
+                          'drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.8)) drop-shadow(0 2px 0 #5A3A0A) drop-shadow(0 0 14px rgba(247, 209, 84, 0.65))',
+                      }
+                      : {
+                        color: led,
+                      }),
             }}
           >
             {d.year}
@@ -485,7 +567,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
                 borderBottom: `3px dotted ${c.onGroundDim}`,
               }}
             >
-              <span style={label(c.onGroundDim, 18)}>{name}</span>
+              <span style={{ ...label(c.onGroundDim, 18), fontWeight: 700 }}>{name}</span>
               <span style={{ ...condensed(40, c.onGround, 800), fontStretch: '75%', lineHeight: 1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
                 {value}
               </span>
@@ -563,7 +645,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               position: 'relative',
               background: c.a2,
               border: `${KEYLINE}px solid ${c.line}`,
-              color: c.ink,
+              color: theme.id === 'fifa' ? '#EAECEF' : c.ink,
               padding: '16px 20px 18px',
               boxSizing: 'border-box',
               display: 'flex',
@@ -573,9 +655,9 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               overflow: 'hidden',
             }}
           >
-            <div style={label(c.ink, 18)}>Player class</div>
-            <div style={{ ...condensed(46, c.ink), lineHeight: 0.92, textTransform: 'uppercase', maxWidth: 210 }}>{cls.name}</div>
-            <div style={{ ...label(c.ink, 18), maxWidth: 210, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.short}</div>
+            <div style={label(theme.id === 'fifa' ? '#F7D154' : c.ink, 18)}>Player class</div>
+            <div style={{ ...condensed(46, theme.id === 'fifa' ? '#EAECEF' : c.ink), lineHeight: 0.92, textTransform: 'uppercase', maxWidth: 210 }}>{cls.name}</div>
+            <div style={{ ...label(theme.id === 'fifa' ? '#EAECEF' : c.ink, 18), maxWidth: 210, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.short}</div>
             <img
               src={playerAvatarUrl || playerAvatar(cls.name)}
               alt=""

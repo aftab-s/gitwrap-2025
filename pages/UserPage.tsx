@@ -576,7 +576,7 @@ const UserPage: React.FC = () => {
             {/* Section A: Theme Selector (Top priority for immediate live feedback!) */}
             <section className="window user-deck-window">
               <div className="user-deck-window-head">
-                <h2 className="heading" style={{ margin: 0 }}>Card Colourway</h2>
+                <h2 className="heading" style={{ margin: 0 }}>Customize Your Card</h2>
                 <span className="silk" style={{ opacity: 0.85 }}>Live Preview</span>
               </div>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />

@@ -12,7 +12,7 @@ interface Props {
  * When the server has no GitHub OAuth app configured the key is shown locked, so the feature is
  * discoverable instead of silently missing. Renders nothing once signed in.
  */
-const GitHubSignIn: React.FC<Props> = ({ label = 'Sign in', className = '' }) => {
+const GitHubSignIn: React.FC<Props> = ({ label = 'SIGN IN', className = '' }) => {
   const auth = useAuth();
 
   if (!auth.ready || auth.login) return null;

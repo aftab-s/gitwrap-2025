@@ -23,16 +23,16 @@ export const THEMES: Theme[] = [
     name: 'Lunar Orbit',
     tagline: 'Inspired by Artemis II',
     c: {
-      ground: '#070B16',
-      line: '#02050A',
-      ink: '#060B18',
-      panel: '#EFF4F9',
-      a1: '#FFA31A',
-      a2: '#00E5FF',
-      led: '#00F0FF',
-      onGround: '#FFFFFF',
-      onGroundDim: '#8CA0C0',
-      onPanelDim: '#4B5C78',
+      ground: '#040A17',
+      line: '#020610',
+      ink: '#040A17',
+      panel: '#D8E7F6',
+      a1: '#7CD6FF',
+      a2: '#E59A1A',
+      led: '#7CD6FF',
+      onGround: '#D8E7F6',
+      onGroundDim: '#C6E0FB',
+      onPanelDim: '#162C4E',
     },
   },
   {
@@ -40,16 +40,16 @@ export const THEMES: Theme[] = [
     name: "Matchday '26",
     tagline: 'Inspired by World Cup 2026',
     c: {
-      ground: '#093D22',
-      line: '#041E10',
-      ink: '#052313',
-      panel: '#F6FFF8',
-      a1: '#FFD21F',
-      a2: '#FF334B',
-      led: '#FFD21F',
-      onGround: '#FFFFFF',
-      onGroundDim: '#96D4B0',
-      onPanelDim: '#3D684E',
+      ground: '#176840',
+      line: '#16468F',
+      ink: '#16468F',
+      panel: '#EAECEF',
+      a1: '#F7D154',
+      a2: '#C42B30',
+      led: '#F7D154',
+      onGround: '#EAECEF',
+      onGroundDim: '#F7D154',
+      onPanelDim: '#8A5A10',
     },
   },
   {
@@ -65,7 +65,7 @@ export const THEMES: Theme[] = [
       a2: '#5E8DA8',
       led: '#F3937B',
       onGround: '#FDE0C8',
-      onGroundDim: '#A5769B',
+      onGroundDim: '#F0D6EC',
       onPanelDim: '#6B3B5E',
     },
   },
@@ -74,16 +74,16 @@ export const THEMES: Theme[] = [
     name: 'Latverian Steel',
     tagline: 'Inspired by Avengers Doomsday',
     c: {
-      ground: '#181B22',
-      line: '#0A0C10',
-      ink: '#0B0D12',
-      panel: '#E2E8EE',
-      a1: '#00FF88',
-      a2: '#FFB800',
-      led: '#00FF88',
-      onGround: '#FFFFFF',
-      onGroundDim: '#9AA7B8',
-      onPanelDim: '#4B5668',
+      ground: '#121512',
+      line: '#0A0D0A',
+      ink: '#121512',
+      panel: '#D5E3A3',
+      a1: '#28D443',
+      a2: '#D42329',
+      led: '#28D443',
+      onGround: '#D5E3A3',
+      onGroundDim: '#8D9694',
+      onPanelDim: '#506340',
     },
   },
   {
@@ -196,3 +196,42 @@ export const CHROME_ACCENTS = {
   '--chrome-volt': THEMES[4].c.a1,
   '--chrome-riso': THEMES[5].c.a1,
 };
+
+// Standard dimensions for the rendered export card
+export const CARD_W = 1080;
+export const CARD_H = 1440;
+
+// Lamp brightness per activity level: unlit stays faint, every lit level clears the dark glass.
+export const LED_STEPS = [0.09, 0.5, 0.7, 0.85, 1];
+
+/** 0-4 intensity, same thresholds GitHub's own calendar reads as. */
+function level(count: number): number {
+  if (count <= 0) return 0;
+  if (count <= 2) return 1;
+  if (count <= 5) return 2;
+  if (count <= 10) return 3;
+  return 4;
+}
+
+/** Calendar days → week columns (Sunday on top), like GitHub's graph. */
+export function toWeeks(calendar: Array<{ date?: string; count?: number }>): number[][] {
+  const sorted = calendar
+    .filter((d): d is { date: string; count: number } => typeof d.date === 'string')
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const weeks: number[][] = [];
+  let week: number[] = [];
+  for (const day of sorted) {
+    const dow = new Date(`${day.date}T00:00:00Z`).getUTCDay();
+    if (dow === 0 && week.length > 0) {
+      weeks.push(week);
+      week = [];
+    }
+    while (week.length < dow) week.push(-1); // before the range starts
+    week.push(level(day.count));
+  }
+  if (week.length) {
+    while (week.length < 7) week.push(-1);
+    weeks.push(week);
+  }
+  return weeks.slice(-53);
+}
