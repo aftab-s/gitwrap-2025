@@ -37,7 +37,7 @@ export async function GET(request: Request): Promise<Response> {
     const user = (await userResp.json()) as { login?: string };
     if (!userResp.ok || !user.login) return fail('exchange_failed');
 
-    return redirect(`${origin}/u/${encodeURIComponent(user.login)}`, [
+    return redirect(`${origin}/u/${encodeURIComponent(user.login)}?auth=1`, [
       sessionCookie(request, user.login, tokenBody.access_token),
       clearState,
     ]);

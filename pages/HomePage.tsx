@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
           justifyContent: 'center',
           textAlign: 'center',
           minHeight: 'calc(100vh - 180px)',
-          paddingTop: 'calc(var(--u) * 8)',
+          paddingTop: 'calc(var(--u) * 12)',
           paddingBottom: 'calc(var(--u) * 10)',
         }}
       >
@@ -88,7 +88,7 @@ const HomePage: React.FC = () => {
               marginInline: 'auto',
             }}
           >
-            A short recap of your year on GitHub, then one card to post: contributions, streaks, languages, and the player class you earned.
+            Get your personalized GitHub year in review. See your coding journey and celebrate your achievements.
           </p>
 
           <form

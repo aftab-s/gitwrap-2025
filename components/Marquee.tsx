@@ -16,7 +16,7 @@ const Marquee: React.FC<Props> = ({ year, fusionStripe }) => {
 
   return (
     <header className="marquee">
-      <div className="gw-wrap marquee-row">
+      <div className="marquee-row">
         <Link to="/" className="wordmark" aria-label="GitWrap home">
           GitWrap
         </Link>
