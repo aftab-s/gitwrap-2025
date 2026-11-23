@@ -293,7 +293,7 @@ export function playerClass(stats: UserStats): PlayerClass {
           { label: 'Active Languages', value: `${langs.length} languages`, hint: 'Distinct primary repo languages' },
           { label: 'Primary Language', value: `${langs[0].name} (${Math.round(langs[0].percent)}%)`, hint: 'Largest single language share' },
           { label: 'Secondary Language', value: `${langs[1]?.name ?? '—'} (${Math.round(langs[1]?.percent ?? 0)}%)`, hint: 'Second largest language share' },
-          { label: 'Dominance Cap', value: '< 50% max', hint: 'Versatile, multi-discipline loadout' },
+          { label: 'Language Balance', value: 'Balanced', hint: 'No single language took more than 50%' },
         ],
       },
     });

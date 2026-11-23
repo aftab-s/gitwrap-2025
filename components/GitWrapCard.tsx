@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import type { UserStats, Theme } from '../types';
-import ArcadeCard, { CARD_W, CARD_H } from './ArcadeCard';
+import ArcadeCard from './ArcadeCard';
+import { CARD_W, CARD_H } from '../constants';
 
 interface GitWrapCardProps {
   userData: UserStats;

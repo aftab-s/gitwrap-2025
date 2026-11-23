@@ -22,7 +22,13 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, activeTheme, onSe
             aria-label={theme.name}
             title={theme.name}
             className="swatch"
-            style={{ background: theme.c.ground, ['--line' as any]: theme.c.line === '#F3F1E8' ? '#0B0D17' : theme.c.line }}
+            style={{
+              background:
+                theme.id === 'fifa'
+                  ? 'linear-gradient(135deg, #C42B30 0%, #16468F 50%, #176840 100%)'
+                  : theme.c.ground,
+              ['--line' as any]: theme.c.line === '#F3F1E8' ? '#0B0D17' : theme.c.line,
+            }}
             onClick={() => onSelectTheme(theme)}
           >
             <span style={{ background: theme.c.a1 }} />

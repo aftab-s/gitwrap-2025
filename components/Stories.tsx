@@ -1,16 +1,33 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { UserStats, Theme } from '../types';
 import { calendarFacts, formatDay, formatHour, playerClass } from '../insights';
-import { toWeeks, LED_STEPS } from './ArcadeCard';
 import GitWrapCard from './GitWrapCard';
 import PlayerAvatar from './PlayerAvatar';
 import { ArrowLeft, ArrowRight, Pause, PlayerArrow } from './icons/Arcade';
-import { THEMES, themeVars } from '../constants';
+import { THEMES, themeVars, toWeeks, LED_STEPS } from '../constants';
 
 const THEME_MAP: Record<string, Theme> = THEMES.reduce((acc, t) => {
   acc[t.id] = t;
   return acc;
 }, {} as Record<string, Theme>);
+
+const ARTEMIS_STORY_THEME: Theme = {
+  id: 'artemis',
+  name: 'Lunar Orbit',
+  tagline: 'Inspired by Artemis II',
+  c: {
+    ground: '#070B16',
+    line: '#02050A',
+    ink: '#060B18',
+    panel: '#EFF4F9',
+    a1: '#FFA31A',
+    a2: '#00E5FF',
+    led: '#00F0FF',
+    onGround: '#FFFFFF',
+    onGroundDim: '#8CA0C0',
+    onPanelDim: '#4B5C78',
+  },
+};
 
 const GTAVI_STORY_THEME: Theme = {
   id: 'gtavi',
@@ -30,6 +47,24 @@ const GTAVI_STORY_THEME: Theme = {
   },
 };
 
+const DOOMSDAY_STORY_THEME: Theme = {
+  id: 'doomsday',
+  name: 'Latverian Steel',
+  tagline: 'Inspired by Avengers Doomsday',
+  c: {
+    ground: '#181B22',
+    line: '#0A0C10',
+    ink: '#0B0D12',
+    panel: '#E2E8EE',
+    a1: '#00FF88',
+    a2: '#FFB800',
+    led: '#00FF88',
+    onGround: '#FFFFFF',
+    onGroundDim: '#9AA7B8',
+    onPanelDim: '#4B5668',
+  },
+};
+
 /**
  * Progression story design: each slide is crafted around a specific 2026 theme world,
  * taking the user through Maximalist Dark, Vice Sunset, Lunar Orbit, Latverian Steel,
@@ -38,13 +73,17 @@ const GTAVI_STORY_THEME: Theme = {
 // Calm, fixed palettes for the character reveal and supporting evidence.
 const CLASS_STORY_THEME: Theme = {
   id: 'story-sage', name: 'Quiet Grove', tagline: 'Player profile',
-  c: { ground: '#202C29', line: '#40534B', ink: '#18241F', panel: '#E5ECE5',
-    a1: '#B5CFB9', a2: '#C5BCAB', onGround: '#EDF0E8', onGroundDim: '#B9C5BC', onPanelDim: '#526459' },
+  c: {
+    ground: '#202C29', line: '#40534B', ink: '#18241F', panel: '#E5ECE5',
+    a1: '#B5CFB9', a2: '#C5BCAB', onGround: '#EDF0E8', onGroundDim: '#B9C5BC', onPanelDim: '#526459'
+  },
 };
 const PROOF_STORY_THEME: Theme = {
   id: 'story-slate', name: 'Evening Slate', tagline: 'Class details',
-  c: { ground: '#272C39', line: '#485064', ink: '#202430', panel: '#E8EAF0',
-    a1: '#BAC5DC', a2: '#C5BDD5', onGround: '#EDEEF3', onGroundDim: '#B8BECE', onPanelDim: '#586176' },
+  c: {
+    ground: '#272C39', line: '#485064', ink: '#202430', panel: '#E8EAF0',
+    a1: '#BAC5DC', a2: '#C5BDD5', onGround: '#EDEEF3', onGroundDim: '#B8BECE', onPanelDim: '#586176'
+  },
 };
 
 function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number, userTheme: Theme): Theme {
@@ -53,13 +92,13 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
   }
   switch (slideId) {
     case 'intro':
-      return THEME_MAP['artemis'] || userTheme;
+      return ARTEMIS_STORY_THEME;
     case 'score':
       return THEME_MAP['fifa'] || userTheme;
     case 'calendar':
       return GTAVI_STORY_THEME;
     case 'rhythm':
-      return THEME_MAP['doomsday'] || userTheme;
+      return DOOMSDAY_STORY_THEME;
     case 'streak':
       return THEME_MAP['maxdark'] || userTheme;
     case 'languages':
@@ -72,7 +111,9 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
     default: {
       const sequence = ['artemis', 'fifa', 'gtavi', 'doomsday', 'maxdark', 'maxlight'];
       const themeId = sequence[slideIndex % sequence.length];
+      if (themeId === 'artemis') return ARTEMIS_STORY_THEME;
       if (themeId === 'gtavi') return GTAVI_STORY_THEME;
+      if (themeId === 'doomsday') return DOOMSDAY_STORY_THEME;
       return THEME_MAP[themeId] || userTheme;
     }
   }
@@ -185,7 +226,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
-            // MATCHDAY TELEMETRY · 2026 CAMPAIGN
+            // 2026 CAMPAIGN
           </div>
           <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 1cqh' }}>
             Season Score
@@ -241,9 +282,6 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
             </div>
           </div>
 
-          <p className="story-note rise" style={{ ...i(8), marginTop: '0.6cqh' }}>
-            Match grade telemetry · Official season whistle confirmed
-          </p>
         </>
       ),
     });
@@ -632,7 +670,7 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
       body: (
         <>
           <div className="story-badge-header rise" style={i(0)}>
-            // PLAYER PROFILE · CLASS UNLOCKED
+            // PLAYER PROFILE
           </div>
           <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.4cqh' }}>
             Player Class

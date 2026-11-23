@@ -3398,9 +3398,122 @@ body:has(.stories),
 
 /* Arcade cabinet edition: solid ink accents and offset panel edges. */
 .circuit-shell .circuit-backdrop { color: #897f9d; background: radial-gradient(ellipse at 5% 20%, #00e5ff0a, transparent 40%), radial-gradient(ellipse at 95% 80%, #ff33660c, transparent 40%), #101015; }
-.landing-shell .landing-edition { display: inline-block; padding: 6px 12px; border: 1px solid #7c6330; background: #292218; color: var(--chrome-matchday); letter-spacing: .12em; }
-.landing-shell .hero-title { color: #f4efe6; }
-.landing-shell .hero-accent { color: #f4efe6; text-shadow: 3px 3px 0 #653650; text-decoration: underline; text-decoration-color: var(--chrome-riso); text-decoration-thickness: .045em; text-underline-offset: .08em; }
+.landing-shell .landing-edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid #7c6330;
+  background: #1c1712;
+  color: var(--chrome-matchday);
+  letter-spacing: .16em;
+  font-family: var(--mono);
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 2px;
+  box-shadow: 0 0 16px rgba(247, 209, 84, 0.08);
+}
+.landing-edition-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f7d154;
+  box-shadow: 0 0 6px #f7d154, 0 0 12px rgba(247, 209, 84, 0.65);
+  animation: edition-led-blink 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes edition-led-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.landing-shell .hero-title {
+  color: #f4efe6;
+  text-shadow: none;
+}
+.hero-scoreboard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: clamp(8px, 1.4vw, 16px);
+  vertical-align: middle;
+}
+.hero-scoreboard-bezel {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28em;
+  padding: 0.08em 0.38em 0.06em 0.34em;
+  background-color: #06080e;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0px, rgba(0, 0, 0, 0.5) 2px, transparent 2px, transparent 4px),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 240, 255, 0.08), transparent 75%);
+  border: 2px solid #1c2738;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(0, 240, 255, 0.14),
+    0 8px 24px rgba(0, 0, 0, 0.65);
+  box-sizing: border-box;
+}
+.hero-scoreboard-bezel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.hero-scoreboard-led {
+  width: 0.22em;
+  height: 0.22em;
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 50%;
+  background: #00f0ff;
+  box-shadow:
+    0 0 6px #00f0ff,
+    0 0 14px rgba(0, 240, 255, 0.85),
+    0 0 24px rgba(0, 240, 255, 0.5);
+  animation: scoreboard-led-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes scoreboard-led-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px #00f0ff, 0 0 14px rgba(0, 240, 255, 0.85), 0 0 24px rgba(0, 240, 255, 0.5);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.86);
+    box-shadow: 0 0 3px #00f0ff, 0 0 8px rgba(0, 240, 255, 0.4);
+  }
+}
+.hero-scoreboard-text {
+  font-family: var(--dot);
+  font-weight: 900;
+  font-stretch: 100%;
+  font-size: 0.78em;
+  line-height: 1;
+  letter-spacing: clamp(0.04em, 0.08em, 0.1em);
+  text-transform: uppercase;
+  color: #00f0ff !important;
+  text-shadow:
+    0 0 8px rgba(0, 240, 255, 0.95),
+    0 0 20px rgba(0, 240, 255, 0.6),
+    0 0 38px rgba(0, 240, 255, 0.35);
+  display: inline-block;
+  transform: none;
+  text-decoration: none;
+}
+.landing-shell .hero-accent {
+  color: inherit;
+  text-shadow: none;
+  text-decoration: none;
+}
 .landing-shell .controls { background: #1a1921; border: 2px solid #4c4459; box-shadow: 5px 5px 0 #765849; }
 .landing-shell .slot { border-color: #4d7681; background: #10171d; }
 .landing-shell .slot-at { color: var(--chrome-lunar); }
@@ -3486,7 +3599,7 @@ body:has(.stories),
   .landing-shell .controls .key { padding: 10px 8px; font-size: .9rem; }
 }
 
-.landing-shell .controls .control .key { font-stretch: 100%; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.landing-shell .controls .control .key { font-stretch: 78%; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* Keep the native and social share actions together in one row. */
 .studio-shell .user-export-panel .social-share-container {
