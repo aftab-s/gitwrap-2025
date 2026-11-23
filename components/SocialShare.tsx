@@ -42,7 +42,7 @@ const SocialShare: React.FC<SocialShareProps> = ({ username, year }) => {
   };
 
   return (
-    <div className="social-share-container" style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+    <div className="social-share-container">
       {canNativeShare && (
         <button
           type="button"
