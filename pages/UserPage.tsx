@@ -326,9 +326,11 @@ const UserPage: React.FC = () => {
     };
   }, [userData?.avatarUrl]);
 
-  const generateCardBlob = useCallback(async (): Promise<Blob | null> => {
-    if (!cardData) return null;
+  const handleDownload = async (aspectRatio: AspectRatio) => {
+    if (!cardData) return;
     const userData = cardData;
+    setIsDownloading(aspectRatio);
+    setDownloadError(null);
 
     const targetWidth = 1080;
     const targetHeight = 1440;
@@ -433,40 +435,18 @@ const UserPage: React.FC = () => {
             : undefined,
       });
 
-      const res = await fetch(dataUrl);
-      return await res.blob();
-    } catch (err) {
-      console.error('Failed to generate card blob:', err);
-      return null;
-    } finally {
-      root.unmount();
-      cleanup();
-    }
-  }, [cardData, embeddedAvatarUrl, funMessage, activeTheme]);
-
-  const handleDownload = async (aspectRatio: AspectRatio) => {
-    if (!cardData) return;
-    setIsDownloading(aspectRatio);
-    setDownloadError(null);
-
-    try {
-      const blob = await generateCardBlob();
-      if (!blob) {
-        throw new Error('Blob could not be generated');
-      }
-
-      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       const safeUsername = username?.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       const safeTheme = activeTheme?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'theme';
       link.download = `gitwrap-${year}-${safeUsername}-${safeTheme}.png`;
-      link.href = url;
+      link.href = dataUrl;
       link.click();
-      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Failed to download image:', err);
       setDownloadError('The image could not be created. Check your connection and press Download again.');
     } finally {
+      root.unmount();
+      cleanup();
       setIsDownloading(null);
     }
   };
@@ -631,15 +611,7 @@ const UserPage: React.FC = () => {
                   </p>
                 )}
 
-                {username && (
-                  <SocialShare
-                    username={username}
-                    year={year}
-                    stats={cardData}
-                    playerClassName={cls?.name}
-                    onGetCardBlob={generateCardBlob}
-                  />
-                )}
+                {username && <SocialShare username={username} year={year} />}
 
                 {/* Privacy controls & toggles */}
                 {userData.includesPrivate ? (
