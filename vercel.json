@@ -3,6 +3,25 @@
     "api/stats.ts": { "maxDuration": 60 }
   },
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/" }
+    {
+      "source": "/2025",
+      "destination": "https://gitwrap-2025-ten.vercel.app/"
+    },
+    {
+      "source": "/2025/:path*",
+      "destination": "https://gitwrap-2025-ten.vercel.app/:path*"
+    },
+    {
+      "source": "/2026",
+      "destination": "/"
+    },
+    {
+      "source": "/2026/:path*",
+      "destination": "/:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
   ]
 }
