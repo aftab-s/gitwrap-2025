@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 // Parse command line arguments
 const args = process.argv.slice(2);
 let token = process.env.VITE_GITHUB_APP_TOKEN || '';
-let repo = process.env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap-2026';
+let repo = process.env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap';
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--token' && i + 1 < args.length) {

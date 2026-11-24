@@ -65,7 +65,7 @@ export function readCookie(request: Request, name: string): string | undefined {
   return undefined;
 }
 
-/** Public origin of this deployment, e.g. https://gitwrap-2026.vercel.app or http://localhost:3000 */
+/** Public origin of this deployment, e.g. https://gitwrap.vercel.app or http://localhost:3000 */
 export function getOrigin(request: Request): string {
   if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? new URL(request.url).host;
