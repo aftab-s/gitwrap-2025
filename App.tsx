@@ -12,9 +12,19 @@ function LegacyUserRedirect() {
 export function AppRoutes() {
   return (
     <Routes>
+      {/* 2026 default root */}
       <Route path="/" element={<HomePage />} />
       <Route path="/u/:username" element={<UserPage />} />
+
+      {/* Explicit /2026 redirects */}
+      <Route path="/2026" element={<Navigate to="/" replace />} />
+      <Route path="/2026/u/:username" element={<LegacyUserRedirect />} />
+      <Route path="/2026/:username" element={<LegacyUserRedirect />} />
+
+      {/* Legacy segment redirects (e.g. /year/username) */}
       <Route path="/:year/:username" element={<LegacyUserRedirect />} />
+
+      {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
