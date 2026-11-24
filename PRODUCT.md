@@ -1,55 +1,65 @@
-# Product
-
-<!-- impeccable:product-schema 1 -->
+# Product: GitWrap
 
 ## Platform
 
-web
+Web application (mobile-first responsive SPA with desktop studio mode).
 
-## Users
+## Target Users
 
-Developers with a GitHub account, at the end of the year, who want a recap of their activity to post on LinkedIn or X. They arrive from someone else's shared card, type a username (or sign in), and expect a finished card within seconds. Many view on a phone; the card is downloaded as an image.
+Developers with a GitHub account at the end of the year who want a meaningful recap of their engineering journey to share across LinkedIn, X, or developer communities. Many visit on mobile from shared links; they expect fast results and a high-fidelity image export.
 
-## Product Purpose
+## Product Narrative: The 2026 Sequel
 
-GitWrap turns a GitHub username into a shareable year-in-review card. Success means the card gets downloaded and shared. The on-screen recap exists to serve the card.
+GitWrap 2025 launched as an arcade-inspired year-in-review card generator for public GitHub activity. Developer feedback on the 2025 edition highlighted two critical gaps:
 
-## Positioning
+1. Private Contributions: Most developers perform their primary work inside private repositories for employers, clients, or proprietary startups. Public-only counting left their cards incomplete.
+2. Spotify-Style Story Recap: Static summary cards are useful for sharing, but developers wanted an engaging, interactive recap they could tap through to experience their milestones before exporting.
 
-- Private contributions are included only when the profile's owner signs in with GitHub; a shared link always shows the public view.
-- A tap-through recap (stories) plays before the card.
-- A "player class" earned from the user's own numbers, and a "signature move" (the verb that opens most of their commits).
-- One URL per year: `/2025`, `/2026`.
+GitWrap 2026 is the direct sequel built to answer both requests while introducing a new aesthetic standard and richer developer telemetry.
 
-## Operating Context
+## Positioning & Core Capabilities
 
-- Flow: landing page (username field, optional sign-in) → loading → recap stories → wrap page (card, customise, download, share).
-- The card is exported as a 1080×1440 PNG and viewed mostly inside social feeds at small sizes.
-- Open source; hosted on Vercel.
+1. Private Contributions via GitHub Sign-In:
+   - Users can authenticate with GitHub via read-only OAuth to include private repository contributions (commits, pull requests, issues, reviews).
+   - Session tokens are encrypted in AES-256-GCM HttpOnly cookies and never written to a database.
+   - Private repository names are masked on public links so proprietary project names remain confidential.
 
-## Capabilities and Constraints
+2. 10-Slide Tap-Through Story Mode:
+   - A full interactive recap (Spotify Wrapped format) preceding the card deck.
+   - Tracks attendance consistency, 52-week activity mosaics, 24-hour combat radar clocks, streak capacitors, PR shipping cadence, polyglot language balance, and 16-bit companion reveals.
 
-- Card stats: total contributions (commits, PRs, issues, reviews, private when signed in), best hour, reviews, stars earned, top three languages, streak, peak day, repositories, year-over-year growth, top repository, player class, contribution heatmap, one generated sentence.
-- Card options: colourway, show/hide private repository names.
-- Styling is plain CSS (`index.css`); the card is inline-styled at 1080×1440. The export renders the same card component in an iframe and rasterises it with html-to-image, so fonts used on the card must be self-hosted.
-- No secrets in the browser; all GitHub and Gemini calls run in `/api`.
+3. Six Bespoke 2026 Colourways:
+   - Matchday '26 (fifa): World Cup 2026 procedural fluid flow fields and stadium tricolor.
+   - Lunar Orbit (artemis): NASA Artemis II translunar trajectories and lunar slate cartography.
+   - Vice Sunset (gtavi): GTA VI neon dusk, crepuscular rays, and humid photographic grain.
+   - Latverian Steel (doomsday): Avengers Doomsday alchemy summoning rings and gunmetal armor.
+   - Volt Matrix (maxdark): Maximalist high-voltage yellow terminal, cybernetic traces, and barcode stamps.
+   - Tokyo Riso (maxlight): Japanese ISBN barcodes, red Hanko inspection seals, halftone riso grain, and Swiss crop marks.
 
-## Brand Commitments
+4. Interactive Hero Contribution Graph:
+   - 7x52 contribution matrix spelling "YOUR 2026" with Story 3 pop physics and cell commit tooltips.
+   - Tactile stamped certification seal (SCORED.) toggleable between Tokyo Riso Hanko and Volt Matrix telemetry.
 
-- Name: GitWrap, followed by the year.
-- User-pinned look for the 2026 revamp: tactile maximalist, arcade style, minimal yet funky; no glass, no rounded corners.
-- The previous six card themes are retired; a new set of colourways replaces them.
-- Must not read as childish, and stats must stay easy to read at a glance.
+5. Ambient CPU Circuit Pulse Backdrop:
+   - Hairline 0.8px semiconductor traces with traveling optical pulses across the homepage and studio canvas.
 
-## Evidence on Hand
+6. Deterministic Archetypes & 16-Bit Companions:
+   - 13 distinct player classes computed from contribution ratios and commit verb analysis, paired with pixel-art virtual pets.
 
-- Real data only: every number on a card comes from the GitHub API for that user.
-- No testimonials, usage counts, or press exist; none may be invented.
-- Assets: `public/images/banner-image.png` (shows the old look), self-hosted Archivo, Martian Mono and Doto in `public/fonts/`.
+7. High-Fidelity 1080x1440 Card Export:
+   - Browser-based DOM rasterization via html-to-image in an isolated iframe.
+   - Base64 pre-inlined assets and self-hosted fonts ensuring crisp exports across mobile Safari and desktop browsers.
+
+## Operating Constraints
+
+- Real data only: all telemetry originates from GitHub GraphQL and REST endpoints.
+- Zero client secrets: all OAuth transactions and AI synthesis run through serverless functions in /api.
+- Clean typography and instant readability: stats must remain legible when cards are scaled down in social feeds.
+- Square corners everywhere: arcade control panel aesthetic strictly enforced (border-radius: 0 !important).
 
 ## Product Principles
 
-1. The card is the product; every screen exists to get someone to a card worth posting.
-2. Numbers are honest: private data needs the owner's sign-in, and the player class is computed, never random.
-3. Legible first: a stat must read in one glance at feed size.
-4. Seconds, not steps: one field, one button, a card.
+1. The card is the artifact, but the story is the journey: the recap delivers insight; the exported card preserves it.
+2. Respect developer privacy: private contributions count toward totals, but repository names never leak without explicit consent.
+3. Authentic numbers: player classes and metrics are mathematically determined from GitHub telemetry, never randomized.
+4. Minimal friction: public lookups require only a username; private lookups require a single OAuth sign-in.
