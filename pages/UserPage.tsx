@@ -326,9 +326,16 @@ const UserPage: React.FC = () => {
     };
   }, [userData?.avatarUrl]);
 
+  const cachedBlobRef = useRef<{ key: string; blob: Blob } | null>(null);
+
   const generateCardBlob = useCallback(async (): Promise<Blob | null> => {
     if (!cardData) return null;
     const userData = cardData;
+
+    const cacheKey = `${activeTheme.name}-${userData.login}-${userData.totalContributions}-${showPrivateRepoNames}`;
+    if (cachedBlobRef.current && cachedBlobRef.current.key === cacheKey) {
+      return cachedBlobRef.current.blob;
+    }
 
     const targetWidth = 1080;
     const targetHeight = 1440;
@@ -434,7 +441,11 @@ const UserPage: React.FC = () => {
       });
 
       const res = await fetch(dataUrl);
-      return await res.blob();
+      const blob = await res.blob();
+      if (blob) {
+        cachedBlobRef.current = { key: cacheKey, blob };
+      }
+      return blob;
     } catch (err) {
       console.error('Failed to generate card blob:', err);
       return null;
@@ -442,7 +453,16 @@ const UserPage: React.FC = () => {
       root.unmount();
       cleanup();
     }
-  }, [cardData, embeddedAvatarUrl, funMessage, activeTheme]);
+  }, [cardData, embeddedAvatarUrl, funMessage, activeTheme, showPrivateRepoNames]);
+
+  // Pre-generate the card blob in the background after the card mounts
+  useEffect(() => {
+    if (!cardData || phase !== 'card') return;
+    const timer = setTimeout(() => {
+      generateCardBlob().catch(() => undefined);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [cardData, phase, generateCardBlob]);
 
   const handleDownload = async (aspectRatio: AspectRatio) => {
     if (!cardData) return;

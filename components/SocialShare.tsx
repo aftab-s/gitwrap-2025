@@ -67,50 +67,55 @@ const SocialShare: React.FC<SocialShareProps> = ({
   const xBody = statsLines.length > 0
     ? `${heading}\n\n${statsLines.join(' · ')}\n\n${tagsText}`
     : `${heading}\n\n${tagsText}`;
+
   const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(xBody)}`;
-  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+  // Use shareArticle scheme so the LinkedIn native app intercepts and opens on mobile
+  const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(xBody)}`;
 
   const open = (url: string) => window.open(url, '_blank', 'noopener,noreferrer,width=600,height=520');
 
-  // Mobile Native Share (iOS & Android) with the generated card image file!
-  const handleNativeShare = async () => {
-    if (!navigator.share) return;
-    setIsSharing(true);
-    try {
-      let file: File | null = null;
-      if (onGetCardBlob) {
+  // On phones (iOS/Android), trigger native share with the card image attached!
+  const handleShareWithCard = async (fallbackUrl?: string) => {
+    if (onGetCardBlob && canNativeShare) {
+      setIsSharing(true);
+      try {
         const blob = await onGetCardBlob();
         if (blob) {
-          file = new File([blob], `gitwrap-${year}-${username}.png`, { type: 'image/png' });
+          const file = new File([blob], `gitwrap-${year}-${username}.png`, { type: 'image/png' });
+          const shareBody = statsLines.length > 0
+            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`
+            : `${heading}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`;
+
+          if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title,
+              text: shareBody,
+              files: [file],
+            });
+            return;
+          }
         }
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') {
+          return; // User cancelled share drawer
+        }
+        console.warn('Native share with file failed, falling back:', err);
+      } finally {
+        setIsSharing(false);
       }
+    }
 
-      const shareBody = statsLines.length > 0
-        ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`
-        : `${heading}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`;
-
-      // If phone supports sharing files via native share sheet (iOS 14.5+, Android 75+)
-      if (file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+    // Fallback if on desktop or if native file share is unavailable
+    if (fallbackUrl) {
+      open(fallbackUrl);
+    } else if (navigator.share) {
+      try {
         await navigator.share({
           title,
-          text: shareBody,
-          files: [file],
+          text: heading,
+          url: shareUrl,
         });
-        return;
-      }
-
-      // Fallback without file if files not accepted
-      await navigator.share({
-        title,
-        text: shareBody,
-        url: shareUrl,
-      });
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        console.warn('Native share failed:', err);
-      }
-    } finally {
-      setIsSharing(false);
+      } catch {}
     }
   };
 
@@ -120,7 +125,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
         <button
           type="button"
           className="key key-plain social-share-native"
-          onClick={handleNativeShare}
+          onClick={() => handleShareWithCard()}
           disabled={isSharing}
           style={{ width: '100%', justifyContent: 'center' }}
         >
@@ -129,11 +134,23 @@ const SocialShare: React.FC<SocialShareProps> = ({
         </button>
       )}
       <div className="social-share-grid">
-        <button type="button" className="key key-plain" onClick={() => open(xShareUrl)} style={{ width: '100%', justifyContent: 'center' }}>
+        <button
+          type="button"
+          className="key key-plain"
+          onClick={() => handleShareWithCard(xShareUrl)}
+          disabled={isSharing}
+          style={{ width: '100%', justifyContent: 'center' }}
+        >
           <XIcon className="ico" />
           Post on X
         </button>
-        <button type="button" className="key key-plain" onClick={() => open(linkedInShareUrl)} style={{ width: '100%', justifyContent: 'center' }}>
+        <button
+          type="button"
+          className="key key-plain"
+          onClick={() => handleShareWithCard(linkedInShareUrl)}
+          disabled={isSharing}
+          style={{ width: '100%', justifyContent: 'center' }}
+        >
           <LinkedInIcon className="ico" />
           LinkedIn
         </button>
