@@ -78,5 +78,14 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress harmless Rollup annotation warnings from third-party libraries (e.g. Zod v4 explanatory comments)
+          if (warning.code === 'INVALID_ANNOTATION') return;
+          warn(warning);
+        },
+      },
+    },
   };
 });
