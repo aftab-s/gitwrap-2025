@@ -258,5 +258,5 @@ Contributions are welcome. Whether reporting a bug, improving responsive styles,
 ---
 
 <div align="center">
-  <p>Crafted for developers around the world.</p>
+  <p>Crafted for developers around the world 💜</p>
 </div>
