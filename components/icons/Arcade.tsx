@@ -71,3 +71,25 @@ export const GitHubMark: React.FC<IconProps> = ({ size = 16, color = 'currentCol
     />
   </svg>
 );
+
+export const GitPR: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+  <svg {...base(size, style, className)}>
+    <rect x="3" y="1" width="3" height="3" fill={color} />
+    <rect x="3" y="12" width="3" height="3" fill={color} />
+    <rect x="4" y="4" width="1" height="8" fill={color} />
+    <rect x="10" y="5" width="3" height="3" fill={color} />
+    <path d="M11 8v2H6V8h1v1h3V8h1z" fill={color} />
+  </svg>
+);
+
+export const ArcadeStar: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" style={{ display: 'block', flexShrink: 0, ...style }} className={className} aria-hidden shapeRendering="geometricPrecision">
+    <polygon points="8,1 10.3,5.6 15.3,6.3 11.6,9.9 12.5,14.9 8,12.5 3.5,14.9 4.4,9.9 0.7,6.3 5.7,5.6" fill={color} />
+  </svg>
+);
+
+export const ArcadeSpark: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style, className }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" style={{ display: 'block', flexShrink: 0, ...style }} className={className} aria-hidden shapeRendering="geometricPrecision">
+    <path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill={color} />
+  </svg>
+);

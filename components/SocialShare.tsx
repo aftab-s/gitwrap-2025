@@ -21,7 +21,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
 }) => {
   const [canNativeShare, setCanNativeShare] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [copiedLinkedIn, setCopiedLinkedIn] = useState(false);
 
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : '';
   const title = `My GitWrap ${year} — @${username}`;
@@ -71,23 +70,9 @@ const SocialShare: React.FC<SocialShareProps> = ({
   // Web intent URLs — on mobile these open the native app via Universal Links / App Links
   // when the app is installed; otherwise they open in the browser.
   const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(fullBody)}`;
-  // LinkedIn officially uses share-offsite (?url=). Custom title/summary parameters in shareArticle were deprecated by LinkedIn.
-  const linkedInWebUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+  const linkedInWebUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}`;
 
   const open = (url: string) => window.open(url, '_blank', 'noopener,noreferrer,width=600,height=520');
-
-  const handleLinkedInShare = async () => {
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(fullBody);
-        setCopiedLinkedIn(true);
-        setTimeout(() => setCopiedLinkedIn(false), 3000);
-      }
-    } catch {
-      // ignore clipboard error
-    }
-    open(linkedInWebUrl);
-  };
 
   /**
    * "Share Card" button — opens the system share sheet with the card image
@@ -168,12 +153,11 @@ const SocialShare: React.FC<SocialShareProps> = ({
         <button
           type="button"
           className="key key-plain"
-          onClick={handleLinkedInShare}
+          onClick={() => open(linkedInWebUrl)}
           style={{ width: '100%', justifyContent: 'center' }}
-          title="Opens LinkedIn share. Recap text is automatically copied to clipboard for pasting!"
         >
           <LinkedInIcon className="ico" />
-          {copiedLinkedIn ? 'Copied & Opening...' : 'LinkedIn'}
+          LinkedIn
         </button>
       </div>
     </div>

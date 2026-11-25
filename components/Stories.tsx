@@ -3,7 +3,7 @@ import type { UserStats, Theme } from '../types';
 import { calendarFacts, formatDay, formatHour, playerClass } from '../insights';
 import GitWrapCard from './GitWrapCard';
 import PlayerAvatar from './PlayerAvatar';
-import { ArrowLeft, ArrowRight, Pause, PlayerArrow } from './icons/Arcade';
+import { ArrowLeft, ArrowRight, Pause, PlayerArrow, GitPR, ArcadeStar, ArcadeSpark } from './icons/Arcade';
 import { THEMES, themeVars, toWeeks, LED_STEPS } from '../constants';
 
 const THEME_MAP: Record<string, Theme> = THEMES.reduce((acc, t) => {
@@ -86,6 +86,24 @@ const PROOF_STORY_THEME: Theme = {
   },
 };
 
+const IMPACT_STORY_THEME: Theme = {
+  id: 'story-impact',
+  name: 'Orbital Starlight',
+  tagline: 'Code impact & stargazers',
+  c: {
+    ground: '#060B18',
+    line: '#101D38',
+    ink: '#02050D',
+    panel: '#F0F5FA',
+    a1: '#38BDF8',
+    a2: '#FBBF24',
+    led: '#FBBF24',
+    onGround: '#F0F5FA',
+    onGroundDim: '#8BA0BA',
+    onPanelDim: '#1B2A40',
+  },
+};
+
 function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number, userTheme: Theme): Theme {
   if (slideIndex === totalSlides - 1 || slideId === 'card') {
     return userTheme;
@@ -101,6 +119,8 @@ function getSlideTheme(slideId: string, slideIndex: number, totalSlides: number,
       return DOOMSDAY_STORY_THEME;
     case 'streak':
       return THEME_MAP['maxdark'] || userTheme;
+    case 'impact':
+      return IMPACT_STORY_THEME;
     case 'languages':
     case 'repos':
       return THEME_MAP['maxlight'] || userTheme;
@@ -604,6 +624,170 @@ function buildSlides(stats: UserStats, funMessage: string, theme: Theme, onDone:
         ),
       });
     }
+
+    const prs = stats.totalPRs;
+    const stars = stats.totalStarsGiven;
+    const reviews = stats.totalPRReviews;
+    const prGrowth = stats.yearOverYearGrowth?.prsGrowth;
+    const topStarRepo = stats.topRepos?.length
+      ? stats.topRepos.reduce((best, r) => (r.stargazers > (best?.stargazers ?? -1) ? r : best), stats.topRepos[0])
+      : null;
+    const totalRepos = stats.totalRepositories || stats.topRepos.length;
+    const prRate = stats.totalCommits + prs > 0 ? Math.round((prs / (stats.totalCommits + prs)) * 100) : 0;
+
+    const tierLabel =
+      stars >= 50 || prs >= 25
+        ? 'MAINTAINER TIER'
+        : stars >= 10 || prs >= 10
+          ? 'CORE CONTRIBUTOR'
+          : stars >= 1 || prs >= 1
+            ? 'VERIFIED SHIPPER'
+            : 'CODE OPERATIVE';
+
+    const velocityScore = Math.min(
+      10,
+      Math.max(
+        2,
+        (prs > 0 ? 3 : 0) +
+        (prs >= 5 ? 2 : 0) +
+        (stars > 0 ? 2 : 0) +
+        (stars >= 10 ? 2 : 0) +
+        (reviews > 0 ? 1 : 0)
+      )
+    );
+
+    let impactNote = '';
+    if (prs > 0 && stars > 0) {
+      impactNote = `${prs.toLocaleString()} pull ${prs === 1 ? 'request' : 'requests'} merged into production and ${stars.toLocaleString()} community ${stars === 1 ? 'star' : 'stars'} earned. Verified by peers, backed by the community.`;
+    } else if (prs > 0 && stars === 0) {
+      impactNote = `${prs.toLocaleString()} pull ${prs === 1 ? 'request' : 'requests'} merged cleanly. Shipping code through review pipelines without chasing vanity stars.`;
+    } else if (prs === 0 && stars > 0) {
+      impactNote = `${stars.toLocaleString()} community ${stars === 1 ? 'star' : 'stars'} earned across public repositories with a direct-to-branch shipping rhythm.`;
+    } else {
+      impactNote = 'Pushing directly to main with zero bureaucracy. A focused, self-contained solo build campaign.';
+    }
+
+    slides.push({
+      id: 'impact',
+      tone: 'ground',
+      body: (
+        <>
+          <div className="story-badge-header rise" style={i(0)}>
+            // OPEN SOURCE PRESTIGE &amp; CODE IMPACT
+          </div>
+          <h2 className="display story-h rise" style={{ ...i(1), margin: '0 0 0.5cqh' }}>
+            PRs &amp; Stargazers
+          </h2>
+
+          {/* Dual Shiny Hero Metric Arcade Cards */}
+          <div className="story-impact-grid rise" style={i(2)}>
+            {/* Merged PRs Card */}
+            <div className="story-impact-card story-impact-card--pr">
+              <span className="story-impact-shimmer" aria-hidden="true" />
+              <div className="story-impact-header">
+                <span className="story-impact-badge">
+                  <GitPR size={13} color="#38BDF8" />
+                  SHIPPED CODE
+                </span>
+                <span className="story-impact-tag story-impact-tag--pr">MERGED</span>
+              </div>
+              <div className="story-impact-digits story-impact-digits--pr">
+                <CountUp to={prs} ms={1400} />
+              </div>
+              <span className="story-impact-label">Pull Requests</span>
+              <div className="story-impact-sub">
+                {prGrowth !== undefined
+                  ? `${prGrowth >= 0 ? `▲ +${prGrowth}%` : `▼ ${prGrowth}%`} YoY pace`
+                  : prs > 0
+                    ? `${prRate}% of code merges`
+                    : 'Direct push workflow'}
+              </div>
+            </div>
+
+            {/* Stars Earned Card */}
+            <div className="story-impact-card story-impact-card--star">
+              <span className="story-impact-shimmer" aria-hidden="true" />
+              <div className="story-impact-header">
+                <span className="story-impact-badge">
+                  <ArcadeStar size={13} color="#FBBF24" />
+                  REPUTATION
+                </span>
+                <span className="story-impact-tag story-impact-tag--star">COMMUNITY</span>
+              </div>
+              <div className="story-impact-digits story-impact-digits--star">
+                <CountUp to={stars} ms={1400} />
+                <span className="story-impact-star-mark" aria-hidden="true">★</span>
+              </div>
+              <span className="story-impact-label">Stars Earned</span>
+              <div className="story-impact-sub">
+                {topStarRepo && topStarRepo.stargazers > 0
+                  ? `Top: ${topStarRepo.name} (${topStarRepo.stargazers}★)`
+                  : stars > 0
+                    ? 'Across public repositories'
+                    : 'Internal codebase focus'}
+              </div>
+            </div>
+          </div>
+
+          {/* Open Source Velocity & Prestige Meter */}
+          <div className="story-impact-beam rise" style={i(3)}>
+            <div className="story-impact-beam-header">
+              <span className="story-impact-beam-title">
+                <ArcadeSpark size={12} color="#FBBF24" />
+                OPEN SOURCE IMPACT VELOCITY
+              </span>
+              <span className="story-impact-beam-tier">
+                {tierLabel}
+              </span>
+            </div>
+            <div className="story-impact-beam-bar" aria-label={`Open source impact velocity: ${velocityScore} of 10`}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((idx) => {
+                const isLit = idx < velocityScore;
+                const isGold = idx >= 5;
+                return (
+                  <span
+                    key={idx}
+                    className={`story-impact-beam-cell${isLit ? (isGold ? ' lit-gold' : ' lit-cyan') : ''}`}
+                    style={isLit ? { animationDelay: `${400 + idx * 80}ms` } : undefined}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Telemetry Footprint Strip */}
+          <div className="story-impact-telemetry rise" style={i(4)}>
+            <div className="story-impact-telemetry-header">
+              <span>COLLABORATION TELEMETRY</span>
+              <span className="story-impact-telemetry-badge">
+                <span className="story-impact-live-dot" /> VERIFIED RUN
+              </span>
+            </div>
+            <div className="story-impact-telemetry-row">
+              <div className="story-impact-telemetry-item">
+                <span className="story-impact-telemetry-val">{reviews.toLocaleString()}</span>
+                <span className="story-impact-telemetry-lbl">Peer Reviews</span>
+              </div>
+              <div className="story-impact-telemetry-sep" aria-hidden="true" />
+              <div className="story-impact-telemetry-item">
+                <span className="story-impact-telemetry-val">{totalRepos.toLocaleString()}</span>
+                <span className="story-impact-telemetry-lbl">Repositories</span>
+              </div>
+              <div className="story-impact-telemetry-sep" aria-hidden="true" />
+              <div className="story-impact-telemetry-item">
+                <span className="story-impact-telemetry-val">{prs > 0 ? `${prRate}%` : 'Direct'}</span>
+                <span className="story-impact-telemetry-lbl">Merge Ratio</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Sarcastic / Authentic Note */}
+          <p className="story-note rise" style={{ ...i(5), marginTop: '0.3cqh' }}>
+            {impactNote}
+          </p>
+        </>
+      ),
+    });
 
     const langs = stats.topLanguages.slice(0, 4);
     if (langs.length > 0) {
