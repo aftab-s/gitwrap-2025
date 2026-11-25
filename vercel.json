@@ -2,15 +2,19 @@
   "functions": {
     "api/stats.ts": { "maxDuration": 60 }
   },
-  "rewrites": [
+  "redirects": [
     {
       "source": "/2025",
-      "destination": "https://gitwrap-2025-ten.vercel.app/"
+      "destination": "https://gitwrap-2025-ten.vercel.app",
+      "permanent": false
     },
     {
       "source": "/2025/:path*",
-      "destination": "https://gitwrap-2025-ten.vercel.app/:path*"
-    },
+      "destination": "https://gitwrap-2025-ten.vercel.app/:path*",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/2026",
       "destination": "/"

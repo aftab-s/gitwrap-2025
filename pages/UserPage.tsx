@@ -21,7 +21,7 @@ import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import Contributors from '../components/Contributors';
 import FuturisticLoader from '../components/FuturisticLoader';
-import { Download, Lock, PlayerArrow } from '../components/icons/Arcade';
+import { Download, Lock, PlayerArrow, GitHubMark } from '../components/icons/Arcade';
 
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
@@ -326,11 +326,16 @@ const UserPage: React.FC = () => {
     };
   }, [userData?.avatarUrl]);
 
-  const handleDownload = async (aspectRatio: AspectRatio) => {
-    if (!cardData) return;
+  const cachedBlobRef = useRef<{ key: string; blob: Blob } | null>(null);
+
+  const generateCardBlob = useCallback(async (): Promise<Blob | null> => {
+    if (!cardData) return null;
     const userData = cardData;
-    setIsDownloading(aspectRatio);
-    setDownloadError(null);
+
+    const cacheKey = `${activeTheme.name}-${userData.login}-${userData.totalContributions}-${showPrivateRepoNames}`;
+    if (cachedBlobRef.current && cachedBlobRef.current.key === cacheKey) {
+      return cachedBlobRef.current.blob;
+    }
 
     const targetWidth = 1080;
     const targetHeight = 1440;
@@ -435,18 +440,53 @@ const UserPage: React.FC = () => {
             : undefined,
       });
 
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      if (blob) {
+        cachedBlobRef.current = { key: cacheKey, blob };
+      }
+      return blob;
+    } catch (err) {
+      console.error('Failed to generate card blob:', err);
+      return null;
+    } finally {
+      root.unmount();
+      cleanup();
+    }
+  }, [cardData, embeddedAvatarUrl, funMessage, activeTheme, showPrivateRepoNames]);
+
+  // Pre-generate the card blob in the background after the card mounts
+  useEffect(() => {
+    if (!cardData || phase !== 'card') return;
+    const timer = setTimeout(() => {
+      generateCardBlob().catch(() => undefined);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [cardData, phase, generateCardBlob]);
+
+  const handleDownload = async (aspectRatio: AspectRatio) => {
+    if (!cardData) return;
+    setIsDownloading(aspectRatio);
+    setDownloadError(null);
+
+    try {
+      const blob = await generateCardBlob();
+      if (!blob) {
+        throw new Error('Blob could not be generated');
+      }
+
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       const safeUsername = username?.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       const safeTheme = activeTheme?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'theme';
       link.download = `gitwrap-${year}-${safeUsername}-${safeTheme}.png`;
-      link.href = dataUrl;
+      link.href = url;
       link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Failed to download image:', err);
       setDownloadError('The image could not be created. Check your connection and press Download again.');
     } finally {
-      root.unmount();
-      cleanup();
       setIsDownloading(null);
     }
   };
@@ -577,7 +617,7 @@ const UserPage: React.FC = () => {
             <section className="window user-deck-window">
               <div className="user-deck-window-head">
                 <h2 className="heading" style={{ margin: 0 }}>Customize Your Card</h2>
-                <span className="silk" style={{ opacity: 0.85 }}>Live Preview</span>
+                <Link to="/themes" className="studio-theme-guide-link" aria-label="Explore themes and Easter eggs">Theme guide <span aria-hidden="true">↗</span></Link>
               </div>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
             </section>
@@ -611,7 +651,15 @@ const UserPage: React.FC = () => {
                   </p>
                 )}
 
-                {username && <SocialShare username={username} year={year} />}
+                {username && (
+                  <SocialShare
+                    username={username}
+                    year={year}
+                    stats={cardData}
+                    playerClassName={cls?.name}
+                    onGetCardBlob={generateCardBlob}
+                  />
+                )}
 
                 {/* Privacy controls & toggles */}
                 {userData.includesPrivate ? (
@@ -714,7 +762,8 @@ const UserPage: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              GitHub Repository
+              <GitHubMark size={14} />
+              <span>GitHub Repository</span>
             </a>
           </div>
           <div style={{ marginTop: 20 }}>
