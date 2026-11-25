@@ -102,30 +102,11 @@ const SocialShare: React.FC<SocialShareProps> = ({
             : `${heading}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`;
 
           if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
-            const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent || '');
-
-            if (isIOS) {
-              // Copy full caption to clipboard so user can paste it above the card image
-              try {
-                if (navigator.clipboard?.writeText) {
-                  await navigator.clipboard.writeText(shareBody);
-                }
-              } catch {}
-
-              // On iOS, passing text alongside files causes LinkedIn's share extension
-              // to drop the image file. Passing ONLY files: [file] forces LinkedIn into
-              // Media/Photo mode so the card image is attached to the post.
-              await navigator.share({
-                files: [file],
-              });
-            } else {
-              // On Android and other platforms, both text and files are supported together
-              await navigator.share({
-                title,
-                text: shareBody,
-                files: [file],
-              });
-            }
+            await navigator.share({
+              title,
+              text: shareBody,
+              files: [file],
+            });
             return;
           }
         }
