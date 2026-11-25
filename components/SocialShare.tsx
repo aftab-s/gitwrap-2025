@@ -64,27 +64,42 @@ const SocialShare: React.FC<SocialShareProps> = ({
     }
   }, []);
 
-  const xBody = statsLines.length > 0
+  // Build share text for web intents (text + link only, used by direct X/LinkedIn buttons)
+  const fullBody = statsLines.length > 0
     ? `${heading}\n\n${statsLines.join(' · ')}\n\n${tagsText}`
     : `${heading}\n\n${tagsText}`;
 
-  const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(xBody)}`;
-  // Use shareArticle scheme so the LinkedIn native app intercepts and opens on mobile
-  const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(xBody)}`;
+  // Web intent URLs — on mobile these open the native app via Universal Links / App Links
+  // when the app is installed; otherwise they open in the browser.
+  const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(fullBody)}`;
+  const linkedInWebUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}`;
 
   const open = (url: string) => window.open(url, '_blank', 'noopener,noreferrer,width=600,height=520');
 
-  // On phones (iOS/Android), trigger native share with the card image attached!
-  const handleShareWithCard = async (fallbackUrl?: string) => {
+  /**
+   * "Share Card" button — opens the system share sheet with the card image
+   * attached as a file. When the user picks X, LinkedIn, WhatsApp, etc. from
+   * the sheet, the image + text are forwarded to that app.
+   *
+   * LinkedIn image fix: the body text uses a bare URL (no https:// protocol).
+   * When the text contains a full https:// link, LinkedIn's mobile app switches
+   * to "link scraping / article preview" mode and silently drops the attached
+   * image file. Stripping the protocol keeps it in normal "image post" mode so
+   * the card PNG shows up in the composed post.
+   */
+  const handleShareCard = async () => {
     if (onGetCardBlob && canNativeShare) {
       setIsSharing(true);
       try {
         const blob = await onGetCardBlob();
         if (blob) {
           const file = new File([blob], `gitwrap-${year}-${username}.png`, { type: 'image/png' });
+
+          // Bare URL (no protocol) so LinkedIn keeps the image attachment
+          const bareUrl = shareUrl.replace(/^https?:\/\//, '');
           const shareBody = statsLines.length > 0
-            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`
-            : `${heading}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`;
+            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`
+            : `${heading}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`;
 
           if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -97,7 +112,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
         }
       } catch (err) {
         if ((err as Error).name === 'AbortError') {
-          return; // User cancelled share drawer
+          return; // User cancelled share sheet
         }
         console.warn('Native share with file failed, falling back:', err);
       } finally {
@@ -105,16 +120,10 @@ const SocialShare: React.FC<SocialShareProps> = ({
       }
     }
 
-    // Fallback if on desktop or if native file share is unavailable
-    if (fallbackUrl) {
-      open(fallbackUrl);
-    } else if (navigator.share) {
+    // Fallback for desktop or browsers without file sharing support
+    if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({
-          title,
-          text: heading,
-          url: shareUrl,
-        });
+        await navigator.share({ title, text: heading, url: shareUrl });
       } catch {}
     }
   };
@@ -125,20 +134,19 @@ const SocialShare: React.FC<SocialShareProps> = ({
         <button
           type="button"
           className="key key-plain social-share-native"
-          onClick={() => handleShareWithCard()}
+          onClick={handleShareCard}
           disabled={isSharing}
           style={{ width: '100%', justifyContent: 'center' }}
         >
           <Share size={18} />
-          {isSharing ? 'Preparing card...' : 'Share Card to Apps (X, LinkedIn)'}
+          {isSharing ? 'Preparing card...' : 'Share Card'}
         </button>
       )}
       <div className="social-share-grid">
         <button
           type="button"
           className="key key-plain"
-          onClick={() => handleShareWithCard(xShareUrl)}
-          disabled={isSharing}
+          onClick={() => open(xWebUrl)}
           style={{ width: '100%', justifyContent: 'center' }}
         >
           <XIcon className="ico" />
@@ -147,8 +155,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
         <button
           type="button"
           className="key key-plain"
-          onClick={() => handleShareWithCard(linkedInShareUrl)}
-          disabled={isSharing}
+          onClick={() => open(linkedInWebUrl)}
           style={{ width: '100%', justifyContent: 'center' }}
         >
           <LinkedInIcon className="ico" />
