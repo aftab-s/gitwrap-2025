@@ -21,7 +21,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
 }) => {
   const [canNativeShare, setCanNativeShare] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [copiedNotice, setCopiedNotice] = useState<string | null>(null);
 
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : '';
   const title = `My GitWrap ${year} — @${username}`;
@@ -65,54 +64,28 @@ const SocialShare: React.FC<SocialShareProps> = ({
     }
   }, []);
 
-  // Full share text: heading + stats + recap url + tags
+  // Build share text for web intents (text + link only, used by direct X/LinkedIn buttons)
   const fullBody = statsLines.length > 0
-    ? `${heading}\n\n${statsLines.join(' · ')}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`
-    : `${heading}\n\nCheck yours: ${shareUrl}\n\n${tagsText}`;
-
-  // Twitter/X web intent URL (X supports both text and url params natively)
-  const xBody = statsLines.length > 0
     ? `${heading}\n\n${statsLines.join(' · ')}\n\n${tagsText}`
     : `${heading}\n\n${tagsText}`;
-  const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(xBody)}`;
 
-  // LinkedIn share URL with all supported & legacy fallback parameters
-  const linkedInWebUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}&text=${encodeURIComponent(fullBody)}`;
+  // Web intent URLs — on mobile these open the native app via Universal Links / App Links
+  // when the app is installed; otherwise they open in the browser.
+  const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(fullBody)}`;
+  const linkedInWebUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}`;
 
   const open = (url: string) => window.open(url, '_blank', 'noopener,noreferrer,width=600,height=520');
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-    } catch {}
-    return false;
-  };
-
   /**
-   * Direct LinkedIn button click handler:
-   * LinkedIn's API strictly ignores pre-filled text in URL parameters.
-   * To ensure heading, stats, link and tags are not lost, we copy the full
-   * text to clipboard and notify the user to paste it when LinkedIn opens.
-   */
-  const handleLinkedInDirect = async () => {
-    await copyToClipboard(fullBody);
-    setCopiedNotice('✓ Caption copied to clipboard! Paste it into LinkedIn.');
-    setTimeout(() => setCopiedNotice(null), 5000);
-    open(linkedInWebUrl);
-  };
-
-  /**
-   * "Share Card" button — opens the system share sheet with the card PNG.
+   * "Share Card" button — opens the system share sheet with the card image
+   * attached as a file. When the user picks X, LinkedIn, WhatsApp, etc. from
+   * the sheet, the image + text are forwarded to that app.
    *
-   * iOS / LinkedIn image attachment fix:
-   * On iOS, when navigator.share receives BOTH `text` and `files`, LinkedIn's
-   * iOS share extension treats it strictly as a text post and drops the image file.
-   * By passing ONLY `files: [file]` on iOS (while copying the full caption to the
-   * clipboard), LinkedIn's extension is forced to open in media/photo mode,
-   * guaranteeing the card image is attached to the post!
+   * LinkedIn image fix: the body text uses a bare URL (no https:// protocol).
+   * When the text contains a full https:// link, LinkedIn's mobile app switches
+   * to "link scraping / article preview" mode and silently drops the attached
+   * image file. Stripping the protocol keeps it in normal "image post" mode so
+   * the card PNG shows up in the composed post.
    */
   const handleShareCard = async () => {
     if (onGetCardBlob && canNativeShare) {
@@ -122,28 +95,18 @@ const SocialShare: React.FC<SocialShareProps> = ({
         if (blob) {
           const file = new File([blob], `gitwrap-${year}-${username}.png`, { type: 'image/png' });
 
-          // Copy full caption to clipboard so user can paste it anywhere
-          await copyToClipboard(fullBody);
+          // Bare URL (no protocol) so LinkedIn keeps the image attachment
+          const bareUrl = shareUrl.replace(/^https?:\/\//, '');
+          const shareBody = statsLines.length > 0
+            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`
+            : `${heading}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`;
 
           if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
-            const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent || '');
-
-            if (isIOS) {
-              // Pass ONLY the image file so iOS LinkedIn share extension does NOT drop the image
-              setCopiedNotice('✓ Image attached! Caption copied to clipboard — paste when posting.');
-              setTimeout(() => setCopiedNotice(null), 6000);
-
-              await navigator.share({
-                files: [file],
-              });
-            } else {
-              // On Android and other platforms, both text and files are supported together
-              await navigator.share({
-                title,
-                text: fullBody,
-                files: [file],
-              });
-            }
+            await navigator.share({
+              title,
+              text: shareBody,
+              files: [file],
+            });
             return;
           }
         }
@@ -160,7 +123,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
     // Fallback for desktop or browsers without file sharing support
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ title, text: fullBody, url: shareUrl });
+        await navigator.share({ title, text: heading, url: shareUrl });
       } catch {}
     }
   };
@@ -192,28 +155,13 @@ const SocialShare: React.FC<SocialShareProps> = ({
         <button
           type="button"
           className="key key-plain"
-          onClick={handleLinkedInDirect}
+          onClick={() => open(linkedInWebUrl)}
           style={{ width: '100%', justifyContent: 'center' }}
         >
           <LinkedInIcon className="ico" />
           LinkedIn
         </button>
       </div>
-      {copiedNotice && (
-        <div
-          className="strip"
-          style={{
-            marginTop: 8,
-            fontSize: '0.8rem',
-            textAlign: 'center',
-            color: 'var(--a1)',
-            borderColor: 'var(--a1)',
-            padding: '6px 10px',
-          }}
-        >
-          {copiedNotice}
-        </div>
-      )}
     </div>
   );
 };
