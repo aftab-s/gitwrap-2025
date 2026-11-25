@@ -577,7 +577,7 @@ const UserPage: React.FC = () => {
             <section className="window user-deck-window">
               <div className="user-deck-window-head">
                 <h2 className="heading" style={{ margin: 0 }}>Customize Your Card</h2>
-                <span className="silk" style={{ opacity: 0.85 }}>Live Preview</span>
+                <Link to="/themes" className="studio-theme-guide-link" aria-label="Explore themes and Easter eggs">Theme guide <span aria-hidden="true">↗</span></Link>
               </div>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
             </section>

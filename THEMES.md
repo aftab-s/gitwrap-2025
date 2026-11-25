@@ -7,7 +7,7 @@ GitWrap 2026 replaces the legacy 2025 palettes with six bespoke colourways roote
 ## 01. Lunar Orbit (`artemis`)
 
 ### 2026 Event & Design Inspiration
-Inspired by **NASA's Artemis II mission (April 1–11, 2026)** — the historic ~10-day crewed lunar flyby that sent four astronauts (Commander Reid Wiseman, Pilot Victor Glover, Mission Specialist Christina Koch, and CSA Mission Specialist Jeremy Hansen) around the Moon for the first time since Apollo 17 in 1972.
+Inspired by **NASA's Artemis II mission (April 1–10, 2026 (US dates; splashdown was April 11 UTC))** — the historic ~10-day crewed lunar flyby that sent four astronauts (Commander Reid Wiseman, Pilot Victor Glover, Mission Specialist Christina Koch, and CSA Mission Specialist Jeremy Hansen) around the Moon for the first time since Apollo 17 in 1972.
 
 Visually, the theme draws from classic 1970s/80s NASA flight aesthetics updated with modern sci-fi polish. The complementary cold-blue and amber-gold palette contrasts the sterile, deep-space obsidian blues of the lunar environment against the warm, reflective gold coating of astronauts' EVA helmet visors. Rather than rigid vector lines or hollow outlines, the card pairs a solid cyan `2026` readout inside a deep-space console with smooth feathered luminance gradients, warm right-horizon visor glare, and fine particulate regolith stardust.
 
@@ -36,7 +36,7 @@ Visually, the theme draws from classic 1970s/80s NASA flight aesthetics updated 
 - **Header Tag (Left):** `Integrity` — the official spacecraft name selected by the crew for Artemis II's Orion capsule (CM-003).
 - **Header Tag (Right):** `ORBIT: LUNAR`
 - **Year Monitor Stamp:** `ARTEMIS // II · ORBIT` housed inside a deep-space navy glass module (`#162C4E` -> `#040A17`).
-- **Footer Telemetry:** `KSC LC-39B · Δv 10.9 KM/S` — references **Kennedy Space Center Launch Complex 39B** (where the SLS rocket lifted off on April 1, 2026) and **~10.9 km/s** (the Translunar Injection burn velocity that propelled Orion out of Earth orbit toward the Moon).
+- **Footer Telemetry:** `KSC LC-39B · Δv 10.9 KM/S` — references **Kennedy Space Center Launch Complex 39B** (where the SLS rocket lifted off on April 1, 2026) and a stylized velocity readout. The printed Δv 10.9 KM/S is decorative, not a verified mission delta-v.
 
 ---
 
@@ -104,7 +104,7 @@ Rather than relying on vector palm trees or clip-art silhouettes, the design pul
 - Fine 35mm photographic film grain overlay (`viceFilmGrain`) feathered gently into the upper sky.
 
 ### Easter Eggs & Hidden Details
-- **Header Tag (Left):** `Emotion 98.3` — direct nod to the iconic soft-rock and power-ballad radio station returning in *GTA VI* across Vice City and Leonida (hosted by Doug Van Dyke).
+- **Header Tag (Left):** `Emotion 98.3` — a Vice City radio homage. The guide does not assert an unverified GTA VI host credit.
 - **Header Tag (Right):** `LEONIDA DEPT.` — dispatch stamp referencing the game's Florida-inspired setting.
 - **VCR Year Monitor:** Frosted CRT glass box (`backdropFilter: blur(16px)`) overlaid with horizontal scanlines and a top-left `PLAY ▶` status indicator framing neon coral-violet `2026` digits.
 - **Footer Telemetry:** `★ WANTED LEVEL 5 · 98.6 FM` — combines a maximum five-star wanted chase alert with a stylized retro FM dial variation (`98.6 FM`).
@@ -185,7 +185,7 @@ Originally created as part of a tactile **Maximalist** exploration before evolvi
   - `0xBEEF_STACK_SAFE`
   - `0x2026_MATRIX_RAW`
   - `0x00FF_OVERCLOCK`
-- **Footer Telemetry:** `HEX: 0x7E0 · NO SEGFAULTS`
+- **Footer Telemetry:** `HEX: 0x7EA · NO SEGFAULTS` — `0x7EA` is 2026 in hexadecimal (7×256 + 14×16 + 10). Earlier builds printed `0x7E0`, which is 2016.
 
 ---
 
@@ -251,3 +251,15 @@ On the landing page (`pages/HomePage.tsx`), the interactive 7x52 `YOUR 2026` mat
    - Header: `[ + ]` + `0x7E01 // TELEMETRY`
    - Title: `SCORED.`
    - Footer Barcode: `0x2026_RECORD_OK`
+
+
+## Theme guide (`/themes`) — fact check, November 25, 2026
+
+The public `/themes` page (`pages/ThemesPage.tsx`, content in `themeGuide.ts`) renders the real card with fictional demo data, orders the themes by when their moment happened in 2026, and lets visitors spotlight each easter egg on the card (via `data-egg` attributes in `ArcadeCard.tsx` / `ThemeBackdrop.tsx`).
+
+- **Volt Matrix · ENIAC at 80 (Feb 2026):** Penn celebrated 80 years since ENIAC's 1946 unveiling (40 panels, 17,000+ vacuum tubes; Eckert & Mauchly). Volt Matrix began as a maximalist study; ENIAC is its 2026 connection. [Penn Today](https://penntoday.upenn.edu/news/penns-eniac-worlds-first-electronic-computer-turns-80)
+- **Lunar Orbit · Artemis II (Apr 1–10):** Launched from LC-39B on April 1; record 252,756 mi from Earth (beating Apollo 13); splashdown 5:07 p.m. PDT April 10 (April 11 UTC). *Integrity* confirmed. "ORBIT" is shorthand for a flyby; the Δv readout is decorative. [NASA](https://www.nasa.gov/news-release/nasa-welcomes-record-setting-artemis-ii-moonfarers-back-to-earth/)
+- **Matchday '26 · World Cup (Jun 11–Jul 19):** 48 teams, 16 host cities. Spain beat Argentina 1–0 a.e.t. at MetLife Stadium (Ferran Torres, 106'). Trionda's red/green/blue panels represent the three hosts; the gold Trionda Final ball was used from the semi-finals. The VAR footer is a GitWrap joke. [NPR](https://www.npr.org/2026/07/19/nx-s1-5899071/spain-2026-world-cup-champion) · [FIFA](https://inside.fifa.com/en/news/final-four-world-cup-2026-matches-trionda-official-match-ball)
+- **Tokyo Riso · RISO at 80 (Sep 2026):** Founded September 2, 1946 in Tokyo as Riso-sha ("riso" = ideal); first Risograph 1980. The ISBN uses Japan's real 978-4 prefix but is otherwise fictional. [RISO](https://www.riso.co.jp/english/80th/index.html)
+- **Vice Sunset · GTA VI (Nov 19):** Launched on PS5 and Xbox Series X|S; Take-Two estimated $3.79B day-one sales. **Emotion 98.3 was not among the six stations Rockstar showcased pre-launch** (Cocoteo FM, Back Country Radio, AfroBank FM, The Chamber 106.6, Flash FM, Dirty South Classics), so the guide presents it as a homage to 2002's *Vice City*. 98.6 FM is fictional. [Rockstar](https://www.rockstargames.com/VI/out-now)
+- **Latverian Steel · Avengers: Doomsday (Dec 18):** Scheduled US release, still upcoming as of this check; the page shows a "Coming soon" badge until the date passes. Russo brothers directing; Robert Downey Jr. as Victor von Doom. [TechRadar](https://www.techradar.com/streaming/entertainment/marvels-avengers-doomsday-hub)

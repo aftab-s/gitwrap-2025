@@ -5,6 +5,7 @@ import { GitHubMark } from './icons/Arcade';
 interface Props {
   label?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -12,7 +13,7 @@ interface Props {
  * When the server has no GitHub OAuth app configured the key is shown locked, so the feature is
  * discoverable instead of silently missing. Renders nothing once signed in.
  */
-const GitHubSignIn: React.FC<Props> = ({ label = 'SIGN IN', className = '' }) => {
+const GitHubSignIn: React.FC<Props> = ({ label = 'SIGN IN', className = '', style }) => {
   const auth = useAuth();
 
   if (!auth.ready || auth.login) return null;
@@ -22,6 +23,7 @@ const GitHubSignIn: React.FC<Props> = ({ label = 'SIGN IN', className = '' }) =>
       <button
         type="button"
         className={`key key-plain ${className}`}
+        style={style}
         disabled
         title={
           (import.meta as any).env?.DEV
@@ -36,7 +38,7 @@ const GitHubSignIn: React.FC<Props> = ({ label = 'SIGN IN', className = '' }) =>
   }
 
   return (
-    <button type="button" className={`key key-plain ${className}`} onClick={() => signIn()}>
+    <button type="button" className={`key key-plain ${className}`} style={style} onClick={() => signIn()}>
       <GitHubMark size={18} />
       {label}
     </button>

@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
         </div>
       </main>
 
-      <Footer />
+      <Footer showThemeGuide />
     </div>
   );
 };

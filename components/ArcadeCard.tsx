@@ -162,7 +162,7 @@ function getFooterEasterEgg(themeId: string): string {
     case 'doomsday':
       return 'ᛝ BY ROYAL DECREE · VON DOOM ᛝ';
     case 'maxdark':
-      return 'HEX: 0x7E0 · NO SEGFAULTS';
+      return 'HEX: 0x7EA · NO SEGFAULTS';
     case 'maxlight':
       return '検印 · TOKYO RISO NO. 0026';
     default:
@@ -269,7 +269,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
 
       {/* ---------- Theme Identity Tag ---------- */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1, minHeight: 20 }}>
-        <span style={{ ...label(c.onGroundDim, 15), letterSpacing: '0.12em', fontWeight: 800 }}>
+        <span data-egg="tag-left" style={{ ...label(c.onGroundDim, 15), letterSpacing: '0.12em', fontWeight: 800 }}>
           {theme.id === 'fifa' && "Trionda"}
           {theme.id === 'artemis' && 'Integrity'}
           {theme.id === 'gtavi' && 'Emotion 98.3'}
@@ -277,7 +277,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
           {theme.id === 'maxdark' && 'DEV TELEMETRY'}
           {theme.id === 'maxlight' && 'ARCHIVAL PRESS ISSUE NO. 01'}
         </span>
-        <span style={{ ...label(c.onGroundDim, 14), opacity: 0.85, letterSpacing: '0.08em' }}>
+        <span data-egg="tag-right" style={{ ...label(c.onGroundDim, 14), opacity: 0.85, letterSpacing: '0.08em' }}>
           {theme.id === 'fifa' && 'MATCH GRADE'}
           {theme.id === 'artemis' && 'ORBIT: LUNAR'}
           {theme.id === 'gtavi' && 'LEONIDA DEPT.'}
@@ -322,6 +322,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
         </div>
 
         <div
+          data-egg="year-console"
           style={{
             ...(theme.id === 'gtavi'
               ? {
@@ -727,7 +728,7 @@ const ArcadeCard = forwardRef<HTMLDivElement, Props>(({ userData, funMessage, th
               <span key={i} style={{ width: 18, height: 18, background: ink, border: `2.5px solid ${c.line}`, boxSizing: 'border-box' }} />
             ))}
           </div>
-          <span style={{ ...label(c.onGroundDim, 14), letterSpacing: '0.08em', opacity: 0.85, whiteSpace: 'nowrap' }}>
+          <span data-egg="footer" style={{ ...label(c.onGroundDim, 14), letterSpacing: '0.08em', opacity: 0.85, whiteSpace: 'nowrap' }}>
             {getFooterEasterEgg(theme.id)}
           </span>
         </div>
