@@ -18,8 +18,15 @@ const __dirname = path.dirname(__filename);
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-let token = process.env.VITE_GITHUB_APP_TOKEN || '';
-let repo = process.env.VITE_GITHUB_REPOSITORY || 'aftab-s/gitwrap';
+let token =
+  process.env.GITHUB_APP_TOKEN ||
+  process.env.GITHUB_TOKEN ||
+  process.env.VITE_GITHUB_APP_TOKEN ||
+  '';
+let repo =
+  process.env.GITHUB_REPOSITORY ||
+  process.env.VITE_GITHUB_REPOSITORY ||
+  'aftab-s/gitwrap';
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--token' && i + 1 < args.length) {
@@ -29,11 +36,11 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-console.log(`📦 Fetching contributors for ${repo}...`);
+console.log(`Fetching contributors for ${repo}...`);
 
 if (!token) {
-  console.warn('⚠️  No GitHub token provided. API rate limits may apply.');
-  console.warn('   Set VITE_GITHUB_APP_TOKEN or pass --token YOUR_TOKEN');
+  console.warn('No GitHub token provided. API rate limits may apply.');
+  console.warn('Set GITHUB_APP_TOKEN or pass --token YOUR_TOKEN');
 }
 
 /**
@@ -100,7 +107,7 @@ async function fetchAllContributors(repo, perPage = 100) {
 
       page++;
     } catch (err) {
-      console.error(`❌ Error fetching page ${page}:`, err.message);
+      console.error(`Error fetching page ${page}:`, err.message);
       hasMore = false;
       if (contributors.length === 0) {
         throw err; // Re-throw if no data collected yet
@@ -108,7 +115,7 @@ async function fetchAllContributors(repo, perPage = 100) {
     }
   }
 
-  return contributors;
+  return contributors.filter((c) => c.type !== 'Bot' && !c.login?.endsWith('[bot]'));
 }
 
 /**
@@ -116,7 +123,16 @@ async function fetchAllContributors(repo, perPage = 100) {
  */
 async function main() {
   try {
-    const contributors = await fetchAllContributors(repo);
+    let contributors;
+    try {
+      contributors = await fetchAllContributors(repo);
+    } catch (err) {
+      if (repo === 'aftab-s/gitwrap' && String(err.message).includes('404')) {
+        contributors = await fetchAllContributors('aftab-s/gitwrap-2025');
+      } else {
+        throw err;
+      }
+    }
 
     if (contributors.length === 0) {
       throw new Error('No contributors found or API returned empty list');
@@ -132,16 +148,16 @@ async function main() {
 
     fs.writeFileSync(outputPath, JSON.stringify(contributors, null, 2));
 
-    console.log(`✅ Successfully updated ${outputPath}`);
-    console.log(`📊 Total contributors: ${contributors.length}`);
-    console.log(`   Top contributors:`);
+    console.log(`Updated ${outputPath}`);
+    console.log(`Total contributors: ${contributors.length}`);
+    console.log(`Top contributors:`);
 
     contributors.slice(0, 5).forEach((c, i) => {
-      console.log(`   ${i + 1}. ${c.login} (${c.contributions} contributions)`);
+      console.log(`  ${i + 1}. ${c.login} (${c.contributions} contributions)`);
     });
 
   } catch (err) {
-    console.error('❌ Failed to update contributors:', err.message);
+    console.error('Failed to update contributors:', err.message);
     process.exit(1);
   }
 }

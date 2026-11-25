@@ -48,7 +48,7 @@ export const ThemeBackdrop: React.FC<Props> = ({ themeId }) => {
           <rect width="1080" height="1440" fill="url(#voltMatrixGrid)" />
 
           {/* AUTHENTIC VECTOR BARCODE STAMP at top right */}
-          <g transform="translate(860, 50)" opacity="0.55" fill="#D4FF00">
+          <g data-egg="barcode" transform="translate(860, 50)" opacity="0.55" fill="#D4FF00">
             <rect x="0" y="0" width="3" height="32" />
             <rect x="5" y="0" width="2" height="32" />
             <rect x="9" y="0" width="5" height="32" />
@@ -74,7 +74,7 @@ export const ThemeBackdrop: React.FC<Props> = ({ themeId }) => {
           </g>
 
           {/* Hex Memory Stream Ticker on Left Border */}
-          <g opacity="0.15" fill="#D4FF00" fontSize="11" fontFamily="'Martian Mono', monospace">
+          <g data-egg="hex-stream" opacity="0.15" fill="#D4FF00" fontSize="11" fontFamily="'Martian Mono', monospace">
             {[
               '0x7E01_SYS_BOOT',
               '0xB420_CONTRIB_OK',
@@ -131,7 +131,7 @@ export const ThemeBackdrop: React.FC<Props> = ({ themeId }) => {
           <rect width="1080" height="1440" fill="url(#risoHalftoneScreen)" />
 
           {/* JAPANESE EDITORIAL ISBN BARCODE at top right */}
-          <g transform="translate(860, 48)" opacity="0.5" fill="#0B1B61">
+          <g data-egg="isbn" transform="translate(860, 48)" opacity="0.5" fill="#0B1B61">
             <rect x="0" y="0" width="3" height="34" />
             <rect x="5" y="0" width="2" height="34" />
             <rect x="9" y="0" width="4" height="34" />
@@ -160,7 +160,7 @@ export const ThemeBackdrop: React.FC<Props> = ({ themeId }) => {
           </g>
 
           {/* SLANTED JAPANESE RED RUBBER INK STAMP (Hanko/Seal) */}
-          <g transform="translate(180, 1370) rotate(-6)" opacity="0.6">
+          <g data-egg="hanko" transform="translate(180, 1370) rotate(-6)" opacity="0.6">
             <rect x="-8" y="-6" width="168" height="42" fill="none" stroke="#FF3366" strokeWidth="2.5" strokeDasharray="6 3" />
             <text x="76" y="14" fill="#FF3366" fontSize="12" fontFamily="'Martian Mono', monospace" fontWeight="900" textAnchor="middle" letterSpacing="0.1em">
               初版限定 · 2026

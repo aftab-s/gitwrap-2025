@@ -21,7 +21,7 @@ import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import Contributors from '../components/Contributors';
 import FuturisticLoader from '../components/FuturisticLoader';
-import { Download, Lock, PlayerArrow } from '../components/icons/Arcade';
+import { Download, Lock, PlayerArrow, GitHubMark } from '../components/icons/Arcade';
 
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
@@ -617,7 +617,7 @@ const UserPage: React.FC = () => {
             <section className="window user-deck-window">
               <div className="user-deck-window-head">
                 <h2 className="heading" style={{ margin: 0 }}>Customize Your Card</h2>
-                <span className="silk" style={{ opacity: 0.85 }}>Live Preview</span>
+                <Link to="/themes" className="studio-theme-guide-link" aria-label="Explore themes and Easter eggs">Theme guide <span aria-hidden="true">↗</span></Link>
               </div>
               <ThemeSelector themes={THEMES} activeTheme={activeTheme} onSelectTheme={setActiveTheme} />
             </section>
@@ -762,7 +762,8 @@ const UserPage: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              GitHub Repository
+              <GitHubMark size={14} />
+              <span>GitHub Repository</span>
             </a>
           </div>
           <div style={{ marginTop: 20 }}>
