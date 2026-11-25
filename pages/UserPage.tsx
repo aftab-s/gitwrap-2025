@@ -21,7 +21,7 @@ import ThemeSelector from '../components/ThemeSelector';
 import SocialShare from '../components/SocialShare';
 import Contributors from '../components/Contributors';
 import FuturisticLoader from '../components/FuturisticLoader';
-import { Download, Lock, PlayerArrow } from '../components/icons/Arcade';
+import { Download, Lock, PlayerArrow, GitHubMark } from '../components/icons/Arcade';
 
 // This is a browser global from the html-to-image CDN script
 declare const htmlToImage: any;
@@ -714,7 +714,8 @@ const UserPage: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              GitHub Repository
+              <GitHubMark size={14} />
+              <span>GitHub Repository</span>
             </a>
           </div>
           <div style={{ marginTop: 20 }}>

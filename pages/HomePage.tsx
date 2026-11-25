@@ -60,7 +60,7 @@ const HomePage: React.FC = () => {
           {/* Animated 7x52 contribution graph spelling YOUR 2026 with Scored seal */}
           <HeroContributionGraph year={year} />
 
-          <p className="lede" style={{ marginTop: 32, textAlign: 'center', maxWidth: 540, marginInline: 'auto' }}>Your commits, streaks, and late-night breakthroughs. One year of building, turned into your personal recap.</p>
+          <p className="lede" style={{ marginTop: 32, textAlign: 'center', maxWidth: 540, marginInline: 'auto' }}>Gitwrap 2026. A visual celebration of your commits, streaks, and late-night breakthroughs in 2026.</p>
           <form onSubmit={handleSubmit} className="controls" style={{ marginTop: 44, width: '100%', maxWidth: 540, marginInline: 'auto', textAlign: 'left' }} noValidate>
             <div className="control control-wide">
               <label className="slot"><span className="slot-at" aria-hidden>@</span>
