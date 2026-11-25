@@ -23,28 +23,35 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 /* ---------------- Found eggs: a per-visitor convenience, safe without storage ---------------- */
 
 const STORE_KEY = 'gitwrap:theme-guide:eggs';
+const VALID_EGG_IDS = new Set(THEME_GUIDE.flatMap(entry =>
+  entry.eggs.map(egg => entry.id + ':' + egg.spot)
+));
 
 function useFoundEggs() {
   const [found, setFound] = useState<Set<string>>(() => {
     try {
       const raw = window.localStorage.getItem(STORE_KEY);
-      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+      const saved: unknown = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(saved)
+        ? saved.filter((id): id is string => typeof id === 'string' && VALID_EGG_IDS.has(id))
+        : []);
     } catch {
-      return new Set();
+      return new Set<string>();
     }
   });
+
+  useEffect(() => {
+    try {
+      if (found.size) window.localStorage.setItem(STORE_KEY, JSON.stringify([...found]));
+      else window.localStorage.removeItem(STORE_KEY);
+    } catch { /* storage unavailable */ }
+  }, [found]);
+
   const mark = useCallback((id: string) => {
-    setFound((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev).add(id);
-      try { window.localStorage.setItem(STORE_KEY, JSON.stringify([...next])); } catch { /* storage unavailable */ }
-      return next;
-    });
+    if (!VALID_EGG_IDS.has(id)) return;
+    setFound(prev => prev.has(id) ? prev : new Set(prev).add(id));
   }, []);
-  const reset = useCallback(() => {
-    setFound(new Set());
-    try { window.localStorage.removeItem(STORE_KEY); } catch { /* storage unavailable */ }
-  }, []);
+  const reset = useCallback(() => setFound(new Set<string>()), []);
   return { found, mark, reset };
 }
 
@@ -140,10 +147,12 @@ interface ExhibitProps {
 
 function Exhibit({ entry, n, found, onFind }: ExhibitProps) {
   const theme = themeById(entry.id);
-  const [active, setActive] = useState<EggSpot | null>(null);
+  const [selected, setSelected] = useState<EggSpot | null>(null);
   const eggId = (spot: EggSpot) => `${entry.id}:${spot}`;
+  // Resetting discovery progress also hides the current answer and card spotlight.
+  const active = selected && found.has(eggId(selected)) ? selected : null;
   const pick = (spot: EggSpot) => {
-    setActive((cur) => (cur === spot ? null : spot));
+    setSelected(active === spot ? null : spot);
     onFind(eggId(spot));
   };
   const foundHere = entry.eggs.filter((e) => found.has(eggId(e.spot))).length;
