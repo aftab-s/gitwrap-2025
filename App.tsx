@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import UserPage from './pages/UserPage';
+import ThemesPage from './pages/ThemesPage';
 import { Analytics } from "@vercel/analytics/react";
 
 function LegacyUserRedirect() {
@@ -14,6 +15,7 @@ export function AppRoutes() {
     <Routes>
       {/* 2026 default root */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/themes" element={<ThemesPage />} />
       <Route path="/u/:username" element={<UserPage />} />
 
       {/* Explicit /2026 redirects */}

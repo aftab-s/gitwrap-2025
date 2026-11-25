@@ -39,6 +39,7 @@ GitWrap 2026 is the direct sequel built to answer both.
   - **Latverian Steel (`doomsday`)** — Mystic alchemy summoning circles, runic columns, imperial Latverian emerald, and gunmetal armor inspired by Avengers Doomsday.
   - **Volt Matrix (`maxdark`)** — Cybernetic circuit traces, neon yellow terminals, authentic vector barcode stamps, and hex debug memory stream ticker.
   - **Tokyo Riso (`maxlight`)** — Japanese ISBN barcodes, red Hanko inspection seals, halftone grain, CMYK color separation density patches, and Swiss printer crop marks.
+- **Interactive Theme Guide (`/themes`):** Try all six themes on a live sample card, explore their 2026 timeline, compare the 2025 and 2026 editions, and uncover Easter eggs with on-card spotlights and locally saved discovery progress. Access it from the homepage footer or the studio’s customization header.
 - **Player Archetypes & 16-Bit Virtual Pets:** 13 distinct archetypes computed deterministically from your data (Night Owl, Early Riser, Bug Hunter, Weekend Warrior, Streak Keeper, Marathoner, Code Reviewer, PR Shipper, Polyglot, Specialist, Sprinter, All-Rounder, New Challenger) paired with 16-bit virtual pet companion sprites and commit action verb analysis.
 - **Production Export Pipeline:** Pixel-perfect 1080x1440 PNG card generation using an isolated offscreen iframe, self-hosted web fonts (`Archivo`, `Martian Mono`, `Doto`), and Base64 pre-inlined image assets to ensure consistent rendering across Safari, iOS, and desktop browsers.
 
@@ -49,8 +50,46 @@ GitWrap 2026 is the direct sequel built to answer both.
 GitWrap 2026 covers contributions logged across **Dec 1, 2025 to Nov 30, 2026**.
 - `/` is the landing page and username dispatcher.
 - `/u/<username>` is the dedicated player studio, recap player, and export deck.
+- `/themes` is the public theme guide, live sample-card gallery, and interactive Easter-egg hunt.
 
 All edition windows, year constants, and repository links are centrally configured in [`config.ts`](config.ts).
+
+---
+
+## Explore the 2026 Themes
+
+The theme guide at `/themes` introduces the artwork, inspirations, and hidden details behind GitWrap 2026. It builds on the original 2025 edition and uses the same card renderer as the studio, with fictional sample data rather than a real developer’s statistics.
+
+![GitWrap 2026 theme guide with live sample card, theme selector, and event timeline](public/images/theme-guide.png)
+
+### Find the guide
+
+- **Homepage:** Select **Explore 2026 themes** in the footer, beside **Star on GitHub**.
+- **Player studio:** Select **Theme guide ↗** in the **Customize Your Card** header.
+- **Direct URL:** Open `/themes`; generating a recap or signing in is not required.
+
+### What you can explore
+
+- **Live theme try-on:** Switch the hero card between all six colourways. The selector supports arrow-key navigation, and each selection links to its theme’s story.
+- **2026 timeline:** Browse the events and anniversaries chronologically, with date ranges, upcoming-event labels, and a current-date marker during 2026.
+- **2025 → 2026 comparison:** See the original mood-based palettes alongside the new edition’s event-inspired artwork and hidden details.
+- **Six detailed exhibits:** Each pairs a sample card and palette swatches with the inspiration, key facts, visual treatment, and source links.
+
+- **Interactive Easter-egg hunt:** Select a numbered card marker or a clue to highlight its location and reveal its meaning. A floating counter tracks discoveries, celebrates completion, and offers a reset. Progress is saved in this browser’s local storage when available; the hunt also works without storage.
+
+![Easter-egg discovery counter showing saved progress across 18 hidden details](public/images/easter-egg-hunt.png)
+
+The guide distinguishes real references from decorative card text, including fictional telemetry and publishing labels. Volt Matrix and Tokyo Riso began as design studies; their 2026 connections are the ENIAC and RISO anniversaries. Source links and the fact-check date are recorded with the guide content. These themes are independent visual tributes, not official collaborations.
+
+### Maintaining the guide
+
+- [`themeGuide.ts`](themeGuide.ts): Theme stories, timeline dates, source links, Easter-egg clues, and the legacy 2025 palette list. The total discovery count is derived from the entries.
+- [`pages/ThemesPage.tsx`](pages/ThemesPage.tsx) and [`pages/ThemesPage.css`](pages/ThemesPage.css): Page layout, theme switcher, timeline, card spotlights, and discovery controls.
+- [`constants.ts`](constants.ts): Shared theme colours and export dimensions.
+- [`demo.ts`](demo.ts): Deterministic fictional sample statistics used throughout the guide.
+- [`THEMES.md`](THEMES.md): Detailed design inspirations, palette notes, and Easter-egg references.
+
+Each clue’s `spot` corresponds to a `data-egg` attribute in [`ArcadeCard.tsx`](components/ArcadeCard.tsx) or [`ThemeBackdrop.tsx`](components/ThemeBackdrop.tsx). Keep those identifiers aligned when changing the card artwork so the spotlight continues to locate the correct detail.
 
 ---
 
@@ -166,7 +205,7 @@ gitwrap/
 │   ├── ArcadeCard.tsx               # Master 1080x1440 arcade card canvas
 │   ├── Contributors.tsx             # GitHub open-source contributors grid
 │   ├── ExportCard.tsx               # Offscreen print wrapper with inlined assets
-│   ├── Footer.tsx                   # Global footer with edition links & legal notes
+│   ├── Footer.tsx                   # Shared footer; optional theme-guide link beside GitHub
 │   ├── FuturisticLoader.tsx         # Cybernetic HUD radar & telemetry loader
 │   ├── GitHubSignIn.tsx             # OAuth sign-in / sign-out button
 │   ├── GitWrapCard.tsx              # Responsive auto-scaling preview container
@@ -180,7 +219,9 @@ gitwrap/
 │   └── ThemeSelector.tsx            # Six-colourway swatch picker
 ├── pages/
 │   ├── HomePage.tsx                 # Landing page with hero dispatcher & fusion backdrop
-│   └── UserPage.tsx                 # Studio command deck, card preview & download controls
+│   ├── UserPage.tsx                 # Studio command deck, card preview & download controls
+│   ├── ThemesPage.tsx               # Theme try-on, timeline, comparison & Easter-egg hunt
+│   └── ThemesPage.css               # Responsive arcade-panel styles for the theme guide
 ├── public/                          # Static assets (fonts, virtual pet avatars, theme graphics)
 │   ├── avatars/                     # 16-bit player companion sprites
 │   ├── fonts/                       # Local variable fonts (Archivo, Martian Mono, Doto)
@@ -189,6 +230,8 @@ gitwrap/
 ├── constants.ts                     # Colourway themes, design tokens & export metrics
 ├── insights.ts                      # Player class archetype scoring logic & metrics
 ├── playerAvatars.ts                 # 16-bit virtual pet companion mappings
+├── themeGuide.ts                    # Theme stories, sources, timeline dates & egg locations
+├── THEMES.md                        # Theme design notes, palettes & reference details
 ├── types.ts                         # TypeScript types & Zod schemas
 └── vite.config.ts                   # Vite configuration with local API proxy
 ```
