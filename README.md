@@ -249,14 +249,6 @@ Contributions are welcome. Whether reporting a bug, improving responsive styles,
 
 ---
 
-## Contributors
-
-<a href="https://github.com/aftab-s/gitwrap/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=aftab-s/gitwrap" />
-</a>
-
-Made with [contrib.rocks](https://contrib.rocks)
-
 ---
 
 <div align="center">
