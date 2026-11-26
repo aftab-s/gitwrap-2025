@@ -1,6 +1,7 @@
 {
   "name": "gitwrap",
   "private": true,
+  "homepage": "https://www.gitwrap.tech",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

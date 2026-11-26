@@ -22,7 +22,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
   const [canNativeShare, setCanNativeShare] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : '';
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : `https://www.gitwrap.tech/u/${encodeURIComponent(username)}`;
   const title = `My GitWrap ${year} — @${username}`;
 
   const heading = `My GitWrap ${year}. A cool log of turning coffee into commits that barely passed CI😎`;

@@ -2,11 +2,18 @@
   <img alt="GitWrap Banner" src="public/images/banner-image-2026.png" style="width:100%;max-width:1000px;border-radius:0px;box-shadow:0 8px 30px rgba(2,6,23,0.3)" />
 
   <p style="margin-top:16px;font-size:18px;font-weight:600;">Showcase your GitHub contributions with an arcade-crafted year-in-review card and an interactive story recap.</p>
+
+  <p>
+    <a href="https://www.gitwrap.tech/"><strong>Live App (gitwrap.tech)</strong></a> &nbsp;&bull;&nbsp;
+    <a href="https://www.gitwrap.tech/themes"><strong>Theme Guide</strong></a> &nbsp;&bull;&nbsp;
+    <a href="https://github.com/aftab-s/gitwrap"><strong>GitHub Repository</strong></a>
+  </p>
 </div>
 
 # GitWrap
 
 GitWrap generates high-fidelity, arcade-inspired year-in-review cards and interactive recaps for GitHub developers.
+Live at **[https://www.gitwrap.tech/](https://www.gitwrap.tech/)**.
 
 When GitWrap debuted for the 2025 season, it gave developers an arcade-style card summarizing their public activity. But two clear requests emerged from community feedback:
 1. Most developers write their most critical code inside private repositories for employers or clients. A recap that only counted public commits left out their biggest accomplishments.
@@ -45,12 +52,15 @@ GitWrap 2026 is the direct sequel built to answer both.
 
 ---
 
-## Active Edition
+## Active Edition & Deployment
+
+The latest version of GitWrap is live at **[https://www.gitwrap.tech/](https://www.gitwrap.tech/)**.
 
 GitWrap 2026 covers contributions logged across **Dec 1, 2025 to Nov 30, 2026**.
 - `/` is the landing page and username dispatcher.
 - `/u/<username>` is the dedicated player studio, recap player, and export deck.
 - `/themes` is the public theme guide, live sample-card gallery, and interactive Easter-egg hunt.
+- `/2025` redirects to the archived 2025 edition.
 
 All edition windows, year constants, and repository links are centrally configured in [`config.ts`](config.ts).
 
