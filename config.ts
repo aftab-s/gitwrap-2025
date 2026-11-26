@@ -16,3 +16,4 @@ export const EDITION: Edition = {
 
 export const APP_REPO = 'aftab-s/gitwrap';
 export const APP_REPO_URL = `https://github.com/${APP_REPO}`;
+export const APP_URL = 'https://www.gitwrap.tech';

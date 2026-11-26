@@ -22,7 +22,9 @@ const SocialShare: React.FC<SocialShareProps> = ({
   const [canNativeShare, setCanNativeShare] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : '';
+  const mainUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.gitwrap.tech';
+  const bareMainUrl = mainUrl.replace(/^https?:\/\//, '');
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/u/${encodeURIComponent(username)}` : `https://www.gitwrap.tech/u/${encodeURIComponent(username)}`;
   const title = `My GitWrap ${year} — @${username}`;
 
   const heading = `My GitWrap ${year}. A cool log of turning coffee into commits that barely passed CI😎`;
@@ -64,13 +66,12 @@ const SocialShare: React.FC<SocialShareProps> = ({
 
   // Build share text for web intents (text + link only, used by direct X/LinkedIn buttons)
   const fullBody = statsLines.length > 0
-    ? `${heading}\n\n${statsLines.join(' · ')}\n\n${tagsText}`
-    : `${heading}\n\n${tagsText}`;
+    ? `${heading}\n\n${statsLines.join(' · ')}\n\nCheck yours: ${bareMainUrl}\n\n${tagsText}`
+    : `${heading}\n\nCheck yours: ${bareMainUrl}\n\n${tagsText}`;
 
-  // Web intent URLs — on mobile these open the native app via Universal Links / App Links
-  // when the app is installed; otherwise they open in the browser.
-  const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(fullBody)}`;
-  const linkedInWebUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}`;
+  // Web intent URLs point to the main site so visitors who click can immediately generate their own wrap
+  const xWebUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(mainUrl)}&text=${encodeURIComponent(fullBody)}`;
+  const linkedInWebUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(mainUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(fullBody)}`;
 
   const open = (url: string) => window.open(url, '_blank', 'noopener,noreferrer,width=600,height=520');
 
@@ -93,11 +94,10 @@ const SocialShare: React.FC<SocialShareProps> = ({
         if (blob) {
           const file = new File([blob], `gitwrap-${year}-${username}.png`, { type: 'image/png' });
 
-          // Bare URL (no protocol) so LinkedIn keeps the image attachment
-          const bareUrl = shareUrl.replace(/^https?:\/\//, '');
+          // Bare main URL so visitors can generate their own wrap without protocol collisions
           const shareBody = statsLines.length > 0
-            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`
-            : `${heading}\n\nCheck yours: ${bareUrl}\n\n${tagsText}`;
+            ? `${heading}\n\n${statsLines.join('\n')}\n\nCheck yours: ${bareMainUrl}\n\n${tagsText}`
+            : `${heading}\n\nCheck yours: ${bareMainUrl}\n\n${tagsText}`;
 
           if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
             await navigator.share({
